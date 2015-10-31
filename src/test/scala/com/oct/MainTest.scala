@@ -3,19 +3,18 @@ package com.oct
 import java.io.File
 
 import com.oct.ThingDoer.ImageSimilarity
-import com.sksamuel.scrimage.Image
+import com.sksamuel.scrimage.{ScaleMethod, Image}
 import com.sksamuel.scrimage.nio.JpegWriter
 import org.scalatest.{BeforeAndAfter, FunSuite, Matchers}
 
 class MainTest extends FunSuite with BeforeAndAfter with Matchers {
-
 
   test("stuff works") {
 
     implicit val writer = JpegWriter.Default
 
     val folder = new File(getClass.getResource("/").getPath)
-    val files = folder.listFiles().filter(_.isFile)
+    val files = folder.listFiles().filter(_.isFile).take(30)
 
     val images = files.map(Image.fromFile)
 
@@ -45,9 +44,11 @@ class MainTest extends FunSuite with BeforeAndAfter with Matchers {
 
     val topFew = distancesSorted.take(6)
 
-    topFew.foreach { case (i1, i2, dist) => }
-
-    println("")
+    topFew.foreach { case (i1, i2, dist) =>
+      val outPath = getClass.getResource("/").getPath
+      i1.scaleTo(128, 128, ScaleMethod.FastScale).output(outPath + "1_1_" + s"${dist}.jpeg")
+      i2.scaleTo(128, 128, ScaleMethod.FastScale).output(outPath + "1_2_" + s"${dist}.jpeg")
+    }
 
 //
 //    val outPath = getClass.getResource("/").getPath + "1_flip_XY.jpeg"

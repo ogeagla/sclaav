@@ -13,6 +13,10 @@ object ThingDoer {
     def apply(img: Image): Image
   }
 
+  trait Similarity {
+    def apply(img1: Image, img2: Image): Double
+  }
+
   object Manipulate {
     def apply(img: Image, manips: List[ImageManipulator]): Image = {
       manips.foldLeft(img)((image, maniper) => maniper(image))
@@ -55,14 +59,16 @@ object ThingDoer {
   }
 
   object ImageSimilarity {
-    def apply(img1: Image, img2: Image): Double = {
+    def apply(img1: Image, img2: Image): Double = (new ImageSimilarity)(img1, img2)
+  }
 
-      println("stuff")
+  class ImageSimilarity extends Similarity {
+    def apply(img1: Image, img2: Image): Double = {
 
       log.info(s"getting similarity")
 
-      val argb1: Array[Array[Int]] = img1.scaleTo(8, 8, ScaleMethod.FastScale).argb
-      val argb2: Array[Array[Int]] = img2.scaleTo(8, 8, ScaleMethod.FastScale).argb
+      val argb1: Array[Array[Int]] = img1.scaleTo(32, 32, ScaleMethod.FastScale).argb
+      val argb2: Array[Array[Int]] = img2.scaleTo(32, 32, ScaleMethod.FastScale).argb
 
       val a1 = argb1.map(_.apply(0).toDouble).toList
       val r1 = argb1.map(_.apply(1).toDouble).toList
