@@ -1,5 +1,6 @@
 package com.oct
 
+import com.sksamuel.scrimage.filter.GrayscaleFilter
 import com.sksamuel.scrimage.{ScaleMethod, Image}
 import org.slf4j.LoggerFactory
 
@@ -58,11 +59,11 @@ object ThingDoer {
     }
   }
 
-  object ImageSimilarity {
-    def apply(img1: Image, img2: Image): Double = (new ImageSimilarity)(img1, img2)
+  object ImageSimilarityArgbDistance2 {
+    def apply(img1: Image, img2: Image): Double = (new ImageSimilarityArgbDistance2)(img1, img2)
   }
 
-  class ImageSimilarity extends Similarity {
+  class ImageSimilarityArgbDistance2 extends Similarity {
     def apply(img1: Image, img2: Image): Double = {
 
       log.info(s"getting similarity")
@@ -86,6 +87,62 @@ object ThingDoer {
       val bDist = Distance2(b1, b2)
 
       math.sqrt(aDist*aDist + rDist*rDist + gDist*gDist + bDist*bDist)
+    }
+  }
+
+  object ImageSimilarityRgbDistance2 {
+    def apply(img1: Image, img2: Image): Double = (new ImageSimilarityRgbDistance2)(img1, img2)
+  }
+
+  class ImageSimilarityRgbDistance2 extends Similarity {
+    def apply(img1: Image, img2: Image): Double = {
+
+      log.info(s"getting similarity")
+
+      val rgb1: Array[Array[Int]] = img1.scaleTo(32, 32, ScaleMethod.FastScale).rgb
+      val rgb2: Array[Array[Int]] = img2.scaleTo(32, 32, ScaleMethod.FastScale).rgb
+
+      val r1 = rgb1.map(_.apply(0).toDouble).toList
+      val g1 = rgb1.map(_.apply(1).toDouble).toList
+      val b1 = rgb1.map(_.apply(2).toDouble).toList
+
+      val r2 = rgb2.map(_.apply(0).toDouble).toList
+      val g2 = rgb2.map(_.apply(1).toDouble).toList
+      val b2 = rgb2.map(_.apply(2).toDouble).toList
+
+      val rDist = Distance2(r1, r2)
+      val gDist = Distance2(g1, g2)
+      val bDist = Distance2(b1, b2)
+
+      math.sqrt(rDist*rDist + gDist*gDist + bDist*bDist)
+    }
+  }
+
+  object ImageSimilarityGrayscaleDistance2 {
+    def apply(img1: Image, img2: Image): Double = (new ImageSimilarityGrayscaleDistance2)(img1, img2)
+  }
+
+  class ImageSimilarityGrayscaleDistance2 extends Similarity {
+    def apply(img1: Image, img2: Image): Double = {
+
+      log.info(s"getting similarity")
+
+      val rgb1: Array[Array[Int]] = img1.scaleTo(32, 32, ScaleMethod.FastScale).filter(GrayscaleFilter).rgb
+      val rgb2: Array[Array[Int]] = img2.scaleTo(32, 32, ScaleMethod.FastScale).filter(GrayscaleFilter).rgb
+
+      val r1 = rgb1.map(_.apply(0).toDouble).toList
+      val g1 = rgb1.map(_.apply(1).toDouble).toList
+      val b1 = rgb1.map(_.apply(2).toDouble).toList
+
+      val r2 = rgb2.map(_.apply(0).toDouble).toList
+      val g2 = rgb2.map(_.apply(1).toDouble).toList
+      val b2 = rgb2.map(_.apply(2).toDouble).toList
+
+      val rDist = Distance2(r1, r2)
+      val gDist = Distance2(g1, g2)
+      val bDist = Distance2(b1, b2)
+
+      math.sqrt(rDist*rDist + gDist*gDist + bDist*bDist)
     }
   }
 

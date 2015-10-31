@@ -2,9 +2,9 @@ package com.oct
 
 import java.io.File
 
-import com.oct.ThingDoer.ImageSimilarity
-import com.sksamuel.scrimage.{ScaleMethod, Image}
+import com.oct.ThingDoer.ImageSimilarityArgbDistance2
 import com.sksamuel.scrimage.nio.JpegWriter
+import com.sksamuel.scrimage.{Image, Position, ScaleMethod}
 import org.scalatest.{BeforeAndAfter, FunSuite, Matchers}
 
 class MainTest extends FunSuite with BeforeAndAfter with Matchers {
@@ -13,10 +13,10 @@ class MainTest extends FunSuite with BeforeAndAfter with Matchers {
 
     implicit val writer = JpegWriter.Default
 
-    val folder = new File(getClass.getResource("/").getPath)
-    val files = folder.listFiles().filter(_.isFile).take(30)
+    val folder = new File(getClass.getResource("/bap-images").getPath)
+    val files = folder.listFiles().filter(_.isFile).take(200)
 
-    val images = files.map(Image.fromFile)
+    val images = files.map(f => Image.fromFile(f).scaleTo(256, 256, ScaleMethod.FastScale))
 
     var array = List[(Image, Image)]()
 
@@ -33,29 +33,23 @@ class MainTest extends FunSuite with BeforeAndAfter with Matchers {
 
       }
     }
-
-//    val imagesCartesian = for { i1 <- images; i2 <- images } yield (i1, i2)
-//
-//    val imagesCartesianUnique = imagesCartesian.filter { case (i1, i2) => ! i1.equals(i2) }
-
-    val distances = array.map { case (i1, i2) => (i1, i2, ImageSimilarity(i1, i2)) }
+    
+    val distances = array.par.map { case (i1, i2) => (i1, i2, ImageSimilarityArgbDistance2(i1, i2)) }.toList
 
     val distancesSorted = distances.sortBy{ case (i1, i2, dist) => dist }
 
-    val topFew = distancesSorted.take(6)
+    val topFew = distancesSorted.take(5)
 
-    topFew.foreach { case (i1, i2, dist) =>
+    val bottomFew = distancesSorted.takeRight(5)
+
+    topFew.++(bottomFew).foreach { case (i1, i2, dist) =>
       val outPath = getClass.getResource("/").getPath
-      i1.scaleTo(128, 128, ScaleMethod.FastScale).output(outPath + "1_1_" + s"${dist}.jpeg")
-      i2.scaleTo(128, 128, ScaleMethod.FastScale).output(outPath + "1_2_" + s"${dist}.jpeg")
-    }
 
-//
-//    val outPath = getClass.getResource("/").getPath + "1_flip_XY.jpeg"
-//
-//    i1.flipX.flipY.output(outPath)
-//
-//    ThingDoer.doIt()
+      val i1Scaled = i1.scaleTo(128, 128, ScaleMethod.FastScale)
+      val i2Scaled = i2.scaleTo(128, 128, ScaleMethod.FastScale)
+
+      val img = i1Scaled.resizeTo(256, 128, Position.CenterLeft).overlay(i2Scaled, 128, 0).output(outPath + s"${dist}.jpeg")
+    }
 
   }
 }
