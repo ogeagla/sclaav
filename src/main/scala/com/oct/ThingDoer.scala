@@ -63,11 +63,8 @@ object MatchByArgbAverage {
 
 object SimplePixelLocationComputer extends PixelLocationComputer {
   override def apply(gridSize: (Int, Int), theGridLocation: (Int, Int), canvasSizeInPixels: (Int, Int)): (Int, Int) = {
-
     val (colCellSize, rowCellSize) = (canvasSizeInPixels._1 / gridSize._1, canvasSizeInPixels._2 / gridSize._2)
-
     val (x, y) = (colCellSize * theGridLocation._1, rowCellSize * theGridLocation._2)
-
     (x, y)
   }
 }
@@ -88,10 +85,14 @@ object SimpleCompleteAssembler extends CompleteAssembler {
 
     val (canvasW, canvasH) = (backgroundImage.width, backgroundImage.height)
 
+    println("computing pixel locations from grid locations")
+
     val imagesWPixelLocations = imagesWIndex.map {
       case (i, (colIndex, rowIndex)) =>
         (i, SimplePixelLocationComputer(gridSize, (colIndex, rowIndex), (canvasW, canvasH)))
     }
+    
+    println("assembling image")
 
     val theAssembledImage = imagesWPixelLocations.foldLeft(backgroundImage){
       case (canvasImage, (image, (i1, i2))) =>
@@ -110,13 +111,9 @@ object SimpleSingleAssembler extends SingleAssembler {
 
 object SimpleCrop extends DiscreteCropper {
   override def apply(gridSize: (Int, Int), locationToCrop: (Int, Int), img: Image): Image = {
-
     val (imgW, imgH) = (img.width, img.height)
-    
     val (colCellSize, rowCellSize) = (imgW / gridSize._1, imgH / gridSize._2)
-
     val (xToCrop, yToCrop) =  SimplePixelLocationComputer(gridSize, locationToCrop, (imgW, imgH))
-
     img.trim(xToCrop, yToCrop, imgW - xToCrop - colCellSize, imgH - yToCrop - rowCellSize)
   }
 }
@@ -138,14 +135,6 @@ object SimpleArgbEstimator extends ArgbEstimator {
     Argb(Average(a), Average(r), Average(g), Average(b))
   }
 }
-
-//object TilesStuff {
-//  def apply(canvasSize: (Int, Int), numCells: (Int, Int), cellDim: (Int, Int), imgs: List[List[Image]]): Image = {
-//    val baseImage = Image.filled(canvasSize._1, canvasSize._2, Color.Transparent)
-//
-//    ???
-//  }
-//}
 
 object UniqueCartesian2 {
   def apply(imgs1: List[Image], imgs2: List[Image]): List[(Image, Image)] = {
@@ -169,7 +158,7 @@ object UniqueCartesian2 {
   }
 }
 
-object Manipulate {
+object ApplyManipulations {
   def apply(img: Image, manips: List[ImageManipulator]): Image = {
     manips.foldLeft(img)((image, maniper) => maniper(image))
   }
@@ -194,12 +183,6 @@ object MixManipulations {
     }
 
     man1b ++: man2b
-  }
-}
-
-class ManipulatorOne extends ImageManipulator {
-  override def apply(img: Image): Image = {
-    img.flipX
   }
 }
 
