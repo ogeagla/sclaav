@@ -5,12 +5,147 @@ import com.sksamuel.scrimage.{Image, ScaleMethod}
 
 import scala.util.Random
 
-object TilesStuff {
-  def apply(ncol: Int, nrow: Int, colW: Int, rowH: Int, imgs: List[List[Image]]): Image = {
-    
-    ???
+
+
+
+case class Argb(a: Int, r: Int, g: Int, b: Int)
+
+trait ArgbEstimator {
+  def apply(img: Image): Argb
+}
+
+trait ArgbDistance {
+  def apply(argb1: Argb, argb2: Argb): Double
+}
+
+trait ImageManipulator {
+  def apply(img: Image): Image
+}
+
+trait Similarity {
+  def apply(img1: Image, img2: Image, scaleWidth: Int, scaleHeight: Int): Double
+}
+
+trait DiscreteCropper {
+  def apply(gridSize: (Int, Int), locationToCrop: (Int, Int), img: Image): Image
+}
+
+trait SingleAssembler {
+  def apply(backgroundImage: Image, pixelLocation: (Int, Int), theImageToInsert: Image): Image
+}
+
+trait CompleteAssembler {
+  def apply(backgroundImage: Image, imagesWIndex: Array[(Image, (Int, Int))], gridSize: (Int, Int)): Image
+}
+
+trait PixelLocationComputer {
+  def apply(gridSize: (Int, Int), theGridLocation: (Int, Int), canvasSizeInPixels: (Int, Int)): (Int, Int)
+}
+
+object MatchByArgbAverage {
+  def apply(argbEstimator: ArgbEstimator, argbDistance: ArgbDistance, refImage: Image, otherImages: Array[Image]): Image = {
+
+    val refArgb = argbEstimator(refImage)
+
+    val argbs = otherImages.map {
+      i => (i, argbEstimator(i))
+    }
+
+    val argbsWDistance = argbs.map {
+      case (i, argb) => (i, argbDistance(refArgb, argb))
+    }
+
+    argbsWDistance.sortBy {
+      case (i, dist) => dist
+    }.head._1
   }
 }
+
+object SimplePixelLocationComputer extends PixelLocationComputer {
+  override def apply(gridSize: (Int, Int), theGridLocation: (Int, Int), canvasSizeInPixels: (Int, Int)): (Int, Int) = {
+
+    val (colCellSize, rowCellSize) = (canvasSizeInPixels._1 / gridSize._1, canvasSizeInPixels._2 / gridSize._2)
+
+    val (x, y) = (colCellSize * theGridLocation._1, rowCellSize * theGridLocation._2)
+
+    (x, y)
+  }
+}
+
+object SimpleArgbDistance extends ArgbDistance {
+  override def apply(argb1: Argb, argb2: Argb): Double = {
+    val da = math.abs(argb1.a - argb2.a)
+    val dr = math.abs(argb1.r - argb2.r)
+    val dg = math.abs(argb1.g - argb2.g)
+    val db = math.abs(argb1.b - argb2.b)
+
+    math.sqrt(da*da + dr*dr + dg*dg + db*db)
+  }
+}
+
+object SimpleCompleteAssembler extends CompleteAssembler {
+  override def apply(backgroundImage: Image, imagesWIndex: Array[(Image, (Int, Int))], gridSize: (Int, Int)): Image = {
+
+    val (canvasW, canvasH) = (backgroundImage.width, backgroundImage.height)
+
+    val imagesWPixelLocations = imagesWIndex.map {
+      case (i, (colIndex, rowIndex)) =>
+        (i, SimplePixelLocationComputer(gridSize, (colIndex, rowIndex), (canvasW, canvasH)))
+    }
+
+    val theAssembledImage = imagesWPixelLocations.foldLeft(backgroundImage){
+      case (canvasImage, (image, (i1, i2))) =>
+        SimpleSingleAssembler(canvasImage, (i1, i2), image)
+    }
+
+    theAssembledImage
+  }
+}
+
+object SimpleSingleAssembler extends SingleAssembler {
+  override def apply(backgroundImage: Image, pixelLocation: (Int, Int), theImageToInsert: Image): Image = {
+    backgroundImage.overlay(theImageToInsert, pixelLocation._1, pixelLocation._2)
+  }
+}
+
+object SimpleCrop extends DiscreteCropper {
+  override def apply(gridSize: (Int, Int), locationToCrop: (Int, Int), img: Image): Image = {
+
+    val (imgW, imgH) = (img.width, img.height)
+    
+    val (colCellSize, rowCellSize) = (imgW / gridSize._1, imgH / gridSize._2)
+
+    val (xToCrop, yToCrop) =  SimplePixelLocationComputer(gridSize, locationToCrop, (imgW, imgH))
+
+    img.trim(xToCrop, yToCrop, imgW - xToCrop - colCellSize, imgH - yToCrop - rowCellSize)
+  }
+}
+
+object Average {
+  def apply(arr: Array[Int]): Int = arr.sum / arr.length
+}
+
+object SimpleArgbEstimator extends ArgbEstimator {
+  override def apply(img: Image): Argb = {
+
+    val argb = img.argb
+
+    val a = argb.map(_.apply(0))
+    val r = argb.map(_.apply(1))
+    val g = argb.map(_.apply(2))
+    val b = argb.map(_.apply(3))
+
+    Argb(Average(a), Average(r), Average(g), Average(b))
+  }
+}
+
+//object TilesStuff {
+//  def apply(canvasSize: (Int, Int), numCells: (Int, Int), cellDim: (Int, Int), imgs: List[List[Image]]): Image = {
+//    val baseImage = Image.filled(canvasSize._1, canvasSize._2, Color.Transparent)
+//
+//    ???
+//  }
+//}
 
 object UniqueCartesian2 {
   def apply(imgs1: List[Image], imgs2: List[Image]): List[(Image, Image)] = {
@@ -32,14 +167,6 @@ object UniqueCartesian2 {
 
     array
   }
-}
-
-trait ImageManipulator {
-  def apply(img: Image): Image
-}
-
-trait Similarity {
-  def apply(img1: Image, img2: Image, scaleWidth: Int, scaleHeight: Int): Double
 }
 
 object Manipulate {

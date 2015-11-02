@@ -8,12 +8,14 @@ import org.scalatest.{BeforeAndAfter, FunSuite, Matchers}
 
 class MainTest extends FunSuite with BeforeAndAfter with Matchers {
 
-  test("builds similar composites") {
+
+  test("builds composites for realz") {
 
     implicit val writer = JpegWriter.Default
+    val outPath = getClass.getResource("/").getPath
 
     val folder = new File(getClass.getResource("/bap-images").getPath)
-    val files = folder.listFiles().filter(_.isFile).take(400)
+    val files = folder.listFiles().filter(_.isFile).take(100)
 
     val filesHead = files.head
     val filesTail = files.tail
@@ -21,18 +23,84 @@ class MainTest extends FunSuite with BeforeAndAfter with Matchers {
     val controlImage = Image.fromFile(filesHead)
     val controlSize = (controlImage.width, controlImage.height)
 
-    val cols = 8
-    val rows = 8
+    val cols = 32
+    val rows = 32
 
     val colWidth = controlSize._1 / cols
     val rowHeight = controlSize._2 / rows
 
     val images = filesTail.map(f => Image.fromFile(f).scaleTo(colWidth, rowHeight, ScaleMethod.FastScale))
+
+    var listOfMatches = List[(Image, (Int, Int))]()
+
+    for(c <- 0 to cols) {
+      for(r <- 0 to rows) {
+        val cropped = SimpleCrop((cols, rows), (c, r), controlImage)
+
+        val matchToCropped = MatchByArgbAverage(SimpleArgbEstimator, SimpleArgbDistance, cropped, images)
+
+        listOfMatches = (matchToCropped, (c, r)) :: listOfMatches
+      }
+    }
+
+    val assembledImage = SimpleCompleteAssembler(controlImage, listOfMatches.toArray, (cols, rows))
+
+    assembledImage.output(outPath + "assembled.jpeg")
+
+  }
+
+  ignore("builds similar composites") {
+
+    implicit val writer = JpegWriter.Default
+    val outPath = getClass.getResource("/").getPath
+
+    val folder = new File(getClass.getResource("/bap-images").getPath)
+    val files = folder.listFiles().filter(_.isFile).take(10)
+
+    val filesHead = files.head
+    val filesTail = files.tail
+
+    val controlImage = Image.fromFile(filesHead)
+    val controlSize = (controlImage.width, controlImage.height)
+
+    val cols = 2
+    val rows = 2
+
+    val colWidth = controlSize._1 / cols
+    val rowHeight = controlSize._2 / rows
+
+    val images = filesTail.map(f => Image.fromFile(f).scaleTo(colWidth, rowHeight, ScaleMethod.FastScale))
+
+    val topLeft =     SimpleCrop((cols, rows), (0, 0), controlImage)
+    val topRight =    SimpleCrop((cols, rows), (1, 0), controlImage)
+    val bottomLeft =  SimpleCrop((cols, rows), (0, 1), controlImage)
+    val bottomRight = SimpleCrop((cols, rows), (1, 1), controlImage)
+
+    topLeft.output(outPath + s"topLeft.jpeg")
+    topRight.output(outPath + s"topRight.jpeg")
+    bottomLeft.output(outPath + s"bottomLeft.jpeg")
+    bottomRight.output(outPath + s"bottomRight.jpeg")
+    controlImage.output(outPath + "ref.jpeg")
+
+    val topLMatch = MatchByArgbAverage(SimpleArgbEstimator, SimpleArgbDistance, topLeft, images)
+    val topRMatch = MatchByArgbAverage(SimpleArgbEstimator, SimpleArgbDistance, topRight, images)
+    val botLMatch = MatchByArgbAverage(SimpleArgbEstimator, SimpleArgbDistance, bottomLeft, images)
+    val botRMatch = MatchByArgbAverage(SimpleArgbEstimator, SimpleArgbDistance, bottomRight, images)
+
+    val img = controlImage
+      .overlay(topLMatch, 0, 0)
+      .overlay(topRMatch, topRight.width, 0)
+      .overlay(botLMatch, 0, bottomLeft.height)
+      .overlay(botRMatch, bottomRight.width, bottomRight.height)
+      .output(outPath + "matched.jpeg")
+
   }
 
   ignore("similarity pairs") {
 
     implicit val writer = JpegWriter.Default
+    val outPath = getClass.getResource("/").getPath
+
 
     val folder = new File(getClass.getResource("/bap-images").getPath)
     val files = folder.listFiles().filter(_.isFile).take(400)
@@ -50,8 +118,6 @@ class MainTest extends FunSuite with BeforeAndAfter with Matchers {
     val bottomFew = distancesSorted.takeRight(15)
 
     topFew.++(bottomFew).foreach { case (i1, i2, dist) =>
-      val outPath = getClass.getResource("/").getPath
-
       val i1Scaled = i1.scaleTo(128, 128, ScaleMethod.FastScale)
       val i2Scaled = i2.scaleTo(128, 128, ScaleMethod.FastScale)
 
