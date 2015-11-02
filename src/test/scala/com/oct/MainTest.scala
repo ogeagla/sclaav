@@ -15,46 +15,14 @@ class MainTest extends FunSuite with BeforeAndAfter with Matchers {
     val outPath = getClass.getResource("/").getPath
 
     val folder = new File(getClass.getResource("/bap-images").getPath)
-    val files = folder.listFiles().filter(_.isFile).take(200)
+    val files = folder.listFiles().filter(_.isFile).take(400)
 
-    val filesHead = files.head
-    val filesTail = files.tail
+    for(file <- files) {
+      val controlFile = file
+      val sampleFiles = files.filter(_ != controlFile)
 
-    val controlImage = Image.fromFile(filesHead)
-    val controlSize = (controlImage.width, controlImage.height)
-
-    val cols = 128
-    val rows = 128
-
-    val colWidth = controlSize._1 / cols
-    val rowHeight = controlSize._2 / rows
-
-    println("loading images")
-
-    val images = filesTail.map(f => Image.fromFile(f).scaleTo(colWidth, rowHeight, ScaleMethod.FastScale))
-
-    var listOfMatches = List[(Image, (Int, Int))]()
-
-    println("cropping and matching")
-
-    for(c <- 0 to cols - 1) {
-      println(s"${c + 1} of $cols cols complete")
-      for(r <- 0 to rows - 1) {
-        val cropped = SimpleCrop((cols, rows), (c, r), controlImage)
-
-        val matchToCropped = MatchByArgbAverage(SimpleArgbEstimator, SimpleArgbDistance, cropped, images)
-
-        listOfMatches = (matchToCropped, (c, r)) :: listOfMatches
-      }
+      DoMosaic(controlFile, sampleFiles, 64, 64, outPath)
     }
-
-    println("assembling")
-    val assembledImage = SimpleCompleteAssembler(controlImage, listOfMatches.toArray, (cols, rows))
-
-    println("persisting")
-    assembledImage.output(outPath + "assembled.jpeg")
-    controlImage.output(outPath + "ref.jpeg")
-
   }
 
   ignore("builds similar composites") {
