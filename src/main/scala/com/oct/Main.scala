@@ -2,7 +2,8 @@ package com.oct
 
 import java.io.File
 
-import com.oct.mosaic.{Config, DoMosaic}
+import com.oct.mosaic.Mode.Mode
+import com.oct.mosaic.{Config, DoMosaic, MapsModes, Mode}
 import org.slf4j.LoggerFactory
 
 object Main {
@@ -11,8 +12,15 @@ object Main {
 
 
   def parseArgs(args: Array[String]): Config= {
+
+    implicit val tenantKeyRead: scopt.Read[Mode] = scopt.Read.reads(MapsModes(_))
+
     val parser = new scopt.OptionParser[Config]("Mosaical.jar") {
       head("Scala Mosaic", "0.0.x")
+      opt[Mode]('d', "mode") action { (x, c) =>
+        c.copy(mode = x) } text "mode is an enum property"
+      opt[File]('t', "target") action { (x, c) =>
+        c.copy(singleTarget = x) } text "target is a file property"
       opt[Boolean]('m', "manipulate") action { (x, c) =>
         c.copy(manipulate = x) } text "manipulate is a boolean property"
       opt[Int]('r', "rows") action { (x, c) =>
@@ -53,18 +61,28 @@ object Main {
     val rows = config.rows
     val cols = config.cols
     val doManipulate = config.manipulate
+    val mode = config.mode
 
     log.info(s"inPath: $inPath outPath: $outPath")
 
     val files = inPath.listFiles().filter(_.isFile).take(maxSamples)
 
-    for(file <- files) {
-      val controlFile = file
-      val sampleFiles = files.filter(_ != controlFile)
+    mode match {
+      case Mode.SINGLE_FILE =>
+        log.info("using single file target")
+        val target = config.singleTarget
+        DoMosaic(target, files, cols, rows, outPath, doManipulate)
 
-      log.info(s"running with control image: ${controlFile.getName}")
+      case Mode.PERMUTE_ALL_FILES =>
+        log.info("permuting all files in input dir")
+        for(file <- files) {
+          val controlFile = file
+          val sampleFiles = files.filter(_ != controlFile)
 
-      DoMosaic(controlFile, sampleFiles, cols, rows, outPath, doManipulate)
+          log.info(s"running with control image: ${controlFile.getName}")
+
+          DoMosaic(controlFile, sampleFiles, cols, rows, outPath, doManipulate)
+        }
     }
   }
 }

@@ -134,3 +134,21 @@ object UniqueCartesian2 {
   }
 }
 
+object SimplePixelLocationComputer extends PixelLocationComputer {
+  override def apply(gridSize: (Int, Int), theGridLocation: (Int, Int), canvasSizeInPixels: (Int, Int)): (Int, Int) = {
+    val (colCellSize, rowCellSize) = (canvasSizeInPixels._1 / gridSize._1, canvasSizeInPixels._2 / gridSize._2)
+    val (x, y) = (colCellSize * theGridLocation._1, rowCellSize * theGridLocation._2)
+    (x, y)
+  }
+}
+
+object SimpleArgbDistance extends ArgbDistance {
+  override def apply(argb1: Argb, argb2: Argb): Double = {
+    val da = math.abs(argb1.a - argb2.a)
+    val dr = math.abs(argb1.r - argb2.r)
+    val dg = math.abs(argb1.g - argb2.g)
+    val db = math.abs(argb1.b - argb2.b)
+
+    math.sqrt(da*da + dr*dr + dg*dg + db*db)
+  }
+}
