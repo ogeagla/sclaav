@@ -3,7 +3,6 @@ package com.oct
 import java.io.File
 
 import com.oct.mosaic.{Config, DoMosaic}
-import com.sksamuel.scrimage.nio.JpegWriter
 import org.slf4j.LoggerFactory
 
 object Main {
@@ -14,6 +13,12 @@ object Main {
   def parseArgs(args: Array[String]): Config= {
     val parser = new scopt.OptionParser[Config]("Mosaical.jar") {
       head("Scala Mosaic", "0.0.x")
+      opt[Boolean]('m', "manipulate") action { (x, c) =>
+        c.copy(manipulate = x) } text "manipulate is a boolean property"
+      opt[Int]('r', "rows") action { (x, c) =>
+        c.copy(rows = x) } text "rows is an integer property"
+      opt[Int]('c', "cols") action { (x, c) =>
+        c.copy(cols = x) } text "cols is an integer property"
       opt[Int]('m', "maxSamplePhotos") action { (x, c) =>
         c.copy(maxSamplePhotos = x) } text "maxSamplePhotos is an integer property"
       opt[File]('i', "in") required() valueName "<file>" action { (x, c) =>
@@ -30,12 +35,10 @@ object Main {
     // parser.parse returns Option[C]
     parser.parse(args, Config()) match {
       case Some(config) =>
-        // do stuff
         config
       case None =>
-        // arguments are bad, error message will have been displayed
-        log.error(s"bad args $args")
-        throw new IllegalArgumentException(s"bad args $args")
+        log.error(s"bad args")
+        throw new IllegalArgumentException(s"bad args")
     }
   }
 
@@ -47,10 +50,11 @@ object Main {
     val inPath = config.in
     val outPath = config.out
     val maxSamples = config.maxSamplePhotos
+    val rows = config.rows
+    val cols = config.cols
+    val doManipulate = config.manipulate
 
     log.info(s"inPath: $inPath outPath: $outPath")
-
-    implicit val writer = JpegWriter.Default
 
     val files = inPath.listFiles().filter(_.isFile).take(maxSamples)
 
@@ -60,7 +64,7 @@ object Main {
 
       log.info(s"running with control image: ${controlFile.getName}")
 
-      DoMosaic(controlFile, sampleFiles, 2, 2, outPath)
+      DoMosaic(controlFile, sampleFiles, cols, rows, outPath, doManipulate)
     }
   }
 }

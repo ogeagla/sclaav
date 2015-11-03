@@ -2,7 +2,7 @@ package com.oct.mosaic
 
 import java.io.File
 
-import com.sksamuel.scrimage.filter.SummerFilter
+import com.sksamuel.scrimage.filter._
 import com.sksamuel.scrimage.nio.JpegWriter
 import com.sksamuel.scrimage.{Color, Image, ScaleMethod}
 import org.slf4j.LoggerFactory
@@ -10,12 +10,14 @@ import org.slf4j.LoggerFactory
 import scala.collection.parallel.mutable.ParArray
 import scala.util.Random
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 object DoMosaic {
 
   val log = LoggerFactory.getLogger(getClass)
 
   implicit val writer = JpegWriter.Default
-  def apply(controlFile: File, sampleFiles: Array[File], cols: Int, rows: Int, outPath: File) = {
+  def apply(controlFile: File, sampleFiles: Array[File], cols: Int, rows: Int, outPath: File, doManipulate: Boolean = false) = {
 
     val controlImage = Image.fromFile(controlFile)
     val controlSize = (controlImage.width, controlImage.height)
@@ -27,9 +29,7 @@ object DoMosaic {
 
     val images = sampleFiles.map(f => Image.fromFile(f).scaleTo(colWidth, rowHeight, ScaleMethod.FastScale))
 
-//    var listOfMatches = List[(Image, (Int, Int))]()
     val listBuffer = new ParArray[(Image, (Int, Int))](rows * cols)
-
 
     log.info("cropping and matching")
 
@@ -40,7 +40,6 @@ object DoMosaic {
 
         val matchToCropped = MatchByArgbAverage(SimpleArgbEstimator, SimpleArgbDistance, cropped, images)
 
-//        listOfMatches = (matchToCropped, (c, r)) :: listOfMatches
         listBuffer.update(rows*c + r, (matchToCropped, (c, r)))
       }
     }
@@ -48,7 +47,7 @@ object DoMosaic {
     val transparentCanvas = Image.filled(controlSize._1, controlSize._2, Color.Transparent)
 
     log.info("assembling")
-    val assembledImage = SimpleCompleteAssembler(transparentCanvas,listBuffer.seq.toArray , (cols, rows))//listOfMatches.toArray
+    val assembledImage = SimpleCompleteAssembler(transparentCanvas,listBuffer.seq.toArray , (cols, rows))
 
     log.info("persisting")
 
@@ -141,6 +140,22 @@ object SimpleCrop extends DiscreteCropper {
   }
 }
 
+object ManipulateAllWithAllOnce {
+  def apply(imgs: Array[Image], manips: Array[ImageManipulator]): Array[Image] = {
+
+    val listBuffer = new ParArray[Image](imgs.length * manips.length)
+
+    for (imgIndex <- imgs.indices.par) {
+      for (manipsIndex <- manips.indices) {
+        val img = imgs(imgIndex)
+        val manip = manips(manipsIndex)
+
+        listBuffer.update(manips.length * imgIndex + manipsIndex, manip(img))
+      }
+    }
+    listBuffer.toArray
+  }
+}
 
 object ApplyManipulations {
   def apply(img: Image, manips: List[ImageManipulator]): Image = {
@@ -172,7 +187,24 @@ object MixManipulations {
 
 object SummerManipulator extends ImageManipulator {
   override def apply(img: Image): Image = {
-    import scala.concurrent.ExecutionContext.Implicits.global
     img.filter(SummerFilter())
+  }
+}
+
+object ChromeManipulator extends ImageManipulator {
+  override def apply(img: Image): Image = {
+    img.filter(ChromeFilter())
+  }
+}
+
+object DiffuseManipulator extends ImageManipulator {
+  override def apply(img: Image): Image = {
+    img.filter(DiffuseFilter())
+  }
+}
+
+object GlowManipulator extends ImageManipulator {
+  override def apply(img: Image): Image = {
+    img.filter(GlowFilter())
   }
 }
