@@ -5,6 +5,7 @@ import java.io.File
 import com.sksamuel.scrimage.filter.GrayscaleFilter
 import com.sksamuel.scrimage.nio.JpegWriter
 import com.sksamuel.scrimage.{Color, Image, ScaleMethod}
+import org.slf4j.LoggerFactory
 
 import scala.collection.parallel.mutable.ParArray
 import scala.util.Random
@@ -46,6 +47,9 @@ trait PixelLocationComputer {
 }
 
 object DoMosaic {
+
+  val log = LoggerFactory.getLogger(getClass)
+
   implicit val writer = JpegWriter.Default
   def apply(controlFile: File, sampleFiles: Array[File], cols: Int, rows: Int, outPath: String) = {
 
@@ -61,10 +65,10 @@ object DoMosaic {
     val listBuffer = new ParArray[(Image, (Int, Int))](rows * cols)
 
 
-    println("cropping and matching")
+    log.info("cropping and matching")
 
     for (c <- (0 to cols - 1).par) {
-      println(s"${c + 1} of $cols cols complete")
+      log.info(s"${c + 1} of $cols cols complete")
       for(r <- 0 to rows - 1) {
         val cropped = SimpleCrop((cols, rows), (c, r), controlImage)
 
@@ -77,10 +81,10 @@ object DoMosaic {
 
     val transparentCanvas = Image.filled(controlSize._1, controlSize._2, Color.Transparent)
 
-    println("assembling")
+    log.info("assembling")
     val assembledImage = SimpleCompleteAssembler(transparentCanvas,listBuffer.seq.toArray , (cols, rows))//listOfMatches.toArray
 
-    println("persisting")
+    log.info("persisting")
 
     val controlFilePhotoName = controlFile.getPath.split("/").last
 
@@ -129,18 +133,21 @@ object SimpleArgbDistance extends ArgbDistance {
 }
 
 object SimpleCompleteAssembler extends CompleteAssembler {
+
+  val log = LoggerFactory.getLogger(getClass)
+
   override def apply(backgroundImage: Image, imagesWIndex: Array[(Image, (Int, Int))], gridSize: (Int, Int)): Image = {
 
     val (canvasW, canvasH) = (backgroundImage.width, backgroundImage.height)
 
-    println("computing pixel locations from grid locations")
+    log.info("computing pixel locations from grid locations")
 
     val imagesWPixelLocations = imagesWIndex.map {
       case (i, (colIndex, rowIndex)) =>
         (i, SimplePixelLocationComputer(gridSize, (colIndex, rowIndex), (canvasW, canvasH)))
     }
 
-    println("assembling image")
+    log.info("assembling image")
 
     val theAssembledImage = imagesWPixelLocations.foldLeft(backgroundImage) {
       case (canvasImage, (image, (i1, i2))) =>

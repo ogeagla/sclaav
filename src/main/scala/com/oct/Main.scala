@@ -3,17 +3,22 @@ package com.oct
 import java.io.File
 
 import com.sksamuel.scrimage.nio.JpegWriter
+import org.slf4j.LoggerFactory
 
 object Main {
 
+  val log = LoggerFactory.getLogger(getClass)
+
   def main(args: Array[String])  {
 
-    println(s"inpath: ${args(0)} outpath: ${args(1)}")
-
-    implicit val writer = JpegWriter.Default
+    val inPath = args(0)
     val outPath = args(1)
 
-    val folder = new File(args(0))
+    log.info(s"inPath: $inPath outPath: $outPath")
+
+    implicit val writer = JpegWriter.Default
+
+    val folder = new File(inPath)
     val files = folder.listFiles().filter(_.isFile).take(400)
 
     for(file <- files) {

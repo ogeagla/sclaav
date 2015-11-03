@@ -5,9 +5,11 @@ import java.io.File
 import com.sksamuel.scrimage.nio.JpegWriter
 import com.sksamuel.scrimage.{Image, Position, ScaleMethod}
 import org.scalatest.{BeforeAndAfter, FunSuite, Matchers}
+import org.slf4j.LoggerFactory
 
 class MainTest extends FunSuite with BeforeAndAfter with Matchers {
 
+  val log = LoggerFactory.getLogger(getClass)
 
   test("builds composites for realz") {
 
@@ -21,7 +23,7 @@ class MainTest extends FunSuite with BeforeAndAfter with Matchers {
       val controlFile = file
       val sampleFiles = files.filter(_ != controlFile)
 
-      DoMosaic(controlFile, sampleFiles, 64, 64, outPath)
+      DoMosaic(controlFile, sampleFiles, 128, 128, outPath)
     }
   }
 
