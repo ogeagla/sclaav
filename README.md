@@ -14,3 +14,11 @@ $ java -jar bin/Mosaical.jar \
   --filters true \
   --target photo.jpg
 ```
+
+## Overview
+
+ - Given a `target` image (or set of target images) and a set of `sample` images,
+    - Discretize target image in grid by `rows` and `cols`.
+    - For each sub-image, find the `sample` image which is the closest match; by default we use min-`2-norm` distance between `ARGB` average vectors.
+    - Assemble each matched sample image onto the original to create the mosaic.
+    - Eyeballs be amazed.
