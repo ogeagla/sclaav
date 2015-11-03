@@ -21,7 +21,7 @@ object Main {
         c.copy(mode = x) } text "mode is an enum property"
       opt[File]('t', "target") action { (x, c) =>
         c.copy(singleTarget = x) } text "target is a file property"
-      opt[Boolean]('m', "manipulate") action { (x, c) =>
+      opt[Boolean]('p', "manipulate") action { (x, c) =>
         c.copy(manipulate = x) } text "manipulate is a boolean property"
       opt[Int]('r', "rows") action { (x, c) =>
         c.copy(rows = x) } text "rows is an integer property"
