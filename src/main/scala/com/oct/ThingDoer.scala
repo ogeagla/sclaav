@@ -6,8 +6,8 @@ import com.sksamuel.scrimage.filter.GrayscaleFilter
 import com.sksamuel.scrimage.nio.JpegWriter
 import com.sksamuel.scrimage.{Color, Image, ScaleMethod}
 
+import scala.collection.parallel.mutable.ParArray
 import scala.util.Random
-
 
 
 
@@ -57,25 +57,28 @@ object DoMosaic {
 
     val images = sampleFiles.map(f => Image.fromFile(f).scaleTo(colWidth, rowHeight, ScaleMethod.FastScale))
 
-    var listOfMatches = List[(Image, (Int, Int))]()
+//    var listOfMatches = List[(Image, (Int, Int))]()
+    val listBuffer = new ParArray[(Image, (Int, Int))](rows * cols)
+
 
     println("cropping and matching")
 
-    for(c <- 0 to cols - 1) {
+    for (c <- (0 to cols - 1).par) {
       println(s"${c + 1} of $cols cols complete")
       for(r <- 0 to rows - 1) {
         val cropped = SimpleCrop((cols, rows), (c, r), controlImage)
 
         val matchToCropped = MatchByArgbAverage(SimpleArgbEstimator, SimpleArgbDistance, cropped, images)
 
-        listOfMatches = (matchToCropped, (c, r)) :: listOfMatches
+//        listOfMatches = (matchToCropped, (c, r)) :: listOfMatches
+        listBuffer.update(rows*c + r, (matchToCropped, (c, r)))
       }
     }
 
     val transparentCanvas = Image.filled(controlSize._1, controlSize._2, Color.Transparent)
 
     println("assembling")
-    val assembledImage = SimpleCompleteAssembler(transparentCanvas, listOfMatches.toArray, (cols, rows))
+    val assembledImage = SimpleCompleteAssembler(transparentCanvas,listBuffer.seq.toArray , (cols, rows))//listOfMatches.toArray
 
     println("persisting")
 
@@ -300,8 +303,10 @@ object ImageSimilarityGrayscaleDistance2 {
 class ImageSimilarityGrayscaleDistance2 extends Similarity {
   def apply(img1: Image, img2: Image, scaleWidth: Int = 32, scaleHeight: Int = 32): Double = {
 
-    val rgb1: Array[Array[Int]] = img1.scaleTo(scaleWidth, scaleHeight, ScaleMethod.FastScale).filter(GrayscaleFilter).rgb
-    val rgb2: Array[Array[Int]] = img2.scaleTo(scaleWidth, scaleHeight, ScaleMethod.FastScale).filter(GrayscaleFilter).rgb
+    val rgb1: Array[Array[Int]] =
+      img1.scaleTo(scaleWidth, scaleHeight, ScaleMethod.FastScale).filter(GrayscaleFilter).rgb
+    val rgb2: Array[Array[Int]] =
+      img2.scaleTo(scaleWidth, scaleHeight, ScaleMethod.FastScale).filter(GrayscaleFilter).rgb
 
     val r1 = rgb1.map(_.apply(0).toDouble).toList
     val g1 = rgb1.map(_.apply(1).toDouble).toList
