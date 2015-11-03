@@ -8,9 +8,8 @@ import com.sksamuel.scrimage.{Color, Image, ScaleMethod}
 import org.slf4j.LoggerFactory
 
 import scala.collection.parallel.mutable.ParArray
-import scala.util.Random
-
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.Random
 
 object DoMosaic {
 
@@ -29,16 +28,25 @@ object DoMosaic {
 
     val images = sampleFiles.map(f => Image.fromFile(f).scaleTo(colWidth, rowHeight, ScaleMethod.FastScale))
 
+    val allImages = doManipulate match {
+      case false => images
+      case true =>
+        log.info(s"doing manipulations")
+        val manips = Array(SummerManipulator, DiffuseManipulator, GlowManipulator, ChromeManipulator)
+        val manipped = ManipulateAllWithAllOnce(images, manips)
+        images.++(manipped)
+    }
+
     val listBuffer = new ParArray[(Image, (Int, Int))](rows * cols)
 
-    log.info("cropping and matching")
+    log.info(s"cropping and matching using sample size ${allImages.length}")
 
     for (c <- (0 to cols - 1).par) {
       log.info(s"${c + 1} of $cols cols complete")
       for(r <- 0 to rows - 1) {
         val cropped = SimpleCrop((cols, rows), (c, r), controlImage)
 
-        val matchToCropped = MatchByArgbAverage(SimpleArgbEstimator, SimpleArgbDistance, cropped, images)
+        val matchToCropped = MatchByArgbAverage(SimpleArgbEstimator, SimpleArgbDistance, cropped, allImages)
 
         listBuffer.update(rows*c + r, (matchToCropped, (c, r)))
       }
@@ -141,11 +149,14 @@ object SimpleCrop extends DiscreteCropper {
 }
 
 object ManipulateAllWithAllOnce {
+  val log = LoggerFactory.getLogger(getClass)
+
   def apply(imgs: Array[Image], manips: Array[ImageManipulator]): Array[Image] = {
 
     val listBuffer = new ParArray[Image](imgs.length * manips.length)
 
     for (imgIndex <- imgs.indices.par) {
+      log.info(s"manipping ${imgIndex + 1} of ${imgs.length}")
       for (manipsIndex <- manips.indices) {
         val img = imgs(imgIndex)
         val manip = manips(manipsIndex)
