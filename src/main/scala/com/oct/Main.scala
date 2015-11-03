@@ -26,7 +26,9 @@ object Main {
       val controlFile = file
       val sampleFiles = files.filter(_ != controlFile)
 
-      DoMosaic(controlFile, sampleFiles, 128, 128, outPath)
+      log.info(s"running with control image: ${controlFile.getName}")
+
+      DoMosaic(controlFile, sampleFiles, 256, 256, outPath)
     }
   }
 }

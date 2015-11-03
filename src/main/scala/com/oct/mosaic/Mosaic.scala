@@ -22,6 +22,8 @@ object DoMosaic {
     val colWidth = controlSize._1 / cols
     val rowHeight = controlSize._2 / rows
 
+    log.info(s"loading ${sampleFiles.length} images")
+
     val images = sampleFiles.map(f => Image.fromFile(f).scaleTo(colWidth, rowHeight, ScaleMethod.FastScale))
 
 //    var listOfMatches = List[(Image, (Int, Int))]()
