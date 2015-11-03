@@ -10,25 +10,24 @@ object Main {
 
   val log = LoggerFactory.getLogger(getClass)
 
-
   def parseArgs(args: Array[String]): Config= {
 
     implicit val tenantKeyRead: scopt.Read[Mode] = scopt.Read.reads(MapsModes(_))
 
     val parser = new scopt.OptionParser[Config]("Mosaical.jar") {
       head("Scala Mosaic", "0.0.x")
-      opt[Mode]('d', "mode") action { (x, c) =>
+      opt[Mode]('m', "mode") action { (x, c) =>
         c.copy(mode = x) } text "mode is an enum property"
       opt[File]('t', "target") action { (x, c) =>
         c.copy(singleTarget = x) } text "target is a file property"
-      opt[Boolean]('p', "manipulate") action { (x, c) =>
-        c.copy(manipulate = x) } text "manipulate is a boolean property"
+      opt[Boolean]('f', "filters") action { (x, c) =>
+        c.copy(manipulate = x) } text "filters is a boolean property"
       opt[Int]('r', "rows") action { (x, c) =>
         c.copy(rows = x) } text "rows is an integer property"
       opt[Int]('c', "cols") action { (x, c) =>
         c.copy(cols = x) } text "cols is an integer property"
-      opt[Int]('m', "maxSamplePhotos") action { (x, c) =>
-        c.copy(maxSamplePhotos = x) } text "maxSamplePhotos is an integer property"
+      opt[Int]('s', "samples") action { (x, c) =>
+        c.copy(maxSamplePhotos = x) } text "samples is an integer property"
       opt[File]('i', "in") required() valueName "<file>" action { (x, c) =>
         c.copy(in = x) } text "in is a required file property"
       opt[File]('o', "out") required() valueName "<file>" action { (x, c) =>
@@ -68,6 +67,7 @@ object Main {
     val files = inPath.listFiles().filter(_.isFile).take(maxSamples)
 
     mode match {
+
       case Mode.SINGLE_FILE =>
         log.info("using single file target")
         val target = config.singleTarget

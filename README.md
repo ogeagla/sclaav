@@ -10,7 +10,7 @@ $ java -jar bin/Mosaical.jar \
   --mode permute \
   --rows 64 \ 
   --cols 64 \
-  --maxSamplePhotos 300 \
-  --manipulate true \
+  --samples 300 \
+  --filters true \
   --target photo.jpg
 ```
