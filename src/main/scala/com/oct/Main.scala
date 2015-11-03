@@ -2,6 +2,7 @@ package com.oct
 
 import java.io.File
 
+import com.oct.mosaic.DoMosaic
 import com.sksamuel.scrimage.nio.JpegWriter
 import org.slf4j.LoggerFactory
 

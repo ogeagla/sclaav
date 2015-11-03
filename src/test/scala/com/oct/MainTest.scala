@@ -2,6 +2,7 @@ package com.oct
 
 import java.io.File
 
+import com.oct.mosaic._
 import com.sksamuel.scrimage.nio.JpegWriter
 import com.sksamuel.scrimage.{Image, Position, ScaleMethod}
 import org.scalatest.{BeforeAndAfter, FunSuite, Matchers}
