@@ -9,6 +9,8 @@ version := "1.0"
 
 scalaVersion := "2.11.7"
 
+resolvers += Resolver.sonatypeRepo("public")
+
 libraryDependencies += "com.sksamuel.scrimage" % "scrimage-core_2.11" % "2.1.1"
 
 libraryDependencies += "com.sksamuel.scrimage" % "scrimage-io-extra_2.11" % "2.1.1"
@@ -18,6 +20,8 @@ libraryDependencies += "com.sksamuel.scrimage" % "scrimage-filters_2.11" % "2.1.
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.12"
 
 libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.7.12"
+
+libraryDependencies += "com.github.scopt" %% "scopt" % "3.3.0"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.1" % "test"
 

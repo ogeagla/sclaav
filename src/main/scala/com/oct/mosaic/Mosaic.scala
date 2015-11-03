@@ -2,6 +2,7 @@ package com.oct.mosaic
 
 import java.io.File
 
+import com.sksamuel.scrimage.filter.SummerFilter
 import com.sksamuel.scrimage.nio.JpegWriter
 import com.sksamuel.scrimage.{Color, Image, ScaleMethod}
 import org.slf4j.LoggerFactory
@@ -14,7 +15,7 @@ object DoMosaic {
   val log = LoggerFactory.getLogger(getClass)
 
   implicit val writer = JpegWriter.Default
-  def apply(controlFile: File, sampleFiles: Array[File], cols: Int, rows: Int, outPath: String) = {
+  def apply(controlFile: File, sampleFiles: Array[File], cols: Int, rows: Int, outPath: File) = {
 
     val controlImage = Image.fromFile(controlFile)
     val controlSize = (controlImage.width, controlImage.height)
@@ -53,9 +54,11 @@ object DoMosaic {
 
     val controlFilePhotoName = controlFile.getPath.split("/").last
 
-    assembledImage.output(outPath + s"${controlFilePhotoName}_assembled.jpeg")
-    controlImage.output(outPath + s"${controlFilePhotoName}_ref.jpeg")
+    val assembledPath = new File(outPath, s"${controlFilePhotoName}_assembled.jpeg")
+    val refPath = new File(outPath, s"${controlFilePhotoName}_ref.jpeg")
 
+    assembledImage.output(assembledPath)
+    controlImage.output(refPath)
   }
 }
 
@@ -164,5 +167,12 @@ object MixManipulations {
     }
 
     man1b ++: man2b
+  }
+}
+
+object SummerManipulator extends ImageManipulator {
+  override def apply(img: Image): Image = {
+    import scala.concurrent.ExecutionContext.Implicits.global
+    img.filter(SummerFilter())
   }
 }
