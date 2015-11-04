@@ -105,20 +105,17 @@ object SimpleCompleteRandomAssembler extends RandomMinCompleteAssembler {
 
     scala.util.Random.setSeed(13)
 
-    for (i <- 0 to 5000) {
+    for (i <- 0 to 100000) {
       println(s"$i")
 
       val randomX = scala.util.Random.nextInt(w)
       val randomY = scala.util.Random.nextInt(h)
       val randomImageIndex = scala.util.Random.nextInt(samples.length)
 
-//      println(s"x: $randomX y: $randomY index: $randomImageIndex")
-
       val imgTest = samples(randomImageIndex)
       val sampledImgSize = (imgTest.width, imgTest.height)
       val newW = Random.nextInt(sampledImgSize._1) + 1
       val newH = Random.nextInt(sampledImgSize._2) + 1
-//      println(s"sample size: $newW $newH")
 
       val scaledImg = imgTest.scaleTo(newW, newH, ScaleMethod.FastScale)
 
@@ -128,7 +125,7 @@ object SimpleCompleteRandomAssembler extends RandomMinCompleteAssembler {
 
       val maybeNewDistance = ImageSimilarityArgbDistance2(theReferenceImage, maybeNewImage)
 
-//      println(s"old dist: $distance ; new distance: $maybeNewDistance")
+      println(s"    old dist: $distance ; new distance: $maybeNewDistance")
 
       distance - maybeNewDistance match {
         case better if better > 0.0 =>

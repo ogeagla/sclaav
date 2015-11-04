@@ -16,14 +16,23 @@ class MainTest extends FunSuite with BeforeAndAfter with Matchers {
     implicit val writer = JpegWriter.Default
     val outPath = getClass.getResource("/").getPath
     val folder = new File(getClass.getResource("/bap-images").getPath)
-    val files = folder.listFiles().filter(_.isFile).take(100)
+    val files = folder.listFiles().filter(_.isFile).take(400)
 
-    val theImage = Image.fromFile(files.head)
-    val otherImages = files.tail.map(f => Image.fromFile(f).scale(0.5, ScaleMethod.FastScale))
-    val emptyImage = Image.filled(theImage.width, theImage.height, Color.Transparent)
-    val composite = SimpleCompleteRandomAssembler(theImage, emptyImage, otherImages)
-    composite.output(outPath + s"composite.jpeg")
-    theImage.output(outPath + s"ref.jpeg")
+    val theImage1 = Image.fromFile(files.filter(f => f.getAbsolutePath.contains("0010-2015-07-1112-24-27")).head)
+    val theImage2 = Image.fromFile(files.filter(f => f.getAbsolutePath.contains("0068-2014-11-2816-57-05")).head)
+
+    val otherImages = files.tail.map(f => Image.fromFile(f).scale(0.25, ScaleMethod.FastScale))
+    val emptyImage = Image.filled(theImage1.width, theImage1.height, Color.Transparent)
+
+    val composite1 = SimpleCompleteRandomAssembler(theImage1, emptyImage, otherImages)
+    composite1.output(outPath + s"composite-1.jpeg")
+    theImage1.output(outPath + s"ref-1.jpeg")
+
+    val composite2 = SimpleCompleteRandomAssembler(theImage2, emptyImage, otherImages)
+    composite2.output(outPath + s"composite-2.jpeg")
+    theImage2.output(outPath + s"ref-2.jpeg")
+
+
   }
 
   ignore("builds composites for realz") {
