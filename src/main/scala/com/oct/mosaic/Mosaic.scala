@@ -89,6 +89,13 @@ object MatchByArgbAverage {
   }
 }
 
+object AddTransparencyToImage extends ImageManipulator {
+  override def apply(img: Image): Image = {
+    val (w, h) = (img.width, img.height)
+    Image.filled(w, h, Color.Transparent).composite(new AlphaComposite(0.5), img)
+  }
+}
+
 object SimpleCompleteRandomAssembler extends RandomMinCompleteAssembler {
   override def apply(theReferenceImage: Image, theBackgroundImage: Image, samples: Array[Image]): Image = {
 
@@ -98,7 +105,7 @@ object SimpleCompleteRandomAssembler extends RandomMinCompleteAssembler {
 
     scala.util.Random.setSeed(13)
 
-    for (i <- 0 to 1000) {
+    for (i <- 0 to 5000) {
       println(s"$i")
 
       val randomX = scala.util.Random.nextInt(w)
@@ -115,7 +122,7 @@ object SimpleCompleteRandomAssembler extends RandomMinCompleteAssembler {
 
       val scaledImg = imgTest.scaleTo(newW, newH, ScaleMethod.FastScale)
 
-      val halfSeeThroughImg = Image.filled(newW, newH, Color.Transparent).composite(new AlphaComposite(0.5), scaledImg)
+      val halfSeeThroughImg = AddTransparencyToImage(scaledImg)
 
       val maybeNewImage = SimpleSingleAbsoluteAssembler(theImage, (randomX, randomY), halfSeeThroughImg)
 
