@@ -53,12 +53,16 @@ package object mosaic {
     def apply(gridSize: (Int, Int), locationToCrop: (Int, Int), img: Image): Image
   }
 
-  trait SingleAssembler {
+  trait SingleAbsoluteAssembler {
     def apply(backgroundImage: Image, pixelLocation: (Int, Int), theImageToInsert: Image): Image
   }
 
-  trait CompleteAssembler {
+  trait CompleteGridAssembler {
     def apply(backgroundImage: Image, imagesWIndex: Array[(Image, (Int, Int))], gridSize: (Int, Int)): Image
+  }
+
+  trait RandomMinCompleteAssembler {
+    def apply(theReferenceImage: Image, theBackgroundImage: Image, samples: Array[Image]): Image
   }
 
   trait PixelLocationComputer {

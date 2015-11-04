@@ -2,6 +2,7 @@ package com.oct.mosaic
 
 import java.io.File
 
+import com.sksamuel.scrimage.composite.AlphaComposite
 import com.sksamuel.scrimage.filter._
 import com.sksamuel.scrimage.nio.JpegWriter
 import com.sksamuel.scrimage.{Color, Image, ScaleMethod}
@@ -55,7 +56,7 @@ object DoMosaic {
     val transparentCanvas = Image.filled(controlSize._1, controlSize._2, Color.Transparent)
 
     log.info("assembling")
-    val assembledImage = SimpleCompleteAssembler(transparentCanvas,listBuffer.seq.toArray , (cols, rows))
+    val assembledImage = SimpleCompleteGridAssembler(transparentCanvas,listBuffer.seq.toArray , (cols, rows))
 
     log.info("persisting")
 
@@ -88,7 +89,53 @@ object MatchByArgbAverage {
   }
 }
 
-object SimpleCompleteAssembler extends CompleteAssembler {
+object SimpleCompleteRandomAssembler extends RandomMinCompleteAssembler {
+  override def apply(theReferenceImage: Image, theBackgroundImage: Image, samples: Array[Image]): Image = {
+
+    var theImage = theBackgroundImage
+    var distance = ImageSimilarityArgbDistance2(theReferenceImage, theBackgroundImage)
+    val (w, h) = (theImage.width, theImage.height)
+
+    scala.util.Random.setSeed(13)
+
+    for (i <- 0 to 1000) {
+      println(s"$i")
+
+      val randomX = scala.util.Random.nextInt(w)
+      val randomY = scala.util.Random.nextInt(h)
+      val randomImageIndex = scala.util.Random.nextInt(samples.length)
+
+//      println(s"x: $randomX y: $randomY index: $randomImageIndex")
+
+      val imgTest = samples(randomImageIndex)
+      val sampledImgSize = (imgTest.width, imgTest.height)
+      val newW = Random.nextInt(sampledImgSize._1) + 1
+      val newH = Random.nextInt(sampledImgSize._2) + 1
+//      println(s"sample size: $newW $newH")
+
+      val scaledImg = imgTest.scaleTo(newW, newH, ScaleMethod.FastScale)
+
+      val halfSeeThroughImg = Image.filled(newW, newH, Color.Transparent).composite(new AlphaComposite(0.5), scaledImg)
+
+      val maybeNewImage = SimpleSingleAbsoluteAssembler(theImage, (randomX, randomY), halfSeeThroughImg)
+
+      val maybeNewDistance = ImageSimilarityArgbDistance2(theReferenceImage, maybeNewImage)
+
+//      println(s"old dist: $distance ; new distance: $maybeNewDistance")
+
+      distance - maybeNewDistance match {
+        case better if better > 0.0 =>
+          theImage = maybeNewImage
+          distance = maybeNewDistance
+        case worse if worse <= 0.0 =>
+      }
+    }
+
+    theImage
+  }
+}
+
+object SimpleCompleteGridAssembler extends CompleteGridAssembler {
 
   val log = LoggerFactory.getLogger(getClass)
 
@@ -107,14 +154,14 @@ object SimpleCompleteAssembler extends CompleteAssembler {
 
     val theAssembledImage = imagesWPixelLocations.foldLeft(backgroundImage) {
       case (canvasImage, (image, (i1, i2))) =>
-        SimpleSingleAssembler(canvasImage, (i1, i2), image)
+        SimpleSingleAbsoluteAssembler(canvasImage, (i1, i2), image)
     }
 
     theAssembledImage
   }
 }
 
-object SimpleSingleAssembler extends SingleAssembler {
+object SimpleSingleAbsoluteAssembler extends SingleAbsoluteAssembler {
   override def apply(backgroundImage: Image, pixelLocation: (Int, Int), theImageToInsert: Image): Image = {
     backgroundImage.overlay(theImageToInsert, pixelLocation._1, pixelLocation._2)
   }

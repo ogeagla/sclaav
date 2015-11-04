@@ -4,7 +4,7 @@ import java.io.File
 
 import com.oct.mosaic._
 import com.sksamuel.scrimage.nio.JpegWriter
-import com.sksamuel.scrimage.{Image, Position, ScaleMethod}
+import com.sksamuel.scrimage.{Color, Image, Position, ScaleMethod}
 import org.scalatest.{BeforeAndAfter, FunSuite, Matchers}
 import org.slf4j.LoggerFactory
 
@@ -12,10 +12,24 @@ class MainTest extends FunSuite with BeforeAndAfter with Matchers {
 
   val log = LoggerFactory.getLogger(getClass)
 
-  test("builds composites for realz") {
-
+  test("builds composite using random method and stuff") {
     implicit val writer = JpegWriter.Default
     val outPath = getClass.getResource("/").getPath
+    val folder = new File(getClass.getResource("/bap-images").getPath)
+    val files = folder.listFiles().filter(_.isFile).take(100)
+
+    val theImage = Image.fromFile(files.head)
+    val otherImages = files.tail.map(f => Image.fromFile(f).scale(0.5, ScaleMethod.FastScale))
+    val emptyImage = Image.filled(theImage.width, theImage.height, Color.Transparent)
+    val composite = SimpleCompleteRandomAssembler(theImage, emptyImage, otherImages)
+    composite.output(outPath + s"composite.jpeg")
+    theImage.output(outPath + s"ref.jpeg")
+  }
+
+  ignore("builds composites for realz") {
+
+    implicit val writer = JpegWriter.Default
+    val outPath = new File(getClass.getResource("/").getFile)
 
     val folder = new File(getClass.getResource("/bap-images").getPath)
     val files = folder.listFiles().filter(_.isFile).take(400)
@@ -86,7 +100,7 @@ class MainTest extends FunSuite with BeforeAndAfter with Matchers {
 
     val images = files.map(f => Image.fromFile(f).scaleTo(256, 256, ScaleMethod.FastScale))
 
-    val array = UniqueCartesian2(images.toList, images.toList)
+    val array = UniqueCartesian2(images, images)
 
     val distances = array.par.map { case (i1, i2) => (i1, i2, ImageSimilarityArgbDistance2(i1, i2)) }.toList
 

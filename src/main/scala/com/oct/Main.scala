@@ -39,7 +39,6 @@ object Main {
       note("some notes.\n")
       help("help") text "prints this usage text"
     }
-    // parser.parse returns Option[C]
     parser.parse(args, Config()) match {
       case Some(config) =>
         config
