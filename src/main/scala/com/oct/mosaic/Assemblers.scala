@@ -24,7 +24,7 @@ object SimpleCompleteGeneticAssembler extends CompleteAssembler {
 
     val finalChains = iterateSteps(initChains, iterations, theBackgroundImage, theReferenceImage, topNSize, manipChainPopulationSize)
 
-    val topChain = takeTopApplied(getApplied(finalChains, theBackgroundImage, theReferenceImage), topNSize).head
+    val topChain = takeTopApplied(getApplied(finalChains, theBackgroundImage, theReferenceImage), topNSize).map(_._1).head
 
     val (topChainAgain, topImage, topDistance) = getApplied(Array(topChain), theBackgroundImage, theReferenceImage).head
 
@@ -37,6 +37,7 @@ object SimpleCompleteGeneticAssembler extends CompleteAssembler {
   def iterateSteps(initChains: Array[Array[ImageManipulator]], iterations: Int, theBackgroundImage: Image, theReferenceImage: Image, topNSize: Int, manipChainPopulationSize: Int): Array[Array[ImageManipulator]] = {
     var theChains = initChains
     for (iter <- 0 to iterations - 1) {
+      println(s"iteration: $iter")
       theChains = doOneStep(theChains, theBackgroundImage, theReferenceImage, topNSize, manipChainPopulationSize)
     }
     theChains
@@ -50,17 +51,23 @@ object SimpleCompleteGeneticAssembler extends CompleteAssembler {
     }
   }
 
-  def takeTopApplied(chainsWDistance: Array[(Array[ImageManipulator], Image, Double)], topCount: Int): Array[Array[ImageManipulator]] = {
+  def takeTopApplied(chainsWDistance: Array[(Array[ImageManipulator], Image, Double)], topCount: Int): Array[(Array[ImageManipulator], Image, Double)] = {
     chainsWDistance.sortBy {
       case (chain, appliedImage, dist) =>
         dist
-    }.take(topCount).map(_._1)
+    }.take(topCount)
   }
 
   def doOneStep(chainsToIterateOn: Array[Array[ImageManipulator]], theBackgroundImage: Image, theReferenceImage: Image, topNSize: Int, manipChainPopulationSize: Int): Array[Array[ImageManipulator]] = {
     val distances = getApplied(chainsToIterateOn, theBackgroundImage, theReferenceImage)
 
-    val topChains = takeTopApplied(distances, topNSize)
+    val topChainsWDist = takeTopApplied(distances, topNSize)
+
+    topChainsWDist.foreach{ tc =>
+      println(s"chain distance: ${tc._3}")
+    }
+
+    val topChains = topChainsWDist.map(_._1)
 
     val notTopChains = chainsToIterateOn.filter(!topChains.contains(_))
 
@@ -84,11 +91,6 @@ object SimpleCompleteGeneticAssembler extends CompleteAssembler {
   }
 
   def createAChain(maxW: Int, maxH: Int, sampleImgs: Array[Image], size: Int): Array[ImageManipulator] = {
-
-    val randomX = scala.util.Random.nextInt(maxW)
-    val randomY = scala.util.Random.nextInt(maxH)
-    val randomIndex = scala.util.Random.nextInt(sampleImgs.length)
-
     val manips: Array[ImageManipulator] = (0 to size - 1).map { s =>
       val randomX = scala.util.Random.nextInt(maxW)
       val randomY = scala.util.Random.nextInt(maxH)

@@ -21,6 +21,13 @@ class MainTest extends FunSuite with BeforeAndAfter with Matchers {
     val theImage1 = Image.fromFile(files.filter(f => f.getAbsolutePath.contains("0010-2015-07-1112-24-27")).head)
     val theImage2 = Image.fromFile(files.filter(f => f.getAbsolutePath.contains("0068-2014-11-2816-57-05")).head)
 
+    val otherImages = files.tail.map(f => Image.fromFile(f).scale(0.25, ScaleMethod.FastScale))
+    val emptyImage = Image.filled(theImage1.width, theImage1.height, Color.Transparent)
+
+    val composite1 = SimpleCompleteGeneticAssembler(theImage1, emptyImage, otherImages)
+    composite1.output(outPath + s"composite-1.jpeg")
+    theImage1.output(outPath + s"ref-1.jpeg")
+
 
   }
 
