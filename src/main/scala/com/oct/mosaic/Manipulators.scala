@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory
 
 import scala.collection.parallel.mutable.ParArray
 import scala.util.Random
+import scala.concurrent.ExecutionContext.Implicits.global
 
 //bitches
 

@@ -22,34 +22,45 @@ object SimpleCompleteGeneticAssembler extends CompleteAssembler {
       createAChain(maxW, maxH, samples, manipChainSize)
     }.toArray
 
-    iterateSteps(initChains, iterations, theBackgroundImage, theReferenceImage, topNSize, manipChainPopulationSize)
+    val finalChains = iterateSteps(initChains, iterations, theBackgroundImage, theReferenceImage, topNSize, manipChainPopulationSize)
 
+    val topChain = takeTopApplied(getApplied(finalChains, theBackgroundImage, theReferenceImage), topNSize).head
 
+    val (topChainAgain, topImage, topDistance) = getApplied(Array(topChain), theBackgroundImage, theReferenceImage).head
 
+    println(s"final distance: $topDistance")
 
-
-    ???
+    topImage
   }
 
 
-  def iterateSteps(initChains: Array[Array[ImageManipulator]], iterations: Int, theBackgroundImage: Image, theReferenceImage: Image, topNSize: Int, manipChainPopulationSize: Int) = {
+  def iterateSteps(initChains: Array[Array[ImageManipulator]], iterations: Int, theBackgroundImage: Image, theReferenceImage: Image, topNSize: Int, manipChainPopulationSize: Int): Array[Array[ImageManipulator]] = {
     var theChains = initChains
     for (iter <- 0 to iterations - 1) {
       theChains = doOneStep(theChains, theBackgroundImage, theReferenceImage, topNSize, manipChainPopulationSize)
     }
+    theChains
   }
 
-  def doOneStep(chainsToIterateOn: Array[Array[ImageManipulator]], theBackgroundImage: Image, theReferenceImage: Image, topNSize: Int, manipChainPopulationSize: Int): Array[Array[ImageManipulator]] = {
-    val distances = chainsToIterateOn.map { chain =>
+  def getApplied(chains: Array[Array[ImageManipulator]], theBackgroundImage: Image, theReferenceImage: Image): Array[(Array[ImageManipulator], Image, Double)] = {
+    chains.map { chain =>
       val appliedImage = ApplyManipulations(theBackgroundImage, chain)
       val distance = ImageSimilarityArgbDistance2(appliedImage, theReferenceImage)
       (chain, appliedImage, distance)
     }
+  }
 
-    val topChains = distances.sortBy{
+  def takeTopApplied(chainsWDistance: Array[(Array[ImageManipulator], Image, Double)], topCount: Int): Array[Array[ImageManipulator]] = {
+    chainsWDistance.sortBy {
       case (chain, appliedImage, dist) =>
         dist
-    }.take(topNSize).map(_._1)
+    }.take(topCount).map(_._1)
+  }
+
+  def doOneStep(chainsToIterateOn: Array[Array[ImageManipulator]], theBackgroundImage: Image, theReferenceImage: Image, topNSize: Int, manipChainPopulationSize: Int): Array[Array[ImageManipulator]] = {
+    val distances = getApplied(chainsToIterateOn, theBackgroundImage, theReferenceImage)
+
+    val topChains = takeTopApplied(distances, topNSize)
 
     val notTopChains = chainsToIterateOn.filter(!topChains.contains(_))
 

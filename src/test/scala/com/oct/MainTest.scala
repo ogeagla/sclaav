@@ -12,7 +12,19 @@ class MainTest extends FunSuite with BeforeAndAfter with Matchers {
 
   val log = LoggerFactory.getLogger(getClass)
 
-  test("builds composite using random method and stuff") {
+  test("builds composite using some fucking resemblance to an inbred genetic algorithm") {
+    implicit val writer = JpegWriter.Default
+    val outPath = getClass.getResource("/").getPath
+    val folder = new File(getClass.getResource("/bap-images").getPath)
+    val files = folder.listFiles().filter(_.isFile).take(400)
+
+    val theImage1 = Image.fromFile(files.filter(f => f.getAbsolutePath.contains("0010-2015-07-1112-24-27")).head)
+    val theImage2 = Image.fromFile(files.filter(f => f.getAbsolutePath.contains("0068-2014-11-2816-57-05")).head)
+
+
+  }
+
+  ignore("builds composite using random method and stuff") {
     implicit val writer = JpegWriter.Default
     val outPath = getClass.getResource("/").getPath
     val folder = new File(getClass.getResource("/bap-images").getPath)
