@@ -152,3 +152,22 @@ object SimpleArgbDistance extends ArgbDistance {
     math.sqrt(da*da + dr*dr + dg*dg + db*db)
   }
 }
+
+object MatchByArgbAverage {
+  def apply(argbEstimator: ArgbEstimator, argbDistance: ArgbDistance, refImage: Image, otherImages: Array[Image]): Image = {
+
+    val refArgb = argbEstimator(refImage)
+
+    val argbs = otherImages.map {
+      i => (i, argbEstimator(i))
+    }
+
+    val argbsWDistance = argbs.map {
+      case (i, argb) => (i, argbDistance(refArgb, argb))
+    }
+
+    argbsWDistance.sortBy {
+      case (i, dist) => dist
+    }.head._1
+  }
+}
