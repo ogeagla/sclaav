@@ -61,7 +61,7 @@ package object mosaic {
     def apply(backgroundImage: Image, imagesWIndex: Array[(Image, (Int, Int))], gridSize: (Int, Int)): Image
   }
 
-  trait RandomMinCompleteAssembler {
+  trait CompleteAssembler {
     def apply(theReferenceImage: Image, theBackgroundImage: Image, samples: Array[Image]): Image
   }
 

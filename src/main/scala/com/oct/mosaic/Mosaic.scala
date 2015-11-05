@@ -96,7 +96,101 @@ object AddTransparencyToImage extends ImageManipulator {
   }
 }
 
-object SimpleCompleteRandomAssembler extends RandomMinCompleteAssembler {
+class AlphaCompositeManipulator(baseImage: Image, x: Int, y: Int) extends ImageManipulator {
+  lazy val seeThruBaseImage = AddTransparencyToImage(baseImage)
+  override def apply(img: Image): Image = {
+    val seeThruProvidedImg = AddTransparencyToImage(img)
+    SimpleSingleAbsoluteAssembler(baseImage, (x, y), seeThruProvidedImg)
+  }
+}
+
+object SimpleCompleteGeneticAssembler extends CompleteAssembler {
+  override def apply(theReferenceImage: Image, theBackgroundImage: Image, samples: Array[Image]): Image = {
+
+    val (maxW, maxH) = (theBackgroundImage.width, theBackgroundImage.height)
+    val refDistance = ImageSimilarityArgbDistance2(theBackgroundImage, theReferenceImage)
+
+    val manipChainSize = 10
+    val manipChainPopulationSize = 10
+    val iterations = 5
+    val topNSize = 3
+
+    scala.util.Random.setSeed(13)
+
+    val initChains = (0 to manipChainPopulationSize - 1).map { c =>
+      createAChain(maxW, maxH, samples, manipChainSize)
+    }.toArray
+
+    iterateSteps(initChains, iterations, theBackgroundImage, theReferenceImage, topNSize, manipChainPopulationSize)
+
+
+
+
+
+    ???
+  }
+
+
+  def iterateSteps(initChains: Array[Array[ImageManipulator]], iterations: Int, theBackgroundImage: Image, theReferenceImage: Image, topNSize: Int, manipChainPopulationSize: Int) = {
+    var theChains = initChains
+    for (iter <- 0 to iterations - 1) {
+      theChains = doOneStep(theChains, theBackgroundImage, theReferenceImage, topNSize, manipChainPopulationSize)
+    }
+  }
+
+  def doOneStep(chainsToIterateOn: Array[Array[ImageManipulator]], theBackgroundImage: Image, theReferenceImage: Image, topNSize: Int, manipChainPopulationSize: Int): Array[Array[ImageManipulator]] = {
+    val distances = chainsToIterateOn.map { chain =>
+      val appliedImage = ApplyManipulations(theBackgroundImage, chain)
+      val distance = ImageSimilarityArgbDistance2(appliedImage, theReferenceImage)
+      (chain, appliedImage, distance)
+    }
+
+    val topChains = distances.sortBy{
+      case (chain, appliedImage, dist) =>
+        dist
+    }.take(topNSize).map(_._1)
+
+    val notTopChains = chainsToIterateOn.filter(!topChains.contains(_))
+
+    val newChainsCorpus = topChains.++:(notTopChains).++(hyvbridizeChains(chainsToIterateOn, chainsToIterateOn))
+
+    val newChainsChosenToLiveAndTheRestToDieMuahahahahahahahahahahahAAAAAAhahahhahahahahahahaha =
+      topChains.++:(Random.shuffle(newChainsCorpus.toList).take(manipChainPopulationSize - topNSize))
+
+    newChainsChosenToLiveAndTheRestToDieMuahahahahahahahahahahahAAAAAAhahahhahahahahahahaha
+  }
+
+  def hyvbridizeChains(
+                        chain1: Array[Array[ImageManipulator]],
+                        chain2: Array[Array[ImageManipulator]]): Array[Array[ImageManipulator]] = {
+    var hybChains = Array[Array[ImageManipulator]]()
+    for (c1: Array[ImageManipulator] <- chain1; c2: Array[ImageManipulator] <- chain2) {
+      if (!(c1 sameElements c2))
+        hybChains = hybChains.++:(Array(MixManipulationsRandomly(c1, c2)))
+    }
+    hybChains
+  }
+
+  def createAChain(maxW: Int, maxH: Int, sampleImgs: Array[Image], size: Int): Array[ImageManipulator] = {
+
+    val randomX = scala.util.Random.nextInt(maxW)
+    val randomY = scala.util.Random.nextInt(maxH)
+    val randomIndex = scala.util.Random.nextInt(sampleImgs.length)
+
+    val manips: Array[ImageManipulator] = (0 to size - 1).map { s =>
+      val randomX = scala.util.Random.nextInt(maxW)
+      val randomY = scala.util.Random.nextInt(maxH)
+      val randomIndex = scala.util.Random.nextInt(sampleImgs.length)
+      val manip = new AlphaCompositeManipulator(sampleImgs(randomIndex), randomX, randomY)
+      manip
+    }.toArray
+
+    manips
+  }
+
+}
+
+object SimpleCompleteRandomAssembler extends CompleteAssembler {
   override def apply(theReferenceImage: Image, theBackgroundImage: Image, samples: Array[Image]): Image = {
 
     var theImage = theBackgroundImage
@@ -105,7 +199,7 @@ object SimpleCompleteRandomAssembler extends RandomMinCompleteAssembler {
 
     scala.util.Random.setSeed(13)
 
-    for (i <- 0 to 100000) {
+    for (i <- 0 to 1000) {
       println(s"$i")
 
       val randomX = scala.util.Random.nextInt(w)
@@ -201,13 +295,13 @@ object ManipulateAllWithAllOnce {
 }
 
 object ApplyManipulations {
-  def apply(img: Image, manips: List[ImageManipulator]): Image = {
+  def apply(img: Image, manips: Array[ImageManipulator]): Image = {
     manips.foldLeft(img)((image, maniper) => maniper(image))
   }
 }
 
-object MixManipulations {
-  def apply(man1: List[ImageManipulator], man2: List[ImageManipulator]): List[ImageManipulator] = {
+object MixManipulationsRandomly {
+  def apply(man1: Array[ImageManipulator], man2: Array[ImageManipulator]): Array[ImageManipulator] = {
     val slice1 = new Random().nextInt(man1.length)
     val slice2 = new Random().nextInt(man2.length)
 
