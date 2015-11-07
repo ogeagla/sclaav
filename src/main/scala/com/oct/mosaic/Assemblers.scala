@@ -12,8 +12,8 @@ object SimpleCompleteGeneticAssembler {
 }
 
 class SimpleCompleteGeneticAssembler(
-                                      chainSize: Int = 30,
-                                      chainsInPopulation: Int = 5,
+                                      chainSize: Int = 40,
+                                      chainsInPopulation: Int = 4,
                                       iterations: Int = 5,
                                       topToTake: Int = 2) extends CompleteAssembler {
   override def apply(theImageToAssemble: Image, theBackgroundImage: Image, samples: Array[Image]): Image = {
@@ -23,7 +23,7 @@ class SimpleCompleteGeneticAssembler(
 
     scala.util.Random.setSeed(13)
 
-    val initChains = (0 to chainsInPopulation - 1).par.map { c =>
+    val initChains = (0 to chainsInPopulation - 1).map { c =>
       createAChain(maxW, maxH, samples, chainSize)
     }.toArray
 
