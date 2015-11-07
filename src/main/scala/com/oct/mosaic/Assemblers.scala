@@ -1,6 +1,6 @@
 package com.oct.mosaic
 
-import com.sksamuel.scrimage.{ScaleMethod, Image}
+import com.sksamuel.scrimage.{Image, ScaleMethod}
 import org.slf4j.LoggerFactory
 
 import scala.util.Random
@@ -13,10 +13,10 @@ object SimpleCompleteGeneticAssembler {
 
 class SimpleCompleteGeneticAssembler(
                                       initChainSizeMax: Int = 500,
-                                      chainsInPopulation: Int = 50,
-                                      iterations: Int = 20,
+                                      chainsInPopulation: Int = 30,
+                                      iterations: Int = 10,
                                       topToTake: Int = 10,
-                                      splitChainOnSize: Option[Int] = Some(2000)) extends CompleteAssembler {
+                                      splitChainOnSize: Option[Int] = Some(1000)) extends CompleteAssembler {
   override def apply(theImageToAssemble: Image, theBackgroundImage: Image, samples: Array[Image]): Image = {
 
     println(s"GA assembler. chain size max: $initChainSizeMax, chain population $chainsInPopulation, iterations: $iterations, topToTake: $topToTake")
@@ -121,7 +121,7 @@ class SimpleCompleteGeneticAssembler(
 //      }
 
       chain.length > size match {
-        case true => Array(chain.slice(0, size), chain.slice(size, chain.length))
+        case true => chain.grouped(size).toArray
         case false => Array(chain)
       }
     }.flatten
