@@ -71,4 +71,12 @@ package object mosaic {
   trait PixelLocationComputer {
     def apply(gridSize: (Int, Int), theGridLocation: (Int, Int), canvasSizeInPixels: (Int, Int)): (Int, Int)
   }
+
+  trait ManipulationsCrossHybridizer {
+    def apply(mans1: Array[ImageManipulator], mans2: Array[ImageManipulator]): Array[ImageManipulator]
+  }
+
+  trait ManipulationsHybridizer {
+    def apply(man: Array[ImageManipulator]): Array[ImageManipulator]
+  }
 }

@@ -5,6 +5,7 @@ import com.sksamuel.scrimage.filter.{GlowFilter, DiffuseFilter, ChromeFilter, Su
 import com.sksamuel.scrimage.{Color, Image}
 import org.slf4j.LoggerFactory
 
+import scala.collection.mutable.ArrayBuffer
 import scala.collection.parallel.mutable.ParArray
 import scala.util.Random
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -101,12 +102,76 @@ object ApplyManipulations {
   }
 }
 
-object MixManipulationsRandomly {
-  def apply(man1: Array[ImageManipulator], man2: Array[ImageManipulator]): Array[ImageManipulator] = {
-    val slice1 = new Random().nextInt(man1.length)
-    val slice2 = new Random().nextInt(man2.length)
+object ModManipulationsRandomlyRemove extends ManipulationsHybridizer {
+  override def apply(man: Array[ImageManipulator]): Array[ImageManipulator] = {
+    val elems: ArrayBuffer[ImageManipulator] = man.to[ArrayBuffer]
+    val howManyToRemove = Random.nextInt(man.length / 4)
+    val whichToRemove = (0 to howManyToRemove - 1).map { i =>
+      val i = Random.nextInt(man.length)
+      elems.remove(i)
+    }
+    elems.toArray
+  }
+}
 
-    val flipper = new Random().nextBoolean()
+object ModManipulationsRandomlySplit extends ManipulationsHybridizer {
+  override def apply(man: Array[ImageManipulator]): Array[ImageManipulator] = {
+    Random.nextBoolean() match {
+      case true =>
+        man.slice(0, Random.nextInt(man.length))
+      case false =>
+        man.slice(Random.nextInt(man.length), man.length)
+    }
+  }
+}
+
+object MixManipulationsCombinator extends ManipulationsCrossHybridizer {
+  override def apply(mans1: Array[ImageManipulator], mans2: Array[ImageManipulator]): Array[ImageManipulator] = {
+    Random.nextBoolean() match {
+      case true =>
+        mans1.++:(mans2)
+      case false =>
+        mans2.++:(mans1)
+    }
+  }
+}
+
+object MixManipulationsRandomlyPointwise extends ManipulationsCrossHybridizer {
+  override def apply(mans1: Array[ImageManipulator], mans2: Array[ImageManipulator]): Array[ImageManipulator] = {
+
+    val size1 = mans1.length
+    val size2 = mans2.length
+
+    val howManyToSwitch = Random.nextInt( math.min(size1, size2) / 4 )
+
+    val (whichToReturn, whichToNotReturn) = Random.nextBoolean() match {
+      case true => (mans1, mans2)
+      case false => (mans2, mans2)
+    }
+
+    val pts = (0 to howManyToSwitch - 1).map { h =>
+      val pt1 = Random.nextInt(whichToReturn.length)
+      val pt2 = Random.nextInt(whichToNotReturn.length)
+      (pt1, pt2)
+    }
+
+    val returnThing: ArrayBuffer[ImageManipulator] = whichToReturn.to[ArrayBuffer]
+
+    for ((pt1, pt2) <- pts) {
+      returnThing.update(pt1, whichToNotReturn(pt2))
+    }
+
+    returnThing.toArray
+  }
+}
+
+object MixManipulationsRandomlyBy2SegmentSwap extends ManipulationsCrossHybridizer {
+  def apply(man1: Array[ImageManipulator], man2: Array[ImageManipulator]): Array[ImageManipulator] = {
+
+    val slice1 = Random.nextInt(man1.length)
+    val slice2 = Random.nextInt(man2.length)
+
+    val flipper = Random.nextBoolean()
 
     val (man1b, man2b) = flipper match {
       case true =>

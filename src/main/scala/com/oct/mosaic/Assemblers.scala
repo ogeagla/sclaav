@@ -12,9 +12,9 @@ object SimpleCompleteGeneticAssembler {
 }
 
 class SimpleCompleteGeneticAssembler(
-                                      chainSizeMax: Int = 750,
+                                      chainSizeMax: Int = 500,
                                       chainsInPopulation: Int = 50,
-                                      iterations: Int = 10,
+                                      iterations: Int = 50,
                                       topToTake: Int = 10) extends CompleteAssembler {
   override def apply(theImageToAssemble: Image, theBackgroundImage: Image, samples: Array[Image]): Image = {
 
@@ -89,7 +89,13 @@ class SimpleCompleteGeneticAssembler(
 
     val notTopChains = chainsToIterateOn.filter(!topChains.contains(_))
 
-    val newChainsCorpus = topChains.++:(notTopChains).++(hyvbridizeChains(chainsToIterateOn, chainsToIterateOn))
+    val newChainsCorpus = topChains
+      .++:(notTopChains)
+      .++(hybridizeChainsBySplit(chainsToIterateOn, chainsToIterateOn))
+      .++(hybridizeChainsPointWise(chainsToIterateOn, chainsToIterateOn))
+      .++(hybrdizeChainsCombine(chainsToIterateOn, chainsToIterateOn))
+      .++(chainsToIterateOn.map(c => ModManipulationsRandomlyRemove(c)))
+      .++(chainsToIterateOn.map(c => ModManipulationsRandomlySplit(c)))
 
     val newChainsChosenToLiveAndTheRestToDieMuahahahahahahahahahahahAAAAAAhahahhahahahahahahaha =
       topChains.++:(Random.shuffle(newChainsCorpus.toList).take(manipChainPopulationSize - topNSize))
@@ -97,13 +103,32 @@ class SimpleCompleteGeneticAssembler(
     newChainsChosenToLiveAndTheRestToDieMuahahahahahahahahahahahAAAAAAhahahhahahahahahahaha
   }
 
-  def hyvbridizeChains(
+  def hybrdizeChainsCombine(chain1: Array[Array[ImageManipulator]],
+                            chain2: Array[Array[ImageManipulator]]): Array[Array[ImageManipulator]] = {
+    var hybChains = Array[Array[ImageManipulator]]()
+    for (c1: Array[ImageManipulator] <- chain1; c2: Array[ImageManipulator] <- chain2) {
+      hybChains = hybChains.++:(Array(MixManipulationsCombinator(c1, c2)))
+    }
+    hybChains
+  }
+
+  def hybridizeChainsPointWise(chain1: Array[Array[ImageManipulator]],
+                               chain2: Array[Array[ImageManipulator]]): Array[Array[ImageManipulator]] = {
+    var hybChains = Array[Array[ImageManipulator]]()
+    for (c1: Array[ImageManipulator] <- chain1; c2: Array[ImageManipulator] <- chain2) {
+      hybChains = hybChains.++:(Array(MixManipulationsRandomlyPointwise(c1, c2)))
+    }
+    hybChains
+  }
+
+  def hybridizeChainsBySplit(
                         chain1: Array[Array[ImageManipulator]],
                         chain2: Array[Array[ImageManipulator]]): Array[Array[ImageManipulator]] = {
+
     var hybChains = Array[Array[ImageManipulator]]()
     for (c1: Array[ImageManipulator] <- chain1; c2: Array[ImageManipulator] <- chain2) {
       if (!(c1 sameElements c2))
-        hybChains = hybChains.++:(Array(MixManipulationsRandomly(c1, c2)))
+        hybChains = hybChains.++:(Array(MixManipulationsRandomlyBy2SegmentSwap(c1, c2)))
     }
     hybChains
   }
