@@ -11,6 +11,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 //bitches
 
+object GetTransparentImage {
+  def apply(width: Int, height: Int) = {
+    Image.filled(width, height, Color.Transparent)
+  }
+}
+
 object AddTransparencyToImage extends ImageManipulator {
   override def apply(img: Image): Image = {
     val (w, h) = (img.width, img.height)
@@ -18,11 +24,45 @@ object AddTransparencyToImage extends ImageManipulator {
   }
 }
 
-class AlphaCompositeManipulator(baseImage: Image, x: Int, y: Int) extends ImageManipulator {
-  lazy val seeThruBaseImage = AddTransparencyToImage(baseImage)
+class ToPositionOnTransparentBackground(backgroundW: Int, backgroundH: Int, x: Int, y: Int) extends ImageManipulator {
+  override def apply(img: Image): Image = {
+    val canvas = GetTransparentImage(backgroundW, backgroundH)
+    SimpleSingleAbsoluteAssembler(canvas, (x, y), img)
+  }
+}
+
+class AlphaCompositeManipulator(theImageToApply: Image, x: Int, y: Int) extends ImageManipulator {
+  override def apply(img: Image): Image = {
+
+    val (baseW, baseH) = (img.width, img.height)
+    val applicator = (new ToPositionOnTransparentBackground(baseW, baseH, x, y))(AddTransparencyToImage(theImageToApply))
+    SimpleSingleAbsoluteAssembler(img, (0, 0), applicator)
+  }
+}
+
+//class AlphaCompositeManipulator(baseImage: Image, x: Int, y: Int, width: Option[Int] = None, height: Option[Int] = None) extends ImageManipulator {
+//
+//  lazy val seeThruBaseImage = (width, height) match {
+//    case (Some(w), Some(h)) =>
+//      val b = GetTransparentImage(w, h)
+//      SimpleSingleAbsoluteAssembler(b, (x, y), AddTransparencyToImage(baseImage))
+//    case (_, _) => AddTransparencyToImage(baseImage)
+//  }
+//
+//  override def apply(img: Image): Image = {
+//    val seeThruProvidedImg = AddTransparencyToImage(img)
+//    SimpleSingleAbsoluteAssembler(seeThruBaseImage, (x, y), seeThruProvidedImg)
+//  }
+//}
+
+class TransparencyComposityManipulator(x: Int, y: Int, baseImage: Option[Image] = None) extends ImageManipulator {
+  lazy val theBaseImage = baseImage match {
+    case None => Image.filled(x, y, Color.Transparent)
+    case Some(img) => AddTransparencyToImage(img)
+  }
   override def apply(img: Image): Image = {
     val seeThruProvidedImg = AddTransparencyToImage(img)
-    SimpleSingleAbsoluteAssembler(baseImage, (x, y), seeThruProvidedImg)
+    SimpleSingleAbsoluteAssembler(theBaseImage, (x, y), seeThruProvidedImg)
   }
 }
 

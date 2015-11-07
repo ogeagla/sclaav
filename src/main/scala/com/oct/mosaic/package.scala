@@ -9,27 +9,30 @@ package object mosaic {
 
   object MapsModes {
     def apply(mode: String) = mode match {
-      case "permute" => Mode.PERMUTE_ALL_FILES
-      case "single" => Mode.SINGLE_FILE
+      case "permute" => Mode.MOSAIC_PERMUTE_ALL_FILES
+      case "single" => Mode.MOSAIC_SINGLE_FILE
     }
   }
 
   object Mode extends Enumeration {
     type Mode = Value
-    val PERMUTE_ALL_FILES, SINGLE_FILE = Value
+    val MOSAIC_PERMUTE_ALL_FILES,
+        MOSAIC_SINGLE_FILE,
+        FREE_COMPOSITE_RANDOM,
+        FREE_COMPOSITE_GA = Value
   }
 
   case class Config(
-      maxSamplePhotos: Int = 10,
-      rows: Int = 8,
-      cols: Int = 8,
-      manipulate: Boolean = false,
-      mode: Mode = Mode.PERMUTE_ALL_FILES,
-      singleTarget: File = new File("./singleTarget"),
-      in: File = new File("./in"),
-      out: File = new File("./out"),
-      verbose: Boolean = false,
-      debug: Boolean = false)
+                     maxSamplePhotos: Int = 10,
+                     rows: Int = 8,
+                     cols: Int = 8,
+                     manipulate: Boolean = false,
+                     mode: Mode = Mode.MOSAIC_PERMUTE_ALL_FILES,
+                     singleTarget: File = new File("./singleTarget"),
+                     in: File = new File("./in"),
+                     out: File = new File("./out"),
+                     verbose: Boolean = false,
+                     debug: Boolean = false)
 
   case class Argb(a: Int, r: Int, g: Int, b: Int)
 

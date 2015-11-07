@@ -18,16 +18,35 @@ class MainTest extends FunSuite with BeforeAndAfter with Matchers {
     val folder = new File(getClass.getResource("/bap-images").getPath)
     val files = folder.listFiles().filter(_.isFile).take(400)
 
-    val theImage1 = Image.fromFile(files.filter(f => f.getAbsolutePath.contains("0010-2015-07-1112-24-27")).head)
-    val theImage2 = Image.fromFile(files.filter(f => f.getAbsolutePath.contains("0068-2014-11-2816-57-05")).head)
+    val imgDevilsThumb = Image.fromFile(files.filter(f => f.getAbsolutePath.contains("0010-2015-07-1112-24-27")).head)
+    val (thumbW, thumbH) = (imgDevilsThumb.width, imgDevilsThumb.height)
+    val imgWetMtns = Image.fromFile(files.filter(f => f.getAbsolutePath.contains("0068-2014-11-2816-57-05")).head)
 
-    val otherImages = files.tail.map(f => Image.fromFile(f).scale(0.25, ScaleMethod.FastScale))
-    val emptyImage = Image.filled(theImage1.width, theImage1.height, Color.Transparent)
+    val otherImages = files.tail.take(20).map(f => Image.fromFile(f).scale(0.25, ScaleMethod.FastScale))
+    val emptyImage = Image.filled(imgDevilsThumb.width, imgDevilsThumb.height, Color.Transparent)
 
-    val composite1 = SimpleCompleteGeneticAssembler(theImage1, emptyImage, otherImages)
+    val transMaker1 = new AlphaCompositeManipulator(imgDevilsThumb.scale(0.25, ScaleMethod.FastScale), 50, 50)
+    val transMaker2 = new AlphaCompositeManipulator(imgWetMtns.scale(0.25, ScaleMethod.FastScale), 200, 200)
+    val transMaker3 = new AlphaCompositeManipulator(imgWetMtns.scale(0.25, ScaleMethod.FastScale), 300, 300)
+
+    val manips: Array[ImageManipulator] = Array(transMaker1, transMaker2, transMaker3)
+
+    val imgsTest1 = transMaker1(imgWetMtns)
+    val imgsTest2 = ApplyManipulations(emptyImage, manips)
+    val imgsTest3 = AddTransparencyToImage(imgDevilsThumb)
+
+    imgsTest1.output(outPath + "test1.jpeg")
+    imgsTest2.output(outPath + "test2.jpeg")
+    imgsTest3.output(outPath + "test3.jpeg")
+
+    val (chain, img, dist) = SimpleCompleteGeneticAssembler.getApplied(Array(manips), emptyImage, imgWetMtns).head
+    println(dist)
+    img.output(outPath + s"applied-1.jpeg")
+
+
+    val composite1 = SimpleCompleteGeneticAssembler(imgWetMtns, emptyImage, otherImages)
     composite1.output(outPath + s"composite-1.jpeg")
-    theImage1.output(outPath + s"ref-1.jpeg")
-
+    imgWetMtns.output(outPath + s"ref-1.jpeg")
 
   }
 

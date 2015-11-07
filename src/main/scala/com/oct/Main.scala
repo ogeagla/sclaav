@@ -67,12 +67,12 @@ object Main {
 
     mode match {
 
-      case Mode.SINGLE_FILE =>
+      case Mode.MOSAIC_SINGLE_FILE =>
         log.info("using single file target")
         val target = config.singleTarget
         DoMosaic(target, files, cols, rows, outPath, doManipulate)
 
-      case Mode.PERMUTE_ALL_FILES =>
+      case Mode.MOSAIC_PERMUTE_ALL_FILES =>
         log.info("permuting all files in input dir")
         for(file <- files) {
           val controlFile = file
