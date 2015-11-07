@@ -23,7 +23,7 @@ class SimpleCompleteGeneticAssembler(
 
     scala.util.Random.setSeed(13)
 
-    val initChains = (0 to chainsInPopulation - 1).map { c =>
+    val initChains = (0 to chainsInPopulation - 1).par.map { c =>
       createAChain(maxW, maxH, samples, chainSize)
     }.toArray
 
