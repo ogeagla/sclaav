@@ -4,6 +4,15 @@ import com.sksamuel.scrimage.filter.GrayscaleFilter
 import com.sksamuel.scrimage.{Image, ScaleMethod}
 
 
+object ComputesMeanAndStddev {
+  def apply(arr: Array[Double]): (Double, Double) = {
+    val mean = arr.sum / arr.length
+    val devs = arr.map(dist => (dist - mean) * (dist - mean))
+    val stddev = Math.sqrt(devs.sum / arr.length)
+    (mean, stddev)
+  }
+}
+
 object Distance2 {
   def apply(arr1: Array[Double], arr2: Array[Double]): Double = {
     assert(arr1.length == arr2.length)
