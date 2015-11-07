@@ -12,11 +12,13 @@ object SimpleCompleteGeneticAssembler {
 }
 
 class SimpleCompleteGeneticAssembler(
-                                      chainSize: Int = 40,
-                                      chainsInPopulation: Int = 4,
-                                      iterations: Int = 5,
-                                      topToTake: Int = 2) extends CompleteAssembler {
+                                      chainSize: Int = 300,
+                                      chainsInPopulation: Int = 30,
+                                      iterations: Int = 10,
+                                      topToTake: Int = 5) extends CompleteAssembler {
   override def apply(theImageToAssemble: Image, theBackgroundImage: Image, samples: Array[Image]): Image = {
+
+    println(s"GA assembler. chain size: $chainSize, chain population $chainsInPopulation, iterations: $iterations, topToTake: $topToTake")
 
     val (maxW, maxH) = (theBackgroundImage.width, theBackgroundImage.height)
     val refDistance = ImageSimilarityArgbDistance2(theBackgroundImage, theImageToAssemble)
@@ -50,7 +52,6 @@ class SimpleCompleteGeneticAssembler(
 
   def getApplied(chains: Array[Array[ImageManipulator]], theBackgroundImage: Image, theImageToAssemble: Image): Array[(Array[ImageManipulator], Image, Double)] = {
     chains.par.map { chain =>
-      println("applying chain...")
       val appliedImage = ApplyManipulations(theBackgroundImage, chain)
       val distance = ImageSimilarityArgbDistance2(appliedImage, theImageToAssemble)
       (chain, appliedImage, distance)
@@ -66,8 +67,17 @@ class SimpleCompleteGeneticAssembler(
 
   def doOneStep(chainsToIterateOn: Array[Array[ImageManipulator]], theBackgroundImage: Image, theImageToAssemble: Image, topNSize: Int, manipChainPopulationSize: Int): Array[Array[ImageManipulator]] = {
 
-    println("getting distances")
+    println("applying chains + getting distances")
     val distances = getApplied(chainsToIterateOn, theBackgroundImage, theImageToAssemble)
+
+    val justDistances = distances.map(_._3)
+    val populationFitness = Distance2(justDistances, distances.map(t => 0.0))
+    val mean = justDistances.sum / justDistances.length
+    val devs = justDistances.map(dist => (dist - mean) * (dist - mean))
+    val stddev = Math.sqrt(devs.sum / justDistances.length)
+    println(s"population fitness: $populationFitness")
+    println(s"population mean, stddev: $mean +/- $stddev")
+
     val topChainsWDist = takeTopApplied(distances, topNSize)
 
     topChainsWDist.foreach{ tc =>
