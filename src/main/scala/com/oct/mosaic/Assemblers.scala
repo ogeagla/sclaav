@@ -14,7 +14,7 @@ object SimpleCompleteGeneticAssembler {
 class SimpleCompleteGeneticAssembler(
                                       chainSizeMax: Int = 500,
                                       chainsInPopulation: Int = 50,
-                                      iterations: Int = 50,
+                                      iterations: Int = 20,
                                       topToTake: Int = 10) extends CompleteAssembler {
   override def apply(theImageToAssemble: Image, theBackgroundImage: Image, samples: Array[Image]): Image = {
 

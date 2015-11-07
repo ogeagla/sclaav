@@ -106,9 +106,10 @@ object ModManipulationsRandomlyRemove extends ManipulationsHybridizer {
   override def apply(man: Array[ImageManipulator]): Array[ImageManipulator] = {
     val elems: ArrayBuffer[ImageManipulator] = man.to[ArrayBuffer]
     val howManyToRemove = Random.nextInt(man.length / 4)
-    val whichToRemove = (0 to howManyToRemove - 1).map { i =>
-      val i = Random.nextInt(man.length)
-      elems.remove(i)
+
+    val whichToRemove = (0 to howManyToRemove - 1).foreach { i =>
+      val index = Random.nextInt(elems.length)
+      elems.remove(index)
     }
     elems.toArray
   }
