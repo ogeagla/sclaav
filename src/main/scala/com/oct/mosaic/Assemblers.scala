@@ -5,26 +5,31 @@ import org.slf4j.LoggerFactory
 
 import scala.util.Random
 
-object SimpleCompleteGeneticAssembler extends CompleteAssembler {
+object SimpleCompleteGeneticAssembler {
+  def apply(theImageToAssemble: Image, theBackgroundImage: Image, samples: Array[Image]): Image = {
+    (new SimpleCompleteGeneticAssembler)(theImageToAssemble, theBackgroundImage, samples)
+  }
+}
+
+class SimpleCompleteGeneticAssembler(
+                                      chainSize: Int = 30,
+                                      chainsInPopulation: Int = 5,
+                                      iterations: Int = 5,
+                                      topToTake: Int = 2) extends CompleteAssembler {
   override def apply(theImageToAssemble: Image, theBackgroundImage: Image, samples: Array[Image]): Image = {
 
     val (maxW, maxH) = (theBackgroundImage.width, theBackgroundImage.height)
     val refDistance = ImageSimilarityArgbDistance2(theBackgroundImage, theImageToAssemble)
 
-    val manipChainSize = 10
-    val manipChainPopulationSize = 1
-    val iterations = 1
-    val topNSize = 1
-
     scala.util.Random.setSeed(13)
 
-    val initChains = (0 to manipChainPopulationSize - 1).map { c =>
-      createAChain(maxW, maxH, samples, manipChainSize)
+    val initChains = (0 to chainsInPopulation - 1).map { c =>
+      createAChain(maxW, maxH, samples, chainSize)
     }.toArray
 
-    val finalChains = iterateSteps(initChains, iterations, theBackgroundImage, theImageToAssemble, topNSize, manipChainPopulationSize)
+    val finalChains = iterateSteps(initChains, iterations, theBackgroundImage, theImageToAssemble, topToTake, chainsInPopulation)
 
-    val topChain = takeTopApplied(getApplied(finalChains, theBackgroundImage, theImageToAssemble), topNSize).map(_._1).head
+    val topChain = takeTopApplied(getApplied(finalChains, theBackgroundImage, theImageToAssemble), topToTake).map(_._1).head
 
     val (topChainAgain, topImage, topDistance) = getApplied(Array(topChain), theBackgroundImage, theImageToAssemble).head
 
@@ -44,12 +49,12 @@ object SimpleCompleteGeneticAssembler extends CompleteAssembler {
   }
 
   def getApplied(chains: Array[Array[ImageManipulator]], theBackgroundImage: Image, theImageToAssemble: Image): Array[(Array[ImageManipulator], Image, Double)] = {
-    chains.map { chain =>
+    chains.par.map { chain =>
       println("applying chain...")
       val appliedImage = ApplyManipulations(theBackgroundImage, chain)
       val distance = ImageSimilarityArgbDistance2(appliedImage, theImageToAssemble)
       (chain, appliedImage, distance)
-    }
+    }.toArray
   }
 
   def takeTopApplied(chainsWDistance: Array[(Array[ImageManipulator], Image, Double)], topCount: Int): Array[(Array[ImageManipulator], Image, Double)] = {
@@ -93,12 +98,11 @@ object SimpleCompleteGeneticAssembler extends CompleteAssembler {
   }
 
   def createAChain(maxW: Int, maxH: Int, sampleImgs: Array[Image], size: Int): Array[ImageManipulator] = {
-    val manips: Array[ImageManipulator] = (0 to size - 1).map { s =>
+    val manips: Array[ImageManipulator] = (0 to size - 1).par.map { s =>
       val randomX = scala.util.Random.nextInt(maxW)
       val randomY = scala.util.Random.nextInt(maxH)
       val randomIndex = scala.util.Random.nextInt(sampleImgs.length)
       val randomImg = sampleImgs(randomIndex)
-      println(s"creating chain: $randomX, $randomY $randomIndex, randomImg size: ${randomImg.width}, ${randomImg.height}")
       val manip = new AlphaCompositeManipulator(randomImg, randomX, randomY)
       manip
     }.toArray

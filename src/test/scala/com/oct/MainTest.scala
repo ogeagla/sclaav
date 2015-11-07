@@ -22,7 +22,7 @@ class MainTest extends FunSuite with BeforeAndAfter with Matchers {
     val (thumbW, thumbH) = (imgDevilsThumb.width, imgDevilsThumb.height)
     val imgWetMtns = Image.fromFile(files.filter(f => f.getAbsolutePath.contains("0068-2014-11-2816-57-05")).head)
 
-    val otherImages = files.tail.take(20).map(f => Image.fromFile(f).scale(0.25, ScaleMethod.FastScale))
+    val otherImages = files.tail.map(f => Image.fromFile(f).scale(0.25, ScaleMethod.FastScale))
     val emptyImage = Image.filled(imgDevilsThumb.width, imgDevilsThumb.height, Color.Transparent)
 
     val transMaker1 = new AlphaCompositeManipulator(imgDevilsThumb.scale(0.25, ScaleMethod.FastScale), 50, 50)
@@ -31,7 +31,7 @@ class MainTest extends FunSuite with BeforeAndAfter with Matchers {
 
     val manips: Array[ImageManipulator] = Array(transMaker1, transMaker2, transMaker3)
 
-    val imgsTest1 = transMaker1(imgWetMtns)
+    val imgsTest1 = transMaker1(AddTransparencyToImage(imgWetMtns))
     val imgsTest2 = ApplyManipulations(emptyImage, manips)
     val imgsTest3 = AddTransparencyToImage(imgDevilsThumb)
 
@@ -39,7 +39,7 @@ class MainTest extends FunSuite with BeforeAndAfter with Matchers {
     imgsTest2.output(outPath + "test2.jpeg")
     imgsTest3.output(outPath + "test3.jpeg")
 
-    val (chain, img, dist) = SimpleCompleteGeneticAssembler.getApplied(Array(manips), emptyImage, imgWetMtns).head
+    val (chain, img, dist) = (new SimpleCompleteGeneticAssembler).getApplied(Array(manips), emptyImage, imgWetMtns).head
     println(dist)
     img.output(outPath + s"applied-1.jpeg")
 
