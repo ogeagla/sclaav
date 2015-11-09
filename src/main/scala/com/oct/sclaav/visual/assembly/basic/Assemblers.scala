@@ -1,5 +1,8 @@
-package com.oct.sclaav.visual
+package com.oct.sclaav.visual.assembly.basic
 
+import com.oct.sclaav.visual._
+import com.oct.sclaav.visual.computation.{SimplePixelLocationComputer, ImageSimilarityArgbDistance2, Distance2, ComputesMeanAndStddev}
+import com.oct.sclaav.visual.manipulators._
 import com.sksamuel.scrimage.{Image, ScaleMethod}
 import org.slf4j.LoggerFactory
 

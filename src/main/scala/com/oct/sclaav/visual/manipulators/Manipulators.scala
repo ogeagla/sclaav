@@ -1,5 +1,8 @@
-package com.oct.sclaav.visual
+package com.oct.sclaav.visual.manipulators
 
+import com.oct.sclaav.visual.{ManipulationsCrossHybridizer, ManipulationsHybridizer, DiscreteCropper, ImageManipulator}
+import com.oct.sclaav.visual.assembly.basic.SimpleSingleAbsoluteAssembler
+import com.oct.sclaav.visual.computation.SimplePixelLocationComputer
 import com.sksamuel.scrimage.composite.AlphaComposite
 import com.sksamuel.scrimage.filter.{ChromeFilter, DiffuseFilter, GlowFilter, SummerFilter}
 import com.sksamuel.scrimage.{Color, Image}

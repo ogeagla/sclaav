@@ -3,7 +3,8 @@ package com.oct.sclaav
 import java.io.File
 
 import com.oct.sclaav.visual.Mode.Mode
-import com.oct.sclaav.visual.{Config, DoMosaic, MapsModes, Mode}
+import com.oct.sclaav.visual.assembly.mosaic.DoMosaic
+import com.oct.sclaav.visual.{Config, MapsModes, Mode}
 import org.slf4j.LoggerFactory
 
 object Main {

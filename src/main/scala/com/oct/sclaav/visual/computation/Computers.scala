@@ -1,5 +1,6 @@
-package com.oct.sclaav.visual
+package com.oct.sclaav.visual.computation
 
+import com.oct.sclaav.visual._
 import com.sksamuel.scrimage.filter.GrayscaleFilter
 import com.sksamuel.scrimage.{Image, ScaleMethod}
 

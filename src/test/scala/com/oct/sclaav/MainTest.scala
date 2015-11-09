@@ -3,6 +3,10 @@ package com.oct.sclaav
 import java.io.File
 
 import com.oct.sclaav.visual._
+import com.oct.sclaav.visual.assembly.SimpleCompleteRandomAssembler
+import com.oct.sclaav.visual.assembly.basic.{SimpleCompleteRandomAssembler, SimpleCompleteGeneticAssembler}
+import com.oct.sclaav.visual.computation._
+import com.oct.sclaav.visual.manipulators.{SimpleCrop, GetTransparentImage}
 import com.sksamuel.scrimage.nio.JpegWriter
 import com.sksamuel.scrimage.{Color, Image, Position, ScaleMethod}
 import org.scalatest.{BeforeAndAfter, FunSuite, Matchers}

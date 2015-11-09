@@ -1,4 +1,4 @@
-package com.oct.sclaav.visual
+package com.oct.sclaav.visual.computation
 
 import org.scalatest.{BeforeAndAfter, FunSuite, Matchers}
 
