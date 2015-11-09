@@ -1,10 +1,12 @@
-# A Photomosaic Generator In Scala
+# Sclaav, An Audio/Visual Library In Scala
 
-## Using
+## Using Visual Functions
+
+### Mosaic
 
 ```
 $ ./sbt clean assembly
-$ java -jar bin/Mosaical.jar \
+$ java -jar bin/Sclaav.jar \
   --in input-files-dir \
   --out output-dir \
   --mode permute \
@@ -15,7 +17,7 @@ $ java -jar bin/Mosaical.jar \
   --target photo.jpg
 ```
 
-## Overview
+#### Overview
 
  - Given a `target` image (or set of target images) and a set of `sample` images,
     - Discretize target image in grid by `rows` and `cols`.
