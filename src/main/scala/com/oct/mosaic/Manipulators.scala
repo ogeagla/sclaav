@@ -169,6 +169,8 @@ object MixManipulationsRandomlyPointwise extends ManipulationsCrossHybridizer {
 object MixManipulationsRandomlyBy2SegmentSwap extends ManipulationsCrossHybridizer {
   def apply(man1: Array[ImageManipulator], man2: Array[ImageManipulator]): Array[ImageManipulator] = {
 
+//    println(s"lengths: ${man1.length}, ${man2.length}")
+
     val slice1 = Random.nextInt(man1.length)
     val slice2 = Random.nextInt(man2.length)
 

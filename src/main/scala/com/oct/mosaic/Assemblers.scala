@@ -12,11 +12,11 @@ object SimpleCompleteGeneticAssembler {
 }
 
 class SimpleCompleteGeneticAssembler(
-                                      initChainSizeMax: Int = 500,
-                                      chainsInPopulation: Int = 30,
+                                      initChainSizeMax: Int = 100,
+                                      chainsInPopulation: Int = 100,
                                       iterations: Int = 10,
                                       topToTake: Int = 10,
-                                      splitChainOnSize: Option[Int] = Some(1000)) extends CompleteAssembler {
+                                      splitChainOnSize: Option[Int] = Some(5000)) extends CompleteAssembler {
   override def apply(theImageToAssemble: Image, theBackgroundImage: Image, samples: Array[Image]): Image = {
 
     println(s"GA assembler. chain size max: $initChainSizeMax, chain population $chainsInPopulation, iterations: $iterations, topToTake: $topToTake")
@@ -91,6 +91,7 @@ class SimpleCompleteGeneticAssembler(
     val notTopChains = chainsToIterateOn.filter(!topChains.contains(_))
 
     val chainsToIterateOnAndMaybeSplit: Array[Array[ImageManipulator]] = splitChainOnSize match {
+    //TODO when do we want to split?  before computing fitness, after hybridization, etc?
       case Some(sizeToSplitOn) =>
         println("splitting chains")
         doChainSplit(chainsToIterateOn, sizeToSplitOn)
@@ -112,6 +113,8 @@ class SimpleCompleteGeneticAssembler(
   }
 
   def doChainSplit(chains: Array[Array[ImageManipulator]], size: Int): Array[Array[ImageManipulator]] = {
+    //NOTE: below, you will see an IntelliJ warning to refactor to flatMap,
+    //but if you do so, the 2.11.7 compiler will yell at you and fail
     chains.map { chain =>
 
 //      if (chain.length > size) {
@@ -121,7 +124,7 @@ class SimpleCompleteGeneticAssembler(
 //      }
 
       chain.length > size match {
-        case true => chain.grouped(size).toArray
+        case true => chain.grouped(size).toArray.++:(Array(chain))
         case false => Array(chain)
       }
     }.flatten

@@ -23,10 +23,10 @@ class MainTest extends FunSuite with BeforeAndAfter with Matchers {
 //    val imgWetMtns = Image.fromFile(
 //      files.filter(f => f.getAbsolutePath.contains("0068-2014-11-2816-57-05")).head)
     val imgFlagstaffSunrise = Image.fromFile(
-      files.filter(f => f.getAbsolutePath.contains("0006-2015-07-1405-29-39")).head).scale(0.125, ScaleMethod.FastScale)
+      files.filter(f => f.getAbsolutePath.contains("0006-2015-07-1405-29-39")).head)
+      .scale(0.125, ScaleMethod.FastScale)
 
-
-    val otherImages = files.tail.map(f => Image.fromFile(f).scale(0.005, ScaleMethod.FastScale))
+    val otherImages = files.tail.map(f => Image.fromFile(f).scale(0.01, ScaleMethod.FastScale))
     val emptyImage = GetTransparentImage(imgFlagstaffSunrise.width, imgFlagstaffSunrise.height)
 
 //    val transMaker1 = new AlphaCompositeManipulator(imgDevilsThumb.scale(0.25, ScaleMethod.FastScale), 50, 50)
