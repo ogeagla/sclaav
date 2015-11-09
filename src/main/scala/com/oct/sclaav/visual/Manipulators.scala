@@ -1,14 +1,14 @@
-package com.oct.mosaic
+package com.oct.sclaav.visual
 
 import com.sksamuel.scrimage.composite.AlphaComposite
-import com.sksamuel.scrimage.filter.{GlowFilter, DiffuseFilter, ChromeFilter, SummerFilter}
+import com.sksamuel.scrimage.filter.{ChromeFilter, DiffuseFilter, GlowFilter, SummerFilter}
 import com.sksamuel.scrimage.{Color, Image}
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.parallel.mutable.ParArray
-import scala.util.Random
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.Random
 
 //bitches
 

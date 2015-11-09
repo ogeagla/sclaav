@@ -3,7 +3,7 @@ import sbtassembly.Plugin.AssemblyKeys._
 
 assemblySettings
 
-name := "scala-images"
+name := "sclaav"
 
 version := "1.0"
 
@@ -27,11 +27,11 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.1" % "test"
 
 testOptions in Test += Tests.Argument("-oD")
 
-mainClass in assembly := Some("com.oct.Main")
+mainClass in assembly := Some("com.oct.sclaav.Main")
 
-jarName in assembly := "Mosaical.jar"
+jarName in assembly := "Sclaav.jar"
 
-outputPath in assembly := file("bin/Mosaical.jar")
+outputPath in assembly := file("bin/Sclaav.jar")
 
 test in assembly := {}
 

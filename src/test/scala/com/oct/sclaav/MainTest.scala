@@ -1,8 +1,8 @@
-package com.oct
+package com.oct.sclaav
 
 import java.io.File
 
-import com.oct.mosaic._
+import com.oct.sclaav.visual._
 import com.sksamuel.scrimage.nio.JpegWriter
 import com.sksamuel.scrimage.{Color, Image, Position, ScaleMethod}
 import org.scalatest.{BeforeAndAfter, FunSuite, Matchers}

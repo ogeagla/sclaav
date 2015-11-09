@@ -1,11 +1,11 @@
-package com.oct
+package com.oct.sclaav
 
 import java.io.File
 
-import com.oct.mosaic.Mode.Mode
+import com.oct.sclaav.visual.Mode.Mode
 import com.sksamuel.scrimage.Image
 
-package object mosaic {
+package object visual {
 
   object MapsModes {
     def apply(mode: String) = mode match {

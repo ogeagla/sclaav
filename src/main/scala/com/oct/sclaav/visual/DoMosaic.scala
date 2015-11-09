@@ -1,4 +1,4 @@
-package com.oct.mosaic
+package com.oct.sclaav.visual
 
 import java.io.File
 

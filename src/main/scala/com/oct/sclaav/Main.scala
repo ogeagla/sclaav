@@ -1,20 +1,20 @@
-package com.oct
+package com.oct.sclaav
 
 import java.io.File
 
-import com.oct.mosaic.Mode.Mode
-import com.oct.mosaic.{Config, DoMosaic, MapsModes, Mode}
+import com.oct.sclaav.visual.Mode.Mode
+import com.oct.sclaav.visual.{Config, DoMosaic, MapsModes, Mode}
 import org.slf4j.LoggerFactory
 
 object Main {
 
   val log = LoggerFactory.getLogger(getClass)
 
-  def parseArgs(args: Array[String]): Config= {
+  def parseArgs(args: Array[String]): Config = {
 
     implicit val tenantKeyRead: scopt.Read[Mode] = scopt.Read.reads(MapsModes(_))
 
-    val parser = new scopt.OptionParser[Config]("Mosaical.jar") {
+    val parser = new scopt.OptionParser[Config]("Sclaav.jar") {
       head("Scala Mosaic", "0.0.x")
       opt[Mode]('m', "mode") action { (x, c) =>
         c.copy(mode = x) } text "mode is an enum property"

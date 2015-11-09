@@ -1,6 +1,6 @@
-package com.oct.mosaic
+package com.oct.sclaav.visual
 
-import org.scalatest.{Matchers, BeforeAndAfter, FunSuite}
+import org.scalatest.{BeforeAndAfter, FunSuite, Matchers}
 
 class ComputersTest extends FunSuite with BeforeAndAfter with Matchers {
 

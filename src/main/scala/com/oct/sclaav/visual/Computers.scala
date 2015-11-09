@@ -1,4 +1,4 @@
-package com.oct.mosaic
+package com.oct.sclaav.visual
 
 import com.sksamuel.scrimage.filter.GrayscaleFilter
 import com.sksamuel.scrimage.{Image, ScaleMethod}
