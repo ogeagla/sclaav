@@ -92,24 +92,33 @@ object ApplyManipulations {
 
 object ModManipulationsRandomlyRemove extends ManipulationsHybridizer {
   override def apply(man: Array[ImageManipulator]): Array[ImageManipulator] = {
-    val elems: ArrayBuffer[ImageManipulator] = man.to[ArrayBuffer]
-    val howManyToRemove = Random.nextInt(man.length / 4)
-
-    val whichToRemove = (0 to howManyToRemove - 1).foreach { i =>
-      val index = Random.nextInt(elems.length)
-      elems.remove(index)
+    man.length match {
+      case len if len / 4 > 0 =>
+        val elems: ArrayBuffer[ImageManipulator] = man.to[ArrayBuffer]
+        val howManyToRemove = Random.nextInt(len)
+        val whichToRemove = (0 to howManyToRemove - 1).foreach { i =>
+          val index = Random.nextInt(elems.length)
+          elems.remove(index)
+        }
+        elems.toArray
+      case len =>
+        man
     }
-    elems.toArray
   }
 }
 
 object ModManipulationsRandomlySplit extends ManipulationsHybridizer {
   override def apply(man: Array[ImageManipulator]): Array[ImageManipulator] = {
-    Random.nextBoolean() match {
-      case true =>
-        man.slice(0, Random.nextInt(man.length))
-      case false =>
-        man.slice(Random.nextInt(man.length), man.length)
+    man.length match {
+      case len if len > 0 =>
+        Random.nextBoolean() match {
+          case true =>
+            man.slice(0, Random.nextInt(man.length))
+          case false =>
+            man.slice(Random.nextInt(man.length), man.length)
+        }
+      case len =>
+        man
     }
   }
 }
@@ -131,26 +140,31 @@ object MixManipulationsRandomlyPointwise extends ManipulationsCrossHybridizer {
     val size1 = mans1.length
     val size2 = mans2.length
 
-    val howManyToSwitch = Random.nextInt( math.min(size1, size2) / 4 )
+    (size1, size2) match {
+      case (s1, s2) if math.min(s1, s2) / 4 > 0 =>
+        val howManyToSwitch = Random.nextInt( math.min(s1, s2) / 4 )
 
-    val (whichToReturn, whichToNotReturn) = Random.nextBoolean() match {
-      case true => (mans1, mans2)
-      case false => (mans2, mans2)
+        val (whichToReturn, whichToNotReturn) = Random.nextBoolean() match {
+          case true => (mans1, mans2)
+          case false => (mans2, mans2)
+        }
+
+        val pts = (0 to howManyToSwitch - 1).map { h =>
+          val pt1 = Random.nextInt(whichToReturn.length)
+          val pt2 = Random.nextInt(whichToNotReturn.length)
+          (pt1, pt2)
+        }
+
+        val returnThing: ArrayBuffer[ImageManipulator] = whichToReturn.to[ArrayBuffer]
+
+        for ((pt1, pt2) <- pts) {
+          returnThing.update(pt1, whichToNotReturn(pt2))
+        }
+
+        returnThing.toArray
+      case (s1, s2) =>
+        mans1 ++: mans2
     }
-
-    val pts = (0 to howManyToSwitch - 1).map { h =>
-      val pt1 = Random.nextInt(whichToReturn.length)
-      val pt2 = Random.nextInt(whichToNotReturn.length)
-      (pt1, pt2)
-    }
-
-    val returnThing: ArrayBuffer[ImageManipulator] = whichToReturn.to[ArrayBuffer]
-
-    for ((pt1, pt2) <- pts) {
-      returnThing.update(pt1, whichToNotReturn(pt2))
-    }
-
-    returnThing.toArray
   }
 }
 
@@ -159,23 +173,27 @@ object MixManipulationsRandomlyBy2SegmentSwap extends ManipulationsCrossHybridiz
 
 //    println(s"lengths: ${man1.length}, ${man2.length}")
 
-    val slice1 = Random.nextInt(man1.length)
-    val slice2 = Random.nextInt(man2.length)
+    val (len1, len2) = (man1.length, man2.length)
 
-    val flipper = Random.nextBoolean()
-
-    val (man1b, man2b) = flipper match {
-      case true =>
-        val a = man1.slice(0, slice1)
-        val b = man2.slice(slice2, man2.length)
-        (a, b)
-      case false =>
-        val a = man1.slice(slice1, man1.length)
-        val b = man2.slice(0, slice2)
-        (a, b)
+    (len1, len2) match {
+      case (l1, l2) if (l1 > 0) && (l2 > 0) =>
+        val slice1 = Random.nextInt(l1)
+        val slice2 = Random.nextInt(l2)
+        val flipper = Random.nextBoolean()
+        val (man1b, man2b) = flipper match {
+          case true =>
+            val a = man1.slice(0, slice1)
+            val b = man2.slice(slice2, l2)
+            (a, b)
+          case false =>
+            val a = man1.slice(slice1, l1)
+            val b = man2.slice(0, slice2)
+            (a, b)
+        }
+        man1b ++: man2b
+      case (l1, l2) =>
+        man1 ++: man2
     }
-
-    man1b ++: man2b
   }
 }
 
