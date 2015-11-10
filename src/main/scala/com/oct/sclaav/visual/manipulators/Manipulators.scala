@@ -44,21 +44,6 @@ class AlphaCompositeManipulator(theImageToApply: Image, x: Int, y: Int) extends 
   }
 }
 
-//class AlphaCompositeManipulator(baseImage: Image, x: Int, y: Int, width: Option[Int] = None, height: Option[Int] = None) extends ImageManipulator {
-//
-//  lazy val seeThruBaseImage = (width, height) match {
-//    case (Some(w), Some(h)) =>
-//      val b = GetTransparentImage(w, h)
-//      SimpleSingleAbsoluteAssembler(b, (x, y), AddTransparencyToImage(baseImage))
-//    case (_, _) => AddTransparencyToImage(baseImage)
-//  }
-//
-//  override def apply(img: Image): Image = {
-//    val seeThruProvidedImg = AddTransparencyToImage(img)
-//    SimpleSingleAbsoluteAssembler(seeThruBaseImage, (x, y), seeThruProvidedImg)
-//  }
-//}
-
 class TransparencyComposityManipulator(x: Int, y: Int, baseImage: Option[Image] = None) extends ImageManipulator {
   lazy val theBaseImage = baseImage match {
     case None => Image.filled(x, y, Color.Transparent)

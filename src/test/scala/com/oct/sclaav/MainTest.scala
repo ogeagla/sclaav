@@ -3,6 +3,7 @@ package com.oct.sclaav
 import java.io.File
 
 import com.oct.sclaav.visual.assembly.basic.{SimpleCompleteGeneticAssembler, SimpleCompleteRandomAssembler}
+import com.oct.sclaav.visual.assembly.mosaic.DoMosaic
 import com.oct.sclaav.visual.computation._
 import com.oct.sclaav.visual.manipulators.{CreatesTransparentImage, SimpleCrop}
 import com.sksamuel.scrimage.nio.JpegWriter
@@ -14,7 +15,7 @@ class MainTest extends FunSuite with BeforeAndAfter with Matchers {
 
   val log = LoggerFactory.getLogger(getClass)
 
-  test("builds composite using some fucking resemblance to an inbred genetic algorithm") {
+  ignore("builds composite using some fucking resemblance to an inbred genetic algorithm") {
     implicit val writer = JpegWriter.Default
     val outPath = getClass.getResource("/").getPath
     val folder = new File(getClass.getResource("/bap-images").getPath)

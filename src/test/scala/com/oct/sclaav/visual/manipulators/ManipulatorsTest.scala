@@ -34,13 +34,15 @@ class ManipulatorsTest extends FunSuite with BeforeAndAfter with Matchers {
   }
 
   test("create an alpha composite") {
-    val imgToApply = Image.filled(200, 100, Color.Black)
-    val imgOnWhichWeApply = Image.filled(400, 500, Color.White)
+    val imgToApply = Image.filled(200, 100, Color.White)
+    val imgOnWhichWeApply = Image.filled(400, 500, Color.Black)
 
     val compositeImg = (new AlphaCompositeManipulator(imgToApply, 100, 50))(imgOnWhichWeApply)
-    
-    //TODO
-    assert(true, "something")
+
+    val somePixel = compositeImg.argb(150, 100)
+
+    //FIXME is the alpha correct?
+    assert(somePixel === Array(255, 128, 128, 128), "should be grey at 1.0 alpha")
   }
 
 
