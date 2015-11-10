@@ -45,5 +45,14 @@ class ManipulatorsTest extends FunSuite with BeforeAndAfter with Matchers {
     assert(somePixel === Array(255, 128, 128, 128), "should be grey at 1.0 alpha")
   }
 
+  test("crops") {
+    val gridSize = (8, 8)
+    val img = Image.filled(320, 240, Color.Black)
+
+    val cropped = SimpleCrop(gridSize, (2, 2), img)
+
+    assert((cropped.width, cropped.height) === (40, 30), "cropped size")
+    assert(cropped.argb(10, 10) === Array(255, 0, 0, 0), "cropped color should not change")
+  }
 
 }
