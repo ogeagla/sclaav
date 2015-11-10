@@ -2,11 +2,9 @@ package com.oct.sclaav
 
 import java.io.File
 
-import com.oct.sclaav.visual._
-import com.oct.sclaav.visual.assembly.SimpleCompleteRandomAssembler
-import com.oct.sclaav.visual.assembly.basic.{SimpleCompleteRandomAssembler, SimpleCompleteGeneticAssembler}
+import com.oct.sclaav.visual.assembly.basic.{SimpleCompleteGeneticAssembler, SimpleCompleteRandomAssembler}
 import com.oct.sclaav.visual.computation._
-import com.oct.sclaav.visual.manipulators.{SimpleCrop, GetTransparentImage}
+import com.oct.sclaav.visual.manipulators.{CreatesTransparentImage, SimpleCrop}
 import com.sksamuel.scrimage.nio.JpegWriter
 import com.sksamuel.scrimage.{Color, Image, Position, ScaleMethod}
 import org.scalatest.{BeforeAndAfter, FunSuite, Matchers}
@@ -31,7 +29,7 @@ class MainTest extends FunSuite with BeforeAndAfter with Matchers {
       .scale(0.125, ScaleMethod.FastScale)
 
     val otherImages = files.tail.map(f => Image.fromFile(f).scale(0.01, ScaleMethod.FastScale))
-    val emptyImage = GetTransparentImage(imgFlagstaffSunrise.width, imgFlagstaffSunrise.height)
+    val emptyImage = CreatesTransparentImage(imgFlagstaffSunrise.width, imgFlagstaffSunrise.height)
 
 //    val transMaker1 = new AlphaCompositeManipulator(imgDevilsThumb.scale(0.25, ScaleMethod.FastScale), 50, 50)
 //    val transMaker2 = new AlphaCompositeManipulator(imgWetMtns.scale(0.25, ScaleMethod.FastScale), 200, 200)

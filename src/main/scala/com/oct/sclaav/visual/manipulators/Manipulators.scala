@@ -15,8 +15,8 @@ import scala.util.Random
 
 //bitches
 
-object GetTransparentImage {
-  def apply(width: Int, height: Int) = {
+object CreatesTransparentImage {
+  def apply(width: Int, height: Int): Image = {
     Image.filled(width, height, Color.Transparent)
   }
 }
@@ -30,7 +30,7 @@ object AddTransparencyToImage extends ImageManipulator {
 
 class ToPositionOnTransparentBackground(backgroundW: Int, backgroundH: Int, x: Int, y: Int) extends ImageManipulator {
   override def apply(img: Image): Image = {
-    val canvas = GetTransparentImage(backgroundW, backgroundH)
+    val canvas = CreatesTransparentImage(backgroundW, backgroundH)
     SimpleSingleAbsoluteAssembler(canvas, (x, y), img)
   }
 }
