@@ -3,7 +3,7 @@ package com.oct.sclaav.visual.assembly.mosaic
 import java.io.File
 
 import com.oct.sclaav.visual.assembly.basic.SimpleCompleteGridAssembler
-import com.oct.sclaav.visual.computation.{SimpleArgbEstimator, SimpleArgbDistance, MatchByArgbAverage}
+import com.oct.sclaav.visual.computation.{MatchByArgbAverage, SimpleArgbDistance, SimpleArgbEstimator}
 import com.oct.sclaav.visual.manipulators._
 import com.sksamuel.scrimage.nio.JpegWriter
 import com.sksamuel.scrimage.{Color, Image, ScaleMethod}

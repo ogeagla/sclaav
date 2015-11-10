@@ -1,7 +1,7 @@
 package com.oct.sclaav.visual.manipulators
 
 import com.sksamuel.scrimage.{Color, Image}
-import org.scalatest.{Matchers, BeforeAndAfter, FunSuite}
+import org.scalatest.{BeforeAndAfter, FunSuite, Matchers}
 
 class ManipulatorsTest extends FunSuite with BeforeAndAfter with Matchers {
 

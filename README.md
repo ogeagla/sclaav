@@ -2,9 +2,9 @@
 
 ## Current Functionality:
 
-| What              | Where                                            |
-| ----------------- |:------------------------------------------------:|
-| Image mosaic      | `com.oct.sclaav.visual.assembly.mosaic.DoMosaic` |
+| What                         | Where                                            |
+| ---------------------------- |:------------------------------------------------:|
+| [Image mosaic](#mosaic)      | `com.oct.sclaav.visual.assembly.mosaic.DoMosaic` |
 
 ## Building
 
