@@ -96,7 +96,7 @@ object ModManipulationsRandomlyRemove extends ManipulationsHybridizer {
       case len if len / 4 > 0 =>
         val elems: ArrayBuffer[ImageManipulator] = man.to[ArrayBuffer]
         val howManyToRemove = Random.nextInt(len)
-        val whichToRemove = (0 to howManyToRemove - 1).foreach { i =>
+        (0 to howManyToRemove - 1).foreach { i =>
           val index = Random.nextInt(elems.length)
           elems.remove(index)
         }

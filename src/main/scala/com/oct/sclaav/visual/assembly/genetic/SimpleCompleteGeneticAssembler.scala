@@ -15,11 +15,11 @@ object SimpleCompleteGeneticAssembler {
 }
 
 class SimpleCompleteGeneticAssembler(
-                                      initChainSizeMax: Int = 100,
-                                      chainsInPopulation: Int = 50,
-                                      iterations: Int = 20,
-                                      topToTake: Int = 10,
-                                      splitChainOnSize: Option[Int] = Some(5000)) extends CompleteAssembler {
+                                      initChainSizeMax: Int = 10,
+                                      chainsInPopulation: Int = 200,
+                                      iterations: Int = 10,
+                                      topToTake: Int = 20,
+                                      splitChainOnSize: Option[Int] = Some(15000)) extends CompleteAssembler {
   override def apply(theImageToAssemble: Image, theBackgroundImage: Image, samples: Array[Image]): Image = {
 
     println(s"GA assembler. chain size max: $initChainSizeMax, chain population $chainsInPopulation, iterations: $iterations, topToTake: $topToTake")

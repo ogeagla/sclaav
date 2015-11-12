@@ -1,10 +1,8 @@
 package com.oct.sclaav
 
-import java.io.File
-
+import com.oct.sclaav.TestHelpers
 import com.oct.sclaav.visual.assembly.basic.SimpleCompleteRandomAssembler
 import com.oct.sclaav.visual.assembly.genetic.SimpleCompleteGeneticAssembler
-import com.oct.sclaav.visual.assembly.mosaic.DoMosaic
 import com.oct.sclaav.visual.computation._
 import com.oct.sclaav.visual.manipulators.{CreatesTransparentImage, SimpleCrop}
 import com.sksamuel.scrimage.nio.JpegWriter
@@ -12,15 +10,13 @@ import com.sksamuel.scrimage.{Color, Image, Position, ScaleMethod}
 import org.scalatest.{BeforeAndAfter, FunSuite, Matchers}
 import org.slf4j.LoggerFactory
 
-class MainTest extends FunSuite with BeforeAndAfter with Matchers {
+class MainTest extends FunSuite with BeforeAndAfter with Matchers with TestHelpers {
 
   val log = LoggerFactory.getLogger(getClass)
 
   test("builds composite using some fucking resemblance to an inbred genetic algorithm") {
     implicit val writer = JpegWriter.Default
-    val outPath = getClass.getResource("/").getPath
-    val folder = new File(getClass.getResource("/bap-images").getPath)
-    val files = folder.listFiles().filter(_.isFile).take(400)
+    val files = bapImagesDir.listFiles().filter(_.isFile).take(400)
 
 //    val imgDevilsThumb = Image.fromFile(
 //      files.filter(f => f.getAbsolutePath.contains("0010-2015-07-1112-24-27")).head).scale(0.25, ScaleMethod.FastScale)
@@ -45,16 +41,14 @@ class MainTest extends FunSuite with BeforeAndAfter with Matchers {
 
 
     val composite1 = SimpleCompleteGeneticAssembler(imgFlagstaffSunrise, emptyImage, otherImages)
-    composite1.output(outPath + s"composite-1.jpeg")
-    imgFlagstaffSunrise.output(outPath + s"ref-1.jpeg")
+    composite1.output(testRootPath + s"composite-1.jpeg")
+    imgFlagstaffSunrise.output(testRootPath + s"ref-1.jpeg")
 
   }
 
   ignore("builds composite using random method and stuff") {
     implicit val writer = JpegWriter.Default
-    val outPath = getClass.getResource("/").getPath
-    val folder = new File(getClass.getResource("/bap-images").getPath)
-    val files = folder.listFiles().filter(_.isFile).take(400)
+    val files = bapImagesDir.listFiles().filter(_.isFile).take(400)
 
     val theImage1 = Image.fromFile(files.filter(f => f.getAbsolutePath.contains("0010-2015-07-1112-24-27")).head)
     val theImage2 = Image.fromFile(files.filter(f => f.getAbsolutePath.contains("0068-2014-11-2816-57-05")).head)
@@ -63,39 +57,21 @@ class MainTest extends FunSuite with BeforeAndAfter with Matchers {
     val emptyImage = Image.filled(theImage1.width, theImage1.height, Color.Transparent)
 
     val composite1 = SimpleCompleteRandomAssembler(theImage1, emptyImage, otherImages)
-    composite1.output(outPath + s"composite-1.jpeg")
-    theImage1.output(outPath + s"ref-1.jpeg")
+    composite1.output(testRootPath + s"composite-1.jpeg")
+    theImage1.output(testRootPath + s"ref-1.jpeg")
 
     val composite2 = SimpleCompleteRandomAssembler(theImage2, emptyImage, otherImages)
-    composite2.output(outPath + s"composite-2.jpeg")
-    theImage2.output(outPath + s"ref-2.jpeg")
+    composite2.output(testRootPath + s"composite-2.jpeg")
+    theImage2.output(testRootPath + s"ref-2.jpeg")
 
 
-  }
-
-  ignore("builds composites for realz") {
-
-    implicit val writer = JpegWriter.Default
-    val outPath = new File(getClass.getResource("/").getFile)
-
-    val folder = new File(getClass.getResource("/bap-images").getPath)
-    val files = folder.listFiles().filter(_.isFile).take(400)
-
-    for(file <- files) {
-      val controlFile = file
-      val sampleFiles = files.filter(_ != controlFile)
-
-      DoMosaic(controlFile, sampleFiles, 128, 128, outPath)
-    }
   }
 
   ignore("builds similar composites") {
 
     implicit val writer = JpegWriter.Default
-    val outPath = getClass.getResource("/").getPath
 
-    val folder = new File(getClass.getResource("/bap-images").getPath)
-    val files = folder.listFiles().filter(_.isFile).take(10)
+    val files = bapImagesDir.listFiles().filter(_.isFile).take(10)
 
     val filesHead = files.head
     val filesTail = files.tail
@@ -116,11 +92,11 @@ class MainTest extends FunSuite with BeforeAndAfter with Matchers {
     val bottomLeft =  SimpleCrop((cols, rows), (0, 1), controlImage)
     val bottomRight = SimpleCrop((cols, rows), (1, 1), controlImage)
 
-    topLeft.output(outPath + s"topLeft.jpeg")
-    topRight.output(outPath + s"topRight.jpeg")
-    bottomLeft.output(outPath + s"bottomLeft.jpeg")
-    bottomRight.output(outPath + s"bottomRight.jpeg")
-    controlImage.output(outPath + "ref.jpeg")
+    topLeft.output(testRootPath + s"topLeft.jpeg")
+    topRight.output(testRootPath + s"topRight.jpeg")
+    bottomLeft.output(testRootPath + s"bottomLeft.jpeg")
+    bottomRight.output(testRootPath + s"bottomRight.jpeg")
+    controlImage.output(testRootPath + "ref.jpeg")
 
     val topLMatch = MatchByArgbAverage(SimpleArgbEstimator, SimpleArgbDistance, topLeft, images)
     val topRMatch = MatchByArgbAverage(SimpleArgbEstimator, SimpleArgbDistance, topRight, images)
@@ -132,18 +108,15 @@ class MainTest extends FunSuite with BeforeAndAfter with Matchers {
       .overlay(topRMatch, topRight.width, 0)
       .overlay(botLMatch, 0, bottomLeft.height)
       .overlay(botRMatch, bottomRight.width, bottomRight.height)
-      .output(outPath + "matched.jpeg")
+      .output(testRootPath + "matched.jpeg")
 
   }
 
   ignore("similarity pairs") {
 
     implicit val writer = JpegWriter.Default
-    val outPath = getClass.getResource("/").getPath
 
-
-    val folder = new File(getClass.getResource("/bap-images").getPath)
-    val files = folder.listFiles().filter(_.isFile).take(400)
+    val files = bapImagesDir.listFiles().filter(_.isFile).take(400)
 
     val images = files.map(f => Image.fromFile(f).scaleTo(256, 256, ScaleMethod.FastScale))
 
@@ -161,7 +134,7 @@ class MainTest extends FunSuite with BeforeAndAfter with Matchers {
       val i1Scaled = i1.scaleTo(128, 128, ScaleMethod.FastScale)
       val i2Scaled = i2.scaleTo(128, 128, ScaleMethod.FastScale)
 
-      val img = i1Scaled.resizeTo(256, 128, Position.CenterLeft).overlay(i2Scaled, 128, 0).output(outPath + s"${dist}.jpeg")
+      val img = i1Scaled.resizeTo(256, 128, Position.CenterLeft).overlay(i2Scaled, 128, 0).output(testRootPath + s"${dist}.jpeg")
     }
 
   }

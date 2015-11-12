@@ -1,10 +1,11 @@
 package com.oct.sclaav.visual.computation
 
+import com.oct.sclaav.TestHelpers
 import com.oct.sclaav.visual.manipulators.CreatesTransparentImage
 import com.sksamuel.scrimage.{Color, Image}
 import org.scalatest.{BeforeAndAfter, FunSuite, Matchers}
 
-class ComputersTest extends FunSuite with BeforeAndAfter with Matchers {
+class ComputersTest extends FunSuite with BeforeAndAfter with Matchers with TestHelpers {
 
   test("simple pixel location computer") {
     val gridSize = (8,8)
