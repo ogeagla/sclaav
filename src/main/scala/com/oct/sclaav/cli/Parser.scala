@@ -1,9 +1,9 @@
-package com.oct.sclaav
+package com.oct.sclaav.cli
 
 import java.net.URI
 
-import com.oct.sclaav.visual.{MapsModes, Config}
-import com.oct.sclaav.visual.Mode._
+import com.oct.sclaav.{MapsModes, Config}
+import com.oct.sclaav.Mode.Mode
 import scopt.OptionParser
 
 object Parser {

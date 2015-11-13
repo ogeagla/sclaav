@@ -2,7 +2,7 @@ package com.oct.sclaav
 
 import java.io.File
 
-import com.oct.sclaav.visual.Mode
+import com.oct.sclaav.cli.Parser
 import com.oct.sclaav.visual.assembly.mosaic.DoMosaic
 import org.slf4j.LoggerFactory
 

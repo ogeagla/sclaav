@@ -1,8 +1,8 @@
 package com.oct.sclaav.visual.assembly.genetic
 
-import com.oct.sclaav.visual.manipulators._
-import com.oct.sclaav.visual.{ImageManipulator, CompleteAssembler}
 import com.oct.sclaav.visual.computation.{ComputesMeanAndStddev, Distance2, ImageSimilarityArgbDistance2}
+import com.oct.sclaav.visual.manipulators._
+import com.oct.sclaav.{CompleteAssembler, ImageManipulator}
 import com.sksamuel.scrimage.Image
 
 import scala.util.Random

@@ -1,16 +1,18 @@
-package com.oct.sclaav
+package com.oct
 
 import java.net.URI
 
-import com.oct.sclaav.visual.Mode.Mode
+import com.oct.sclaav.Mode.Mode
 import com.sksamuel.scrimage.Image
 
-package object visual {
+package object sclaav {
 
   object MapsModes {
     def apply(mode: String) = mode match {
       case "permute" => Mode.MOSAIC_PERMUTE_ALL_FILES
       case "single" => Mode.MOSAIC_SINGLE_FILE
+      case "free-random-composite" => Mode.FREE_COMPOSITE_RANDOM
+      case "free-ga-composite" => Mode.FREE_COMPOSITE_GA
     }
   }
 

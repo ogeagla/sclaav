@@ -2,7 +2,7 @@ package com.oct.sclaav.visual.manipulators
 
 import com.oct.sclaav.visual.assembly.basic.SimpleSingleAbsoluteAssembler
 import com.oct.sclaav.visual.computation.SimplePixelLocationComputer
-import com.oct.sclaav.visual.{DiscreteCropper, ImageManipulator, ManipulationsCrossHybridizer, ManipulationsHybridizer}
+import com.oct.sclaav.{DiscreteCropper, ImageManipulator, ManipulationsCrossHybridizer, ManipulationsHybridizer}
 import com.sksamuel.scrimage.composite.AlphaComposite
 import com.sksamuel.scrimage.filter.{ChromeFilter, DiffuseFilter, GlowFilter, SummerFilter}
 import com.sksamuel.scrimage.{Color, Image}
