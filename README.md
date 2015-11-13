@@ -2,9 +2,9 @@
 
 ## Current Functionality:
 
-| What                         | Where                                            |
-| ---------------------------- |:------------------------------------------------:|
-| [Image mosaic](#mosaic)      | `com.oct.sclaav.visual.assembly.mosaic.DoMosaic` |
+| What                         | Where                                            | Test |
+| ---------------------------- |:------------------------------------------------:|:-----:|
+| [Image mosaic](#mosaic)      | `DoMosaic` |`DoesMosaicTest`|
 
 ## Building
 
@@ -23,6 +23,11 @@ $ ./sbt clean test
 ## Using Visual Functions
 
 ### Mosaic
+
+| Original | Mosaic |
+| -------- | ------ |
+| <img src='https://github.com/ogeagla/sclaav/blob/master/src/test/resources/below-average-photography/0207-2014-05-1808-12-27-IMG_1328_marked.jpg'  height="200" width="300"> | <img src ='https://github.com/ogeagla/sclaav/blob/master/src/test/resources/assembled/mosaic/boulder-foothills-mosaic.jpeg' height="200" width="300"> |
+
  - Given a `target` image (or set of target images) and a set of `sample` images,
     - Discretize target image in grid by `rows` and `cols`.
     - For each sub-image, find the `sample` image which is the closest match; by default we use min-`2-norm` distance between `ARGB` average vectors.
