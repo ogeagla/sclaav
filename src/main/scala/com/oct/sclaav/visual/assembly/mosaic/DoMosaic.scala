@@ -16,7 +16,15 @@ object DoMosaic {
   val log = LoggerFactory.getLogger(getClass)
 
   implicit val writer = JpegWriter.Default
-  def apply(controlFile: File, sampleFiles: Array[File], cols: Int, rows: Int, outPath: File, doManipulate: Boolean = false) = {
+  def apply(
+             controlFile: File,
+             sampleFiles: Array[File],
+             cols: Int,
+             rows: Int,
+             outPath: File,
+             outputFilename: Option[String] = None,
+             doManipulate: Boolean = false,
+             writeReferenceImg: Boolean = false): Image = {
 
     val controlImage = Image.fromFile(controlFile)
     val controlSize = (controlImage.width, controlImage.height)
@@ -61,10 +69,16 @@ object DoMosaic {
 
     val controlFilePhotoName = controlFile.getPath.split("/").last
 
-    val assembledPath = new File(outPath, s"${controlFilePhotoName}_assembled.jpeg")
-    val refPath = new File(outPath, s"${controlFilePhotoName}_ref.jpeg")
+    if (writeReferenceImg) {
+      val refPath = new File(outPath, s"${controlFilePhotoName}_ref.jpeg")
+      controlImage.output(refPath)
+    }
 
+    val assembledPath = outputFilename match {
+      case None => new File(outPath, s"${controlFilePhotoName}_assembled.jpeg")
+      case Some(name) => new File(outPath, s"${name}")
+    }
     assembledImage.output(assembledPath)
-    controlImage.output(refPath)
+    assembledImage
   }
 }

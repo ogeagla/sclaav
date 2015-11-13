@@ -2,7 +2,7 @@ package com.oct.sclaav.visual.computation
 
 import com.oct.sclaav.visual._
 import com.sksamuel.scrimage.filter.GrayscaleFilter
-import com.sksamuel.scrimage.{Image, ScaleMethod}
+import com.sksamuel.scrimage.{Color, Image, ScaleMethod}
 
 
 object ComputesMeanAndStddev {
@@ -18,6 +18,21 @@ object Distance2 {
   def apply(arr1: Array[Double], arr2: Array[Double]): Double = {
     assert(arr1.length == arr2.length)
     math.sqrt(arr1.zip(arr2).map{case (a, b) => math.pow(a-b, 2.0)}.foldLeft(0.0)(_ + _))
+  }
+}
+
+object RelativeImageSimilarityArgbDistance2 {
+  def apply(img1: Image, img2: Image): Double = (new RelativeImageSimilarityArgbDistance2)(img1, img2)
+}
+
+class RelativeImageSimilarityArgbDistance2 extends Similarity {
+  override def apply(img1: Image, img2: Image, scaleWidth: Int = 32, scaleHeight: Int = 32): Double = {
+
+    val imgsDist = (new ImageSimilarityArgbDistance2)(img1, img2, scaleWidth, scaleHeight)
+    val transparent = Image.filled(scaleWidth, scaleHeight, Color.Transparent)
+    val distToTrans = (new ImageSimilarityArgbDistance2)(img1, transparent, scaleWidth, scaleHeight)
+
+    imgsDist / distToTrans
   }
 }
 

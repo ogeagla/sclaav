@@ -71,7 +71,7 @@ object Main {
       case Mode.MOSAIC_SINGLE_FILE =>
         log.info("using single file target")
         val target = config.singleTarget
-        DoMosaic(target, files, cols, rows, outPath, doManipulate)
+        DoMosaic(target, files, cols, rows, outPath, doManipulate = doManipulate)
 
       case Mode.MOSAIC_PERMUTE_ALL_FILES =>
         log.info("permuting all files in input dir")
@@ -81,7 +81,7 @@ object Main {
 
           log.info(s"running with control image: ${controlFile.getName}")
 
-          DoMosaic(controlFile, sampleFiles, cols, rows, outPath, doManipulate)
+          DoMosaic(controlFile, sampleFiles, cols, rows, outPath, doManipulate = doManipulate)
         }
     }
   }
