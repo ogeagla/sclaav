@@ -1,6 +1,6 @@
 package com.oct.sclaav
 
-import java.io.File
+import java.net.URI
 
 import com.oct.sclaav.visual.Mode.Mode
 import com.sksamuel.scrimage.Image
@@ -26,13 +26,34 @@ package object visual {
                      maxSamplePhotos: Int = 10,
                      rows: Int = 8,
                      cols: Int = 8,
+                     mode: Mode = Mode.MOSAIC_SINGLE_FILE,
+                     in: Option[URI] = None,
+                     out: Option[URI] = None,
+                     singleTarget: Option[URI] = None,
                      manipulate: Boolean = false,
-                     mode: Mode = Mode.MOSAIC_PERMUTE_ALL_FILES,
-                     singleTarget: File = new File("./singleTarget"),
-                     in: File = new File("./in"),
-                     out: File = new File("./out"),
                      verbose: Boolean = false,
-                     debug: Boolean = false)
+                     debug: Boolean = false) {
+
+    def validate: Either[String, Unit] = {
+      val validations = Seq(validateMode)
+      validations.foldLeft[Either[String, Unit]](Right(Unit)) { (vs, v) =>
+        if (vs.isLeft)
+          vs
+        else if (v.isLeft)
+          v
+        else
+          Right(Unit)
+      }
+    }
+
+    def validateMode: Either[String, Unit] = (mode, singleTarget) match {
+      case (Mode.MOSAIC_SINGLE_FILE, None) =>
+        Left("Should provide a target file when using Mosaic mode with a single file")
+      case (Mode.MOSAIC_PERMUTE_ALL_FILES, Some(_)) =>
+        Left("Should not provide a target file when using Mosaic mode with permuting all input files")
+    }
+
+  }
 
   case class Argb(a: Int, r: Int, g: Int, b: Int)
 
