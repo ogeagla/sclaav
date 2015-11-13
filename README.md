@@ -47,3 +47,8 @@ $ java -jar bin/Sclaav.jar \ # invokes jar
   --filters true \           # apply filters to images and append to corpus of possible mosaic images
   --target photo.jpg         # if mode is single, specify the target image from which to create mosaic
 ```
+## Credits
+http://www.octaviangeagla.com/bap
+
+## License
+Apache 2.0
