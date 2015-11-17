@@ -2,7 +2,7 @@ package com.oct.sclaav.visual.assembly.genetic
 
 import com.oct.sclaav.visual.computation.{ComputesMeanAndStddev, Distance2, ImageSimilarityArgbDistance2, ImageSimilarityRgbDistance2}
 import com.oct.sclaav.visual.manipulators._
-import com.oct.sclaav.{CompleteAssembler, ImageManipulator}
+import com.oct.sclaav.{IterationStats, CompleteAssembler, ImageManipulator}
 import com.sksamuel.scrimage.{Image, ScaleMethod}
 
 import scala.util.Random
@@ -16,9 +16,9 @@ object SimpleCompleteGeneticAssembler {
 
 class SimpleCompleteGeneticAssembler(
                                       initChainSizeMax: Int = 5,
-                                      chainsInPopulation: Int = 100,
-                                      iterations: Int = 15,
-                                      topToTake: Int = 20,
+                                      chainsInPopulation: Int = 300,
+                                      iterations: Int = 20,
+                                      topToTake: Int = 5,
                                       splitChainOnSize: Option[Int] = Some(15000)) extends CompleteAssembler {
   override def apply(theImageToAssemble: Image, theBackgroundImage: Image, samples: Array[Image]): Image = {
 
@@ -41,9 +41,9 @@ class SimpleCompleteGeneticAssembler(
 
     println(s"final distance: $topDistance")
 
-    println(s"Printing best distances:")
+    println(s"iteration,chain size mean,chain size stddev,pop fit,pop dist mean,pop dist stddev,best dist,worst dist:")
     (0 to iterations - 1).foreach{ i =>
-      println(s"${finalStats.bestDistances(i)}")
+      println(s"$i,${finalStats.chainSizeMeans(i)},${finalStats.chainSizeStddevs(i)},${finalStats.populationFitness(i)},${finalStats.populationDistanceMeans(i)},${finalStats.populationDistanceStddevs(i)},${finalStats.bestDistances(i)},${finalStats.worstDistances(i)}")
     }
 
     topImage
@@ -84,17 +84,6 @@ class SimpleCompleteGeneticAssembler(
     }.take(topCount)
   }
 
-  case class IterationStats(
-                           chainSizeMeans: Array[Double] = Array(),
-                           chainSizeStddevs: Array[Double] = Array(),
-                           populationFitness: Array[Double] = Array(),
-                           populationDistanceMeans: Array[Double] = Array(),
-                           populationDistanceStddevs: Array[Double] = Array(),
-                           bestDistances: Array[Double] = Array(),
-                           worstDistances: Array[Double] = Array()
-                           )
-
-
   def doOneStep(chainsToIterateOn: Array[Array[ImageManipulator]], theBackgroundImage: Image, theImageToAssemble: Image, topNSize: Int, manipChainPopulationSize: Int, stats: IterationStats, splitChainOnSize: Option[Int] = None): (Array[Array[ImageManipulator]], IterationStats) = {
 
     println("applying chains + getting distances")
@@ -113,13 +102,13 @@ class SimpleCompleteGeneticAssembler(
     val bottomOne = takeBottom(distances)
 
     val newStats = stats.copy(
-      chainSizeMeans = stats.chainSizeMeans.+:(chainSizeMean),
-      chainSizeStddevs = stats.chainSizeStddevs.+:(chainSizeStddev),
-      populationFitness = stats.populationFitness.+:(populationFitness),
-      populationDistanceMeans = stats.populationDistanceMeans.+:(distMean),
-      populationDistanceStddevs = stats.populationDistanceStddevs.+:(distStddev),
-      bestDistances = stats.bestDistances.+:(topChainsWDist(0)._3),
-      worstDistances = stats.worstDistances.+:(bottomOne(0)._3)
+      chainSizeMeans = Array(chainSizeMean).++:(stats.chainSizeMeans),
+      chainSizeStddevs = Array(chainSizeStddev).++:(stats.chainSizeStddevs),
+      populationFitness = Array(populationFitness).++:(stats.populationFitness),
+      populationDistanceMeans = Array(distMean).++:(stats.populationDistanceMeans),
+      populationDistanceStddevs = Array(distStddev).++:(stats.populationDistanceStddevs),
+      bestDistances = Array(topChainsWDist(0)._3).++:(stats.bestDistances),
+      worstDistances = Array(bottomOne(0)._3).++:(stats.worstDistances)
     )
 
     topChainsWDist.foreach{ tc =>

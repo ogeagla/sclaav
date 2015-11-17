@@ -102,4 +102,14 @@ package object sclaav {
   trait ManipulationsHybridizer {
     def apply(man: Array[ImageManipulator]): Array[ImageManipulator]
   }
+
+  case class IterationStats(
+                             chainSizeMeans: Array[Double] = Array(),
+                             chainSizeStddevs: Array[Double] = Array(),
+                             populationFitness: Array[Double] = Array(),
+                             populationDistanceMeans: Array[Double] = Array(),
+                             populationDistanceStddevs: Array[Double] = Array(),
+                             bestDistances: Array[Double] = Array(),
+                             worstDistances: Array[Double] = Array()
+                           )
 }
