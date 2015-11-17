@@ -32,8 +32,8 @@ java -ea                          \
   -XX:MaxPermSize=1024m           \
   -XX:SurvivorRatio=128           \
   -XX:MaxTenuringThreshold=0      \
-  -Xss16M                         \
-  -Xms1024M                       \
-  -Xmx2G                          \
+  -Xss32M                         \
+  -Xms2056M                       \
+  -Xmx4G                          \
   -server                         \
   -jar $sbtjar "$@"

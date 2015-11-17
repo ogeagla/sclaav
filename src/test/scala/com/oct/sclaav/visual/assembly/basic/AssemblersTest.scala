@@ -1,9 +1,9 @@
 package com.oct.sclaav.visual.assembly.basic
 
 import com.oct.sclaav.TestHelpers
-import com.sksamuel.scrimage.{Color, ScaleMethod, Image}
 import com.sksamuel.scrimage.nio.JpegWriter
-import org.scalatest.{Matchers, BeforeAndAfter, FunSuite}
+import com.sksamuel.scrimage.{Color, Image, ScaleMethod}
+import org.scalatest.{BeforeAndAfter, FunSuite, Matchers}
 
 class AssemblersTest extends FunSuite with BeforeAndAfter with Matchers with TestHelpers {
 
