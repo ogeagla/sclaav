@@ -1,9 +1,9 @@
 package com.oct.sclaav.visual.assembly.genetic
 
-import com.oct.sclaav.visual.computation.{ComputesMeanAndStddev, Distance2, ImageSimilarityArgbDistance2}
+import com.oct.sclaav.visual.computation.{ComputesMeanAndStddev, Distance2, ImageSimilarityArgbDistance2, ImageSimilarityRgbDistance2}
 import com.oct.sclaav.visual.manipulators._
 import com.oct.sclaav.{CompleteAssembler, ImageManipulator}
-import com.sksamuel.scrimage.Image
+import com.sksamuel.scrimage.{Image, ScaleMethod}
 
 import scala.util.Random
 
@@ -15,17 +15,17 @@ object SimpleCompleteGeneticAssembler {
 }
 
 class SimpleCompleteGeneticAssembler(
-                                      initChainSizeMax: Int = 10,
-                                      chainsInPopulation: Int = 200,
-                                      iterations: Int = 3,
-                                      topToTake: Int = 20,
+                                      initChainSizeMax: Int = 5,
+                                      chainsInPopulation: Int = 1500,
+                                      iterations: Int = 10,
+                                      topToTake: Int = 10,
                                       splitChainOnSize: Option[Int] = Some(15000)) extends CompleteAssembler {
   override def apply(theImageToAssemble: Image, theBackgroundImage: Image, samples: Array[Image]): Image = {
 
     println(s"GA assembler. chain size max: $initChainSizeMax, chain population $chainsInPopulation, iterations: $iterations, topToTake: $topToTake")
 
     val (maxW, maxH) = (theBackgroundImage.width, theBackgroundImage.height)
-    val refDistance = ImageSimilarityArgbDistance2(theBackgroundImage, theImageToAssemble)
+    val refDistance = ImageSimilarityRgbDistance2(theBackgroundImage, theImageToAssemble)
 
     scala.util.Random.setSeed(13)
 
@@ -109,16 +109,16 @@ class SimpleCompleteGeneticAssembler(
       .++(chainsToIterateOnAndMaybeSplit.map(c => ModManipulationsRandomlyRemove(c)))
       .++(chainsToIterateOnAndMaybeSplit.map(c => ModManipulationsRandomlySplit(c)))
 
-    val newChainsChosenToLiveAndTheRestToDieMuahahahahahahahahahahahAAAAAAhahahhahahahahahahaha =
-      topChains.++:(Random.shuffle(newChainsCorpus.toList).take(manipChainPopulationSize - topNSize))
+    val newChainsChosenToLiveAndTheRestToDieMuahaha =
+      topChains.++:(Random.shuffle(newChainsCorpus.toList).take(chainsToIterateOn.length - topNSize - (manipChainPopulationSize / iterations)))
 
-    newChainsChosenToLiveAndTheRestToDieMuahahahahahahahahahahahAAAAAAhahahhahahahahahahaha
+    newChainsChosenToLiveAndTheRestToDieMuahaha
   }
 
   def doChainSplit(chains: Array[Array[ImageManipulator]], size: Int): Array[Array[ImageManipulator]] = {
-    //NOTE: below, you will see an IntelliJ warning to refactor to flatMap,
+    //FIXME: below, you will see an IntelliJ warning to refactor to flatMap,
     //but if you do so, the 2.11.7 compiler will yell at you and fail
-    chains.map { chain =>
+    chains.par.map { chain =>
 
       //      if (chain.length > size) {
       //        Array(chain.slice(0, size), chain.slice(size, chain.length))
@@ -130,7 +130,7 @@ class SimpleCompleteGeneticAssembler(
         case true => chain.grouped(size).toArray.++:(Array(chain))
         case false => Array(chain)
       }
-    }.flatten
+    }.flatten.toArray
 
   }
 
@@ -173,7 +173,22 @@ class SimpleCompleteGeneticAssembler(
       val randomY = scala.util.Random.nextInt(maxH)
       val randomIndex = scala.util.Random.nextInt(sampleImgs.length)
       val randomImg = sampleImgs(randomIndex)
-      val manip = new AlphaCompositeManipulator(randomImg, randomX, randomY)
+
+      val scaleFactorCap = 3.0
+
+      val gaussian = Random.nextGaussian()
+      val scaleFactor = gaussian match {
+        case g if g <= -scaleFactorCap => 1.0 / scaleFactorCap
+        case g if g == 0.0 => 1.0
+        case g if g < 0.0 => 1.0 / ((-g) + 0.1)
+        case g if g >= scaleFactorCap => scaleFactorCap
+        case g => g + 0.1
+      }
+
+      val newWidth = (scaleFactor * randomImg.width.toDouble).toInt
+      val newHeight = (scaleFactor * randomImg.height.toDouble).toInt
+
+      val manip = new AlphaCompositeManipulator(randomImg.scaleTo(newWidth, newHeight, ScaleMethod.FastScale), randomX, randomY)
       manip
     }.toArray
 

@@ -10,7 +10,7 @@ import org.scalatest.{BeforeAndAfter, FunSuite, Matchers}
 
 class DoesMosaicTest extends FunSuite with BeforeAndAfter with Matchers with TestHelpers {
 
-  test("builds mosaics for realz") {
+  ignore("builds mosaics for realz") {
 
     implicit val writer = JpegWriter.Default
     val outPath = new File(testRootPath)

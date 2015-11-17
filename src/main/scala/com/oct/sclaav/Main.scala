@@ -46,7 +46,7 @@ object Main {
             }
         }
       case None =>
-        log.error(s"Failed to parse args $args")
+        log.error(s"Failed to parse args ${args.toList.toString}")
     }
 
   }
