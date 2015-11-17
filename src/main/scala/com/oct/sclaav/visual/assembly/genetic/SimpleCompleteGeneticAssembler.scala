@@ -16,9 +16,9 @@ object SimpleCompleteGeneticAssembler {
 
 class SimpleCompleteGeneticAssembler(
                                       initChainSizeMax: Int = 5,
-                                      chainsInPopulation: Int = 1000,
-                                      iterations: Int = 10,
-                                      topToTake: Int = 10,
+                                      chainsInPopulation: Int = 100,
+                                      iterations: Int = 15,
+                                      topToTake: Int = 20,
                                       splitChainOnSize: Option[Int] = Some(15000)) extends CompleteAssembler {
   override def apply(theImageToAssemble: Image, theBackgroundImage: Image, samples: Array[Image]): Image = {
 
@@ -33,7 +33,7 @@ class SimpleCompleteGeneticAssembler(
       createAChain(maxW, maxH, samples, initChainSizeMax)
     }.toArray
 
-    val finalChains = iterateSteps(initChains, iterations, theBackgroundImage, theImageToAssemble, topToTake, chainsInPopulation, splitChainOnSize)
+    val (finalChains, finalStats) = iterateSteps(initChains, iterations, theBackgroundImage, theImageToAssemble, topToTake, chainsInPopulation, splitChainOnSize)
 
     val topChain = takeTopApplied(getApplied(finalChains, theBackgroundImage, theImageToAssemble), topToTake).map(_._1).head
 
@@ -41,17 +41,25 @@ class SimpleCompleteGeneticAssembler(
 
     println(s"final distance: $topDistance")
 
+    println(s"Printing best distances:")
+    (0 to iterations - 1).foreach{ i =>
+      println(s"${finalStats.bestDistances(i)}")
+    }
+
     topImage
   }
 
 
-  def iterateSteps(initChains: Array[Array[ImageManipulator]], iterations: Int, theBackgroundImage: Image, theImageToAssemble: Image, topNSize: Int, manipChainPopulationSize: Int, splitChainOnSize: Option[Int] = None): Array[Array[ImageManipulator]] = {
+  def iterateSteps(initChains: Array[Array[ImageManipulator]], iterations: Int, theBackgroundImage: Image, theImageToAssemble: Image, topNSize: Int, manipChainPopulationSize: Int, splitChainOnSize: Option[Int] = None): (Array[Array[ImageManipulator]], IterationStats) = {
     var theChains = initChains
+    var iterStats = IterationStats()
     for (iter <- 0 to iterations - 1) {
       println(s"iteration: $iter, chain size: ${theChains.length}")
-      theChains = doOneStep(theChains, theBackgroundImage, theImageToAssemble, topNSize, manipChainPopulationSize, splitChainOnSize)
+      val results = doOneStep(theChains, theBackgroundImage, theImageToAssemble, topNSize, manipChainPopulationSize, iterStats, splitChainOnSize)
+      theChains = results._1
+      iterStats = results._2
     }
-    theChains
+    (theChains, iterStats)
   }
 
   def getApplied(chains: Array[Array[ImageManipulator]], theBackgroundImage: Image, theImageToAssemble: Image): Array[(Array[ImageManipulator], Image, Double)] = {
@@ -69,7 +77,25 @@ class SimpleCompleteGeneticAssembler(
     }.take(topCount)
   }
 
-  def doOneStep(chainsToIterateOn: Array[Array[ImageManipulator]], theBackgroundImage: Image, theImageToAssemble: Image, topNSize: Int, manipChainPopulationSize: Int, splitChainOnSize: Option[Int] = None): Array[Array[ImageManipulator]] = {
+  def takeBottom(chainsWDistance: Array[(Array[ImageManipulator], Image, Double)], topCount: Int = 1): Array[(Array[ImageManipulator], Image, Double)] = {
+    chainsWDistance.sortBy {
+      case (chain, appliedImage, dist) =>
+        -1 * dist
+    }.take(topCount)
+  }
+
+  case class IterationStats(
+                           chainSizeMeans: Array[Double] = Array(),
+                           chainSizeStddevs: Array[Double] = Array(),
+                           populationFitness: Array[Double] = Array(),
+                           populationDistanceMeans: Array[Double] = Array(),
+                           populationDistanceStddevs: Array[Double] = Array(),
+                           bestDistances: Array[Double] = Array(),
+                           worstDistances: Array[Double] = Array()
+                           )
+
+
+  def doOneStep(chainsToIterateOn: Array[Array[ImageManipulator]], theBackgroundImage: Image, theImageToAssemble: Image, topNSize: Int, manipChainPopulationSize: Int, stats: IterationStats, splitChainOnSize: Option[Int] = None): (Array[Array[ImageManipulator]], IterationStats) = {
 
     println("applying chains + getting distances")
     val distances: Array[(Array[ImageManipulator], Image, Double)] = getApplied(chainsToIterateOn, theBackgroundImage, theImageToAssemble)
@@ -84,6 +110,17 @@ class SimpleCompleteGeneticAssembler(
     println(s"population chain size mean, stddev: $chainSizeMean +/- $chainSizeStddev")
 
     val topChainsWDist = takeTopApplied(distances, topNSize)
+    val bottomOne = takeBottom(distances)
+
+    val newStats = stats.copy(
+      chainSizeMeans = stats.chainSizeMeans.+:(chainSizeMean),
+      chainSizeStddevs = stats.chainSizeStddevs.+:(chainSizeStddev),
+      populationFitness = stats.populationFitness.+:(populationFitness),
+      populationDistanceMeans = stats.populationDistanceMeans.+:(distMean),
+      populationDistanceStddevs = stats.populationDistanceStddevs.+:(distStddev),
+      bestDistances = stats.bestDistances.+:(topChainsWDist(0)._3),
+      worstDistances = stats.worstDistances.+:(bottomOne(0)._3)
+    )
 
     topChainsWDist.foreach{ tc =>
       println(s"top chain distance: ${tc._3}, size: ${tc._1.length}")
@@ -101,18 +138,28 @@ class SimpleCompleteGeneticAssembler(
       case None => chainsToIterateOn
     }
 
+
+    val funcsThatRunOnAllChains: Array[(Array[Array[ImageManipulator]], Array[Array[ImageManipulator]]) => Array[Array[ImageManipulator]]] = Array(hybrdizeChainsCombine(_, _), hybridizeChainsPointWise(_, _), hybridizeChainsBySplit(_, _))
+
+    val funcsThatRunOnSingleChain = Array(ModManipulationsRandomlyRemove(_), ModManipulationsRandomlySplit(_))
+
+    val newChainsFromSingleOps = funcsThatRunOnSingleChain.par.flatMap { f =>
+      chainsToIterateOnAndMaybeSplit.map(f)
+    }.toArray
+
+    val newChainsFromBulkOps: Array[Array[ImageManipulator]] = funcsThatRunOnAllChains.par.flatMap { f =>
+      f(chainsToIterateOnAndMaybeSplit, chainsToIterateOnAndMaybeSplit)
+    }.toArray
+
     val newChainsCorpus = topChains
       .++:(notTopChains)
-      .++(hybridizeChainsBySplit(chainsToIterateOnAndMaybeSplit, chainsToIterateOnAndMaybeSplit))
-      .++(hybridizeChainsPointWise(chainsToIterateOnAndMaybeSplit, chainsToIterateOnAndMaybeSplit))
-      .++(hybrdizeChainsCombine(chainsToIterateOnAndMaybeSplit, chainsToIterateOnAndMaybeSplit))
-      .++(chainsToIterateOnAndMaybeSplit.map(c => ModManipulationsRandomlyRemove(c)))
-      .++(chainsToIterateOnAndMaybeSplit.map(c => ModManipulationsRandomlySplit(c)))
+      .++(newChainsFromBulkOps)
+      .++(newChainsFromSingleOps)
 
     val newChainsChosenToLiveAndTheRestToDieMuahaha =
       topChains.++:(Random.shuffle(newChainsCorpus.toList).take(chainsToIterateOn.length - topNSize - (manipChainPopulationSize / iterations)))
 
-    newChainsChosenToLiveAndTheRestToDieMuahaha
+    (newChainsChosenToLiveAndTheRestToDieMuahaha, newStats)
   }
 
   def doChainSplit(chains: Array[Array[ImageManipulator]], size: Int): Array[Array[ImageManipulator]] = {
@@ -136,6 +183,7 @@ class SimpleCompleteGeneticAssembler(
 
   def hybrdizeChainsCombine(chain1: Array[Array[ImageManipulator]],
                             chain2: Array[Array[ImageManipulator]]): Array[Array[ImageManipulator]] = {
+    println(s"hybridizing chain by combining, of sizes: ${chain1.length}, ${chain2.length}")
     var hybChains = Array[Array[ImageManipulator]]()
     for (c1: Array[ImageManipulator] <- chain1; c2: Array[ImageManipulator] <- chain2) {
       hybChains = hybChains.+:(MixManipulationsCombinator(c1, c2))
@@ -145,6 +193,7 @@ class SimpleCompleteGeneticAssembler(
 
   def hybridizeChainsPointWise(chain1: Array[Array[ImageManipulator]],
                                chain2: Array[Array[ImageManipulator]]): Array[Array[ImageManipulator]] = {
+    println(s"hybridizing chain by combining point-wise, of sizes: ${chain1.length}, ${chain2.length}")
     var hybChains = Array[Array[ImageManipulator]]()
     for (c1: Array[ImageManipulator] <- chain1; c2: Array[ImageManipulator] <- chain2) {
       hybChains = hybChains.+:(MixManipulationsRandomlyPointwise(c1, c2))
@@ -156,6 +205,7 @@ class SimpleCompleteGeneticAssembler(
                               chain1: Array[Array[ImageManipulator]],
                               chain2: Array[Array[ImageManipulator]]): Array[Array[ImageManipulator]] = {
 
+    println(s"hybridizing chain by split, of sizes: ${chain1.length}, ${chain2.length}")
     var hybChains = Array[Array[ImageManipulator]]()
     for (c1: Array[ImageManipulator] <- chain1; c2: Array[ImageManipulator] <- chain2) {
       if (!(c1 sameElements c2))
@@ -164,6 +214,7 @@ class SimpleCompleteGeneticAssembler(
     hybChains
   }
 
+  //FIXME this is a computer
   def gaussianScaleFactor(cap: Double = 3.0): Double = {
 
     val gaussian = Random.nextGaussian()
@@ -177,6 +228,25 @@ class SimpleCompleteGeneticAssembler(
     scaleFactor
   }
 
+  //FIXME this is a computer
+  def uniformScaleFactor(cap: Double = 2.0): Double = {
+    Random.nextDouble() * cap
+  }
+
+  def verifySizeNotZero(w: Int, h: Int, default: (Int, Int) = (20, 20)): (Int, Int) = {
+    val goodW = w match {
+      case badW if badW == 0 => default._1
+      case gW => gW
+    }
+
+    val goodH = h match {
+      case badH if badH == 0 => default._2
+      case gH => gH
+    }
+
+    (goodW, goodH )
+  }
+
   def createAChain(maxW: Int, maxH: Int, sampleImgs: Array[Image], maxSize: Int): Array[ImageManipulator] = {
 
     val size = scala.util.Random.nextInt(maxSize)
@@ -187,10 +257,9 @@ class SimpleCompleteGeneticAssembler(
       val randomIndex = scala.util.Random.nextInt(sampleImgs.length)
       val randomImg = sampleImgs(randomIndex)
 
-      val scaleFactor = gaussianScaleFactor()
+      val scaleFactor = uniformScaleFactor()
 
-      val newWidth = (scaleFactor * randomImg.width.toDouble).toInt
-      val newHeight = (scaleFactor * randomImg.height.toDouble).toInt
+      val (newWidth, newHeight) = verifySizeNotZero((scaleFactor * randomImg.width.toDouble).toInt, (scaleFactor * randomImg.height.toDouble).toInt)
 
       val manip = new AlphaCompositeManipulator(randomImg.scaleTo(newWidth, newHeight, ScaleMethod.FastScale), randomX, randomY)
       manip
