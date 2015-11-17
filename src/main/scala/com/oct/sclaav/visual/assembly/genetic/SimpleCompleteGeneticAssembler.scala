@@ -16,7 +16,7 @@ object SimpleCompleteGeneticAssembler {
 
 class SimpleCompleteGeneticAssembler(
                                       initChainSizeMax: Int = 5,
-                                      chainsInPopulation: Int = 1500,
+                                      chainsInPopulation: Int = 1000,
                                       iterations: Int = 10,
                                       topToTake: Int = 10,
                                       splitChainOnSize: Option[Int] = Some(15000)) extends CompleteAssembler {
@@ -138,7 +138,7 @@ class SimpleCompleteGeneticAssembler(
                             chain2: Array[Array[ImageManipulator]]): Array[Array[ImageManipulator]] = {
     var hybChains = Array[Array[ImageManipulator]]()
     for (c1: Array[ImageManipulator] <- chain1; c2: Array[ImageManipulator] <- chain2) {
-      hybChains = hybChains.++:(Array(MixManipulationsCombinator(c1, c2)))
+      hybChains = hybChains.+:(MixManipulationsCombinator(c1, c2))
     }
     hybChains
   }
@@ -147,7 +147,7 @@ class SimpleCompleteGeneticAssembler(
                                chain2: Array[Array[ImageManipulator]]): Array[Array[ImageManipulator]] = {
     var hybChains = Array[Array[ImageManipulator]]()
     for (c1: Array[ImageManipulator] <- chain1; c2: Array[ImageManipulator] <- chain2) {
-      hybChains = hybChains.++:(Array(MixManipulationsRandomlyPointwise(c1, c2)))
+      hybChains = hybChains.+:(MixManipulationsRandomlyPointwise(c1, c2))
     }
     hybChains
   }
@@ -159,9 +159,22 @@ class SimpleCompleteGeneticAssembler(
     var hybChains = Array[Array[ImageManipulator]]()
     for (c1: Array[ImageManipulator] <- chain1; c2: Array[ImageManipulator] <- chain2) {
       if (!(c1 sameElements c2))
-        hybChains = hybChains.++:(Array(MixManipulationsRandomlyBy2SegmentSwap(c1, c2)))
+        hybChains = hybChains.+:(MixManipulationsRandomlyBy2SegmentSwap(c1, c2))
     }
     hybChains
+  }
+
+  def gaussianScaleFactor(cap: Double = 3.0): Double = {
+
+    val gaussian = Random.nextGaussian()
+    val scaleFactor = gaussian match {
+      case g if g <= -cap => 1.0 / cap
+      case g if g == 0.0 => 1.0
+      case g if g < 0.0 => 1.0 / ((-g) + 0.1)
+      case g if g >= cap => cap
+      case g => g + 0.1
+    }
+    scaleFactor
   }
 
   def createAChain(maxW: Int, maxH: Int, sampleImgs: Array[Image], maxSize: Int): Array[ImageManipulator] = {
@@ -174,16 +187,7 @@ class SimpleCompleteGeneticAssembler(
       val randomIndex = scala.util.Random.nextInt(sampleImgs.length)
       val randomImg = sampleImgs(randomIndex)
 
-      val scaleFactorCap = 3.0
-
-      val gaussian = Random.nextGaussian()
-      val scaleFactor = gaussian match {
-        case g if g <= -scaleFactorCap => 1.0 / scaleFactorCap
-        case g if g == 0.0 => 1.0
-        case g if g < 0.0 => 1.0 / ((-g) + 0.1)
-        case g if g >= scaleFactorCap => scaleFactorCap
-        case g => g + 0.1
-      }
+      val scaleFactor = gaussianScaleFactor()
 
       val newWidth = (scaleFactor * randomImg.width.toDouble).toInt
       val newHeight = (scaleFactor * randomImg.height.toDouble).toInt
