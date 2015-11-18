@@ -32,7 +32,7 @@ object Parser {
     opt[Int]('c', "cols") action { (x, c) =>
       c.copy(cols = Some(x)) } text "cols is an integer property"
     opt[Int]('s', "samples") action { (x, c) =>
-      c.copy(maxSamplePhotos = x) } text "samples is an integer property"
+      c.copy(maxSamplePhotos = Some(x)) } text "samples is an integer property"
     opt[URI]('i', "in") required() valueName "<file>" action { (x, c) =>
       c.copy(in = Some(x)) } text "in is a required file property" validate validateUri("Input must be valid URI")
     opt[URI]('o', "out") required() valueName "<file>" action { (x, c) =>

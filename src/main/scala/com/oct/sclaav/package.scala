@@ -25,7 +25,7 @@ package object sclaav {
   }
 
   case class Config(
-                     maxSamplePhotos: Int = 10,
+                     maxSamplePhotos: Option[Int] = Some(10),
                      rows: Option[Int] = None,
                      cols: Option[Int] = None,
                      mode: Mode = Mode.MOSAIC_SINGLE_FILE,

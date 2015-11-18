@@ -25,7 +25,7 @@ object Main {
 
         log.info(s"inPath: $inPath outPath: $outPath")
 
-        val files = new File(inPath.get).listFiles().filter(_.isFile).take(maxSamples)
+        val files = new File(inPath.get).listFiles().filter(_.isFile).take(maxSamples.get)
 
         mode match {
 
