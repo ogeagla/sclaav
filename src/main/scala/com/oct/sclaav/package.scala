@@ -65,6 +65,11 @@ package object sclaav {
       case (_, _, _) => Right(Unit)
     }
 
+    def validateOutputDir: Either[String, Unit] = (mode, out) match {
+      case (Mode.MOSAIC_SINGLE_FILE, None) => Right(Unit)
+      case (_, None) => Left("Should provide output dir")
+    }
+
   }
 
   case class Argb(a: Int, r: Int, g: Int, b: Int)

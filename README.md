@@ -39,13 +39,13 @@ Run with:
 ```
 $ java -jar bin/Sclaav.jar \ # invokes jar
   --in input-files-dir \     # input images directory
-  --out output-dir \         # output directory where results will be written
-  --mode permute \           # permute or single; permute creates mosaics for all imgs in input dir
-  --rows 64 \                # how many rows to split target img into
-  --cols 64 \                # how many cols to split target img into
-  --samples 300 \            # how many samples to take from input dir
-  --filters true \           # apply filters to images and append to corpus of possible mosaic images
-  --target photo.jpg         # if mode is single, specify the target image from which to create mosaic
+  --out output-dir \         # output directory
+  --mode permute \           # permute or single mode
+  --rows 64 \                # how many rows to split target
+  --cols 64 \                # how many cols to split target
+  --samples 300 \            # how many samples to use from input dir
+  --filters true \           # apply and use filtered images
+  --target photo.jpg         # if mode is single, specify the target image to use
 ```
 ## Credits
 http://www.octaviangeagla.com/bap
