@@ -26,8 +26,8 @@ package object sclaav {
 
   case class Config(
                      maxSamplePhotos: Int = 10,
-                     rows: Int = 8,
-                     cols: Int = 8,
+                     rows: Option[Int] = None,
+                     cols: Option[Int] = None,
                      mode: Mode = Mode.MOSAIC_SINGLE_FILE,
                      in: Option[URI] = None,
                      out: Option[URI] = None,
@@ -37,7 +37,7 @@ package object sclaav {
                      debug: Boolean = false) {
 
     def validate: Either[String, Unit] = {
-      val validations = Seq(validateMode)
+      val validations = Seq(validateMode, validateMosaic)
       validations.foldLeft[Either[String, Unit]](Right(Unit)) { (vs, v) =>
         if (vs.isLeft)
           vs
@@ -53,6 +53,16 @@ package object sclaav {
         Left("Should provide a target file when using Mosaic mode with a single file")
       case (Mode.MOSAIC_PERMUTE_ALL_FILES, Some(_)) =>
         Left("Should not provide a target file when using Mosaic mode with permuting all input files")
+      case (_, _) =>
+        Right(Unit)
+    }
+
+    def validateMosaic: Either[String, Unit] = (mode, rows, cols) match {
+      case (Mode.MOSAIC_SINGLE_FILE, Some(r), Some(c)) => Right(Unit)
+      case (Mode.MOSAIC_PERMUTE_ALL_FILES, Some(r), Some(c)) => Right(Unit)
+      case (Mode.MOSAIC_SINGLE_FILE, _, _) => Left("Should provide rows and cols for mosaic")
+      case (Mode.MOSAIC_PERMUTE_ALL_FILES, _, _) => Right("Should provide rows and cols for mosaic")
+      case (_, _, _) => Right(Unit)
     }
 
   }

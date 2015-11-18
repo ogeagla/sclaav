@@ -28,9 +28,9 @@ object Parser {
     opt[Boolean]('f', "filters") action { (x, c) =>
       c.copy(manipulate = x) } text "filters is a boolean property"
     opt[Int]('r', "rows") action { (x, c) =>
-      c.copy(rows = x) } text "rows is an integer property"
+      c.copy(rows = Some(x)) } text "rows is an integer property"
     opt[Int]('c', "cols") action { (x, c) =>
-      c.copy(cols = x) } text "cols is an integer property"
+      c.copy(cols = Some(x)) } text "cols is an integer property"
     opt[Int]('s', "samples") action { (x, c) =>
       c.copy(maxSamplePhotos = x) } text "samples is an integer property"
     opt[URI]('i', "in") required() valueName "<file>" action { (x, c) =>
