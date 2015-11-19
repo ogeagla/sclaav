@@ -25,14 +25,14 @@ object Main {
 
         log.info(s"inPath: $inPath outPath: $outPath")
 
-        val files = new File(inPath.get).listFiles().filter(_.isFile).take(maxSamples)
+        val files = new File(inPath.get).listFiles().filter(_.isFile).take(maxSamples.get)
 
         mode match {
 
           case Mode.MOSAIC_SINGLE_FILE =>
             log.info("using single file target")
             val target = config.singleTarget
-            DoMosaic(new File(target.get), files, cols, rows, new File(outPath.get), doManipulate = doManipulate)
+            DoMosaic(new File(target.get), files, cols.get, rows.get, new File(outPath.get), doManipulate = doManipulate)
 
           case Mode.MOSAIC_PERMUTE_ALL_FILES =>
             log.info("permuting all files in input dir")
@@ -42,7 +42,7 @@ object Main {
 
               log.info(s"running with control image: ${controlFile.getName}")
 
-              DoMosaic(controlFile, sampleFiles, cols, rows, new File(outPath.get), doManipulate = doManipulate)
+              DoMosaic(controlFile, sampleFiles, cols.get, rows.get, new File(outPath.get), doManipulate = doManipulate)
             }
         }
       case None =>
