@@ -1,4 +1,4 @@
-package com.oct.sclaav.visual.assembly.basic
+package com.oct.sclaav.visual.assembly.grid
 
 import com.oct.sclaav.visual.computation.{ImageSimilarityArgbDistance2, SimplePixelLocationComputer}
 import com.oct.sclaav.visual.manipulators._

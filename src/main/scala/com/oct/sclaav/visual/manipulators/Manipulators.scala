@@ -1,6 +1,6 @@
 package com.oct.sclaav.visual.manipulators
 
-import com.oct.sclaav.visual.assembly.basic.SimpleSingleAbsoluteAssembler
+import com.oct.sclaav.visual.assembly.grid.SimpleSingleAbsoluteAssembler
 import com.oct.sclaav.visual.computation.SimplePixelLocationComputer
 import com.oct.sclaav.{DiscreteCropper, ImageManipulator, ManipulationsCrossHybridizer, ManipulationsHybridizer}
 import com.sksamuel.scrimage.composite.AlphaComposite

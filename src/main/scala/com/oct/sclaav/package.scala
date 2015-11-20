@@ -5,6 +5,9 @@ import java.net.URI
 import com.oct.sclaav.Mode.Mode
 import com.sksamuel.scrimage.Image
 
+import scala.collection.mutable.ArrayBuffer
+import scala.util.Random
+
 package object sclaav {
 
   object MapsModes {
@@ -127,4 +130,18 @@ package object sclaav {
                              bestDistances: Array[Double] = Array(),
                              worstDistances: Array[Double] = Array()
                            )
+
+  case class QuadrilateralCell(
+                                startCol: Int,
+                                startRow: Int,
+                                endCol: Int,
+                                endRow: Int
+                              )
+
+  case class QuadrilateralGrid(
+                              rows: Int,
+                              cols: Int,
+                              listOfTheStuff: Array[QuadrilateralCell]
+                              )
+
 }
