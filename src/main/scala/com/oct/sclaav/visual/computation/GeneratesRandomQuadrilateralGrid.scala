@@ -46,7 +46,12 @@ object GeneratesRandomQuadrilateralGrid {
     var doesNotInter = true
 
     for(c <- cell.startCol to cell.endCol; r <- cell.startRow to cell.endRow) {
-      doesNotInter = doesNotInter && (!arrBuff(c)(r))
+      try {
+        doesNotInter = doesNotInter && (!arrBuff(c)(r))
+      } catch {
+        case e: Exception =>
+          println(e.getMessage)
+      }
     }
     ! doesNotInter
   }
@@ -68,7 +73,7 @@ object GeneratesRandomQuadrilateralGrid {
 
   def generateRandomly(rows: Int, cols: Int, iterations: Int = 5000): QuadrilateralGrid = {
 
-    var arrBuff = ArrayBuffer.fill(rows, cols)(false)
+    var arrBuff = ArrayBuffer.fill(cols, rows)(false)
     var cells = Array[QuadrilateralCell]()
 
     var iter = 0

@@ -2,7 +2,7 @@ package com.oct.sclaav.visual.manipulators
 
 import com.oct.sclaav.visual.assembly.grid.SimpleSingleAbsoluteAssembler
 import com.oct.sclaav.visual.computation.SimplePixelLocationComputer
-import com.oct.sclaav.{DiscreteCropper, ImageManipulator, ManipulationsCrossHybridizer, ManipulationsHybridizer}
+import com.oct.sclaav._
 import com.sksamuel.scrimage.composite.AlphaComposite
 import com.sksamuel.scrimage.filter.{ChromeFilter, DiffuseFilter, GlowFilter, SummerFilter}
 import com.sksamuel.scrimage.{Color, Image}
@@ -55,12 +55,18 @@ class TransparencyComposityManipulator(x: Int, y: Int, baseImage: Option[Image] 
   }
 }
 
-object SimpleCrop extends DiscreteCropper {
+object SimpleCrop extends UniformGridCropper {
   override def apply(gridSize: (Int, Int), locationToCrop: (Int, Int), img: Image): Image = {
     val (imgW, imgH) = (img.width, img.height)
     val (colCellSize, rowCellSize) = (imgW / gridSize._1, imgH / gridSize._2)
     val (xToCrop, yToCrop) =  SimplePixelLocationComputer(gridSize, locationToCrop, (imgW, imgH))
     img.trim(xToCrop, yToCrop, imgW - xToCrop - colCellSize, imgH - yToCrop - rowCellSize)
+  }
+}
+
+object SimpleAbsoluteCrop extends AbsoluteCropper {
+  override def apply(startW: Int, startH: Int, endW: Int, endH: Int, img: Image): Image = {
+    img.trim(startW, startH, img.width - endW, img.height - endH)
   }
 }
 
