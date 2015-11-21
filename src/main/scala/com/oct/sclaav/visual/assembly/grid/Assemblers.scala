@@ -1,8 +1,8 @@
-package com.oct.sclaav.visual.assembly.basic
+package com.oct.sclaav.visual.assembly.grid
 
 import com.oct.sclaav.visual.computation.{ImageSimilarityArgbDistance2, SimplePixelLocationComputer}
 import com.oct.sclaav.visual.manipulators._
-import com.oct.sclaav.{CompleteAssembler, CompleteGridAssembler, SingleAbsoluteAssembler}
+import com.oct.sclaav.{CompleteAbsoluteAssembler, CompleteAssembler, CompleteGridAssembler, SingleAbsoluteAssembler}
 import com.sksamuel.scrimage.{Image, ScaleMethod}
 import org.slf4j.LoggerFactory
 
@@ -58,21 +58,23 @@ object SimpleCompleteGridAssembler extends CompleteGridAssembler {
   override def apply(backgroundImage: Image, imagesWIndex: Array[(Image, (Int, Int))], gridSize: (Int, Int)): Image = {
 
     val (canvasW, canvasH) = (backgroundImage.width, backgroundImage.height)
-
     log.info("computing pixel locations from grid locations")
-
     val imagesWPixelLocations = imagesWIndex.map {
       case (i, (colIndex, rowIndex)) =>
         (i, SimplePixelLocationComputer(gridSize, (colIndex, rowIndex), (canvasW, canvasH)))
     }
-
     log.info("assembling image")
+    val theAssembledImage = SimpleCompleteAbsoluteAssembler(backgroundImage, imagesWPixelLocations)
+    theAssembledImage
+  }
+}
 
-    val theAssembledImage = imagesWPixelLocations.foldLeft(backgroundImage) {
+object SimpleCompleteAbsoluteAssembler extends CompleteAbsoluteAssembler {
+  override def apply(backgroundImage: Image, imagesWPosition: Array[(Image, (Int, Int))]): Image = {
+    val theAssembledImage = imagesWPosition.foldLeft(backgroundImage) {
       case (canvasImage, (image, (i1, i2))) =>
         SimpleSingleAbsoluteAssembler(canvasImage, (i1, i2), image)
     }
-
     theAssembledImage
   }
 }

@@ -90,8 +90,12 @@ package object sclaav {
     def apply(img1: Image, img2: Image, scaleWidth: Int, scaleHeight: Int): Double
   }
 
-  trait DiscreteCropper {
+  trait UniformGridCropper {
     def apply(gridSize: (Int, Int), locationToCrop: (Int, Int), img: Image): Image
+  }
+
+  trait AbsoluteCropper {
+    def apply(startH: Int, startW: Int, endH: Int, endW: Int, img: Image): Image
   }
 
   trait SingleAbsoluteAssembler {
@@ -104,6 +108,10 @@ package object sclaav {
 
   trait CompleteAssembler {
     def apply(theReferenceImage: Image, theBackgroundImage: Image, samples: Array[Image]): Image
+  }
+
+  trait CompleteAbsoluteAssembler {
+    def apply(backgroundImage: Image, imagesWPosition: Array[(Image, (Int, Int))]): Image
   }
 
   trait PixelLocationComputer {
@@ -127,4 +135,19 @@ package object sclaav {
                              bestDistances: Array[Double] = Array(),
                              worstDistances: Array[Double] = Array()
                            )
+
+  case class QuadrilateralCell(
+                                startCol: Int,
+                                startRow: Int,
+                                endCol: Int,
+                                endRow: Int
+                              )
+
+  case class QuadrilateralGrid(
+                              rows: Int,
+                              cols: Int,
+                              listOfTheStuff: Array[QuadrilateralCell]
+                              )
+
+  case class AbsoluteQuadrilateralPosition(startW: Int, startH: Int, endW: Int, endH: Int)
 }

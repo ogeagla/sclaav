@@ -1,4 +1,4 @@
-package com.oct.sclaav.visual.assembly.basic
+package com.oct.sclaav.visual.assembly.grid
 
 import com.oct.sclaav.TestHelpers
 import com.sksamuel.scrimage.nio.JpegWriter
@@ -18,12 +18,12 @@ class AssemblersTest extends FunSuite with BeforeAndAfter with Matchers with Tes
     val emptyImage = Image.filled(theImage1.width, theImage1.height, Color.Transparent)
 
     val composite1 = SimpleCompleteRandomAssembler(theImage1, emptyImage, otherImages)
-    composite1.output(testRootPath + s"composite-1.jpeg")
-    theImage1.output(testRootPath + s"ref-1.jpeg")
+    composite1.output(testRootPath + s"simple-composite-1.jpeg")
+    theImage1.output(testRootPath + s"simple-ref-1.jpeg")
 
     val composite2 = SimpleCompleteRandomAssembler(theImage2, emptyImage, otherImages)
-    composite2.output(testRootPath + s"composite-2.jpeg")
-    theImage2.output(testRootPath + s"ref-2.jpeg")
+    composite2.output(testRootPath + s"simple-composite-2.jpeg")
+    theImage2.output(testRootPath + s"simple-ref-2.jpeg")
 
   }
 }
