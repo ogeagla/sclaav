@@ -52,8 +52,8 @@ $ java -jar bin/Sclaav.jar \ # invokes jar
 
 | What                         | Where                                            | Test |
 | ---------------------------- |:------------------------------------------------:|:-----:|
-| SimpleCompleteGeneticAssembler      | `SimpleCompleteGeneticAssembler` |`SimpleCompleteGeneticAssemblerTest`|
-| QuadrilateralAssembler      | `QuadrilateralAssembler` |`QuadrilateralAssemblerTest`|
+| Genetic Algorithm for sub-image matching      | `SimpleCompleteGeneticAssembler` |`SimpleCompleteGeneticAssemblerTest`|
+| Image mosaic using non-uniform quadrilateral grid      | `QuadrilateralAssembler` |`QuadrilateralAssemblerTest`|
 
 ## Credits
 http://www.octaviangeagla.com/bap
