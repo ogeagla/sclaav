@@ -5,9 +5,6 @@ import java.net.URI
 import com.oct.sclaav.Mode.Mode
 import com.sksamuel.scrimage.Image
 
-import scala.collection.mutable.ArrayBuffer
-import scala.util.Random
-
 package object sclaav {
 
   object MapsModes {
@@ -144,4 +141,5 @@ package object sclaav {
                               listOfTheStuff: Array[QuadrilateralCell]
                               )
 
+  case class AbsoluteQuadrilateralPosition(startW: Int, startH: Int, endW: Int, endH: Int)
 }

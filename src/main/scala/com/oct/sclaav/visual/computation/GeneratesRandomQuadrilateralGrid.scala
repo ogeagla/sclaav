@@ -1,11 +1,37 @@
 package com.oct.sclaav.visual.computation
 
-import com.oct.sclaav.{QuadrilateralCell, QuadrilateralGrid}
+import com.oct.sclaav.{AbsoluteQuadrilateralPosition, QuadrilateralCell, QuadrilateralGrid}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
 
-object GeneratesQuadrilateralGrid {
+class QuadrilateralGridToAbsolutePositions(sizeW: Int, sizeH: Int) {
+  def apply(grid: QuadrilateralGrid): Array[AbsoluteQuadrilateralPosition] = {
+
+    val cols = grid.cols
+    val rows = grid.rows
+
+    val colPixels = sizeW / cols
+    val rowPixels = sizeH / rows
+
+    grid.listOfTheStuff.map { cell =>
+
+      val colW = math.max(cell.endCol - cell.startCol, 1)
+      val rowW = math.max(cell.endRow - cell.startRow, 1)
+
+      val startWP = cell.startCol * colPixels
+      val endWP = (cell.endCol + 1) * colPixels
+      val startHP = cell.startRow * rowPixels
+      val endHP = (cell.endRow + 1) * rowPixels
+
+      new AbsoluteQuadrilateralPosition(startWP, startHP, endWP, endHP)
+    }
+  }
+}
+
+object GeneratesRandomQuadrilateralGrid {
+
+  def apply(rows: Int, cols: Int, iterations: Int = 5000): QuadrilateralGrid = generateRandomly(rows, cols, iterations)
 
   def flipToTrue(arrBuff: ArrayBuffer[ArrayBuffer[Boolean]], cell: QuadrilateralCell): ArrayBuffer[ArrayBuffer[Boolean]] = {
     for(c <- cell.startCol to cell.endCol; r <- cell.startRow to cell.endRow) {
@@ -25,7 +51,7 @@ object GeneratesQuadrilateralGrid {
     ! doesNotInter
   }
 
-  def falseToSingleCells(arrBuff: ArrayBuffer[ArrayBuffer[Boolean]]): Array[QuadrilateralCell] = {
+  def fillRemainingWithSingleCells(arrBuff: ArrayBuffer[ArrayBuffer[Boolean]]): Array[QuadrilateralCell] = {
 
     val cols = arrBuff.length
     val rows = arrBuff(0).length
@@ -66,7 +92,7 @@ object GeneratesQuadrilateralGrid {
       iter = iter + 1
     }
 
-    cells = cells.++:(falseToSingleCells(arrBuff))
+    cells = cells.++:(fillRemainingWithSingleCells(arrBuff))
     val quadGrid = new QuadrilateralGrid(rows, cols, cells)
     quadGrid
   }
