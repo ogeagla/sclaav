@@ -16,11 +16,11 @@ object SimpleCompleteGeneticAssembler {
 
 class SimpleCompleteGeneticAssembler(
                                       initChainSizeMax: Int = 5,
-                                      chainsInPopulation: Int = 100,
-                                      iterations: Int = 50,
+                                      chainsInPopulation: Int = 200,
+                                      iterations: Int = 10,
                                       topToTakePercent: Double = 0.2,
                                       splitChainOnSize: Option[Int] = Some(1000),
-                                      chainSizeAttenuation: Option[Double] = Some(0.1)) extends CompleteAssembler {
+                                      chainSizeAttenuation: Option[Double] = Some(0.02)) extends CompleteAssembler {
   override def apply(theImageToAssemble: Image, theBackgroundImage: Image, samples: Array[Image]): Image = {
 
     println(s"GA assembler. chain size max: $initChainSizeMax, chain population $chainsInPopulation, iterations: $iterations, topToTake: $topToTakePercent")
@@ -72,10 +72,12 @@ class SimpleCompleteGeneticAssembler(
   }
 
   def takeTopApplied(chainsWDistance: Array[(Array[ImageManipulator], Image, Double)], topPercent: Double): Array[(Array[ImageManipulator], Image, Double)] = {
+    val takeCount = (topPercent * chainsWDistance.length).toInt
+    val theTake = if (takeCount <= 0) 1 else takeCount
     chainsWDistance.sortBy {
       case (chain, appliedImage, dist) =>
         dist
-    }.take((topPercent * chainsWDistance.length).toInt)
+    }.take(theTake)
   }
 
   def takeBottom(chainsWDistance: Array[(Array[ImageManipulator], Image, Double)], topCount: Int = 1): Array[(Array[ImageManipulator], Image, Double)] = {
@@ -87,7 +89,7 @@ class SimpleCompleteGeneticAssembler(
 
   def doOneStep(chainsToIterateOn: Array[Array[ImageManipulator]], theBackgroundImage: Image, theImageToAssemble: Image, topPercent: Double, manipChainPopulationSize: Int, stats: IterationStats, splitChainOnSize: Option[Int] = None, chainSizeAttenuation: Option[Double]): (Array[Array[ImageManipulator]], IterationStats) = {
 
-    val manipsCount = chainsToIterateOn.map(_.length).foldLeft(0)(_ + _)
+    val manipsCount = chainsToIterateOn.map(_.length).sum
     println(s"applying chains + getting distances for total manips: $manipsCount")
     val distances: Array[(Array[ImageManipulator], Image, Double)] = getApplied(chainsToIterateOn, theBackgroundImage, theImageToAssemble)
 
