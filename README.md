@@ -47,6 +47,14 @@ $ java -jar bin/Sclaav.jar \ # invokes jar
   --filters true \           # apply and use filtered images
   --target photo.jpg         # if mode is single, specify the target image to use
 ```
+
+## Experimental Functionality (not hooked up via CLI):
+
+| What                         | Where                                            | Test |
+| ---------------------------- |:------------------------------------------------:|:-----:|
+| SimpleCompleteGeneticAssembler      | `SimpleCompleteGeneticAssembler` |`SimpleCompleteGeneticAssemblerTest`|
+| QuadrilateralAssembler      | `QuadrilateralAssembler` |`QuadrilateralAssemblerTest`|
+
 ## Credits
 http://www.octaviangeagla.com/bap
 
