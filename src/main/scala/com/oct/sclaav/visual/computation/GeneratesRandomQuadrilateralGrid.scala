@@ -31,7 +31,7 @@ class QuadrilateralGridToAbsolutePositions(sizeW: Int, sizeH: Int) {
 
 object GeneratesRandomQuadrilateralGrid {
 
-  def apply(rows: Int, cols: Int, iterations: Int = 5000): QuadrilateralGrid = generateRandomly(rows, cols, iterations)
+  def apply(rows: Int, cols: Int, iterations: Int = 50000): QuadrilateralGrid = generateRandomly(rows, cols, iterations)
 
   def flipToTrue(arrBuff: ArrayBuffer[ArrayBuffer[Boolean]], cell: QuadrilateralCell): ArrayBuffer[ArrayBuffer[Boolean]] = {
     for(c <- cell.startCol to cell.endCol; r <- cell.startRow to cell.endRow) {
