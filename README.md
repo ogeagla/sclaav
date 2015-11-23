@@ -1,10 +1,23 @@
 # Sclaav, An Audio/Visual Library In Scala
 
-## Current Functionality:
+A library and application for manipulating and creating images and audio.
+
+## Functionality:
+
+Functionality which presently works well and default parameters are tuned to work well for most cases.
 
 | What                         | Where                                            | Test |
 | ---------------------------- |:------------------------------------------------:|:-----:|
-| [Image mosaic](#mosaic)      | `DoMosaic` |`DoesMosaicTest`|
+| [Image mosaic](#mosaic)      | [DoMosaic](https://github.com/ogeagla/sclaav/blob/master/src/main/scala/com/oct/sclaav/visual/assembly/mosaic/DoMosaic.scala) |[DoesMosaicTest](https://github.com/ogeagla/sclaav/blob/master/src/test/scala/com/oct/sclaav/visual/assembly/mosaic/DoesMosaicTest.scala)|
+
+## Experimental Functionality:
+
+Functionality which may or may not work well yet, where default parameters are a WIP, etc.
+
+| What                         | Where                                            | Test |
+| ---------------------------- |:------------------------------------------------:|:-----:|
+| Genetic Algorithm for sub-image matching      | [SimpleCompleteGeneticAssembler](https://github.com/ogeagla/sclaav/blob/master/src/main/scala/com/oct/sclaav/visual/assembly/genetic/SimpleCompleteGeneticAssembler.scala) |[SimpleCompleteGeneticAssemblerTest](https://github.com/ogeagla/sclaav/blob/master/src/test/scala/com/oct/sclaav/visual/assembly/genetic/SimpleCompleteGeneticAssemblerTest.scala)|
+| Image mosaic using non-uniform quadrilateral grid      | [QuadrilateralAssembler](https://github.com/ogeagla/sclaav/blob/master/src/main/scala/com/oct/sclaav/visual/assembly/grid/QuadrilateralAssembler.scala) |[QuadrilateralAssemblerTest](https://github.com/ogeagla/sclaav/blob/master/src/test/scala/com/oct/sclaav/visual/assembly/grid/QuadrilateralAssemblerTest.scala)|
 
 ## Building
 
@@ -20,7 +33,9 @@ will create the far jar: `bin/Sclaav.jar`
 $ ./sbt clean test
 ```
 
-## Using Visual Functions
+## Using via CLI
+
+This is the preferred method for using the functionality.
 
 ### Mosaic
 
@@ -47,13 +62,6 @@ $ java -jar bin/Sclaav.jar \ # invokes jar
   --filters true \           # apply and use filtered images
   --target photo.jpg         # if mode is single, specify the target image to use
 ```
-
-## Experimental Functionality (not hooked up via CLI):
-
-| What                         | Where                                            | Test |
-| ---------------------------- |:------------------------------------------------:|:-----:|
-| Genetic Algorithm for sub-image matching      | `SimpleCompleteGeneticAssembler` |`SimpleCompleteGeneticAssemblerTest`|
-| Image mosaic using non-uniform quadrilateral grid      | `QuadrilateralAssembler` |`QuadrilateralAssemblerTest`|
 
 ## Credits
 http://www.octaviangeagla.com/bap
