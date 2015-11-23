@@ -1,8 +1,8 @@
 package com.oct.sclaav.visual.manipulators
 
+import com.oct.sclaav._
 import com.oct.sclaav.visual.assembly.grid.SimpleSingleAbsoluteAssembler
 import com.oct.sclaav.visual.computation.SimplePixelLocationComputer
-import com.oct.sclaav._
 import com.sksamuel.scrimage.composite.AlphaComposite
 import com.sksamuel.scrimage.filter.{ChromeFilter, DiffuseFilter, GlowFilter, SummerFilter}
 import com.sksamuel.scrimage.{Color, Image}
@@ -176,8 +176,6 @@ object MixManipulationsRandomlyPointwise extends ManipulationsCrossHybridizer {
 
 object MixManipulationsRandomlyBy2SegmentSwap extends ManipulationsCrossHybridizer {
   def apply(man1: Array[ImageManipulator], man2: Array[ImageManipulator]): Array[ImageManipulator] = {
-
-//    println(s"lengths: ${man1.length}, ${man2.length}")
 
     val (len1, len2) = (man1.length, man2.length)
 

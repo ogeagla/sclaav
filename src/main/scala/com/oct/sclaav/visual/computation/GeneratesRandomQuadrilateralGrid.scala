@@ -1,6 +1,7 @@
 package com.oct.sclaav.visual.computation
 
 import com.oct.sclaav.{AbsoluteQuadrilateralPosition, QuadrilateralCell, QuadrilateralGrid}
+import org.slf4j.LoggerFactory
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
@@ -30,6 +31,7 @@ class QuadrilateralGridToAbsolutePositions(sizeW: Int, sizeH: Int) {
 }
 
 object GeneratesRandomQuadrilateralGrid {
+  val log = LoggerFactory.getLogger(getClass)
 
   def apply(rows: Int, cols: Int, iterations: Int = 50000): QuadrilateralGrid = generateRandomly(rows, cols, iterations)
 
@@ -50,7 +52,7 @@ object GeneratesRandomQuadrilateralGrid {
         doesNotInter = doesNotInter && (!arrBuff(c)(r))
       } catch {
         case e: Exception =>
-          println(e.getMessage)
+          log.info(e.getMessage)
       }
     }
     ! doesNotInter

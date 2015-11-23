@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory
 import scala.util.Random
 
 object SimpleCompleteRandomAssembler extends CompleteAssembler {
+  val log = LoggerFactory.getLogger(getClass)
   override def apply(theReferenceImage: Image, theBackgroundImage: Image, samples: Array[Image]): Image = {
 
     var theImage = theBackgroundImage
@@ -18,7 +19,7 @@ object SimpleCompleteRandomAssembler extends CompleteAssembler {
     scala.util.Random.setSeed(13)
 
     for (i <- 0 to 1000) {
-      println(s"$i")
+      log.info(s"$i")
 
       val randomX = scala.util.Random.nextInt(w)
       val randomY = scala.util.Random.nextInt(h)
@@ -37,7 +38,7 @@ object SimpleCompleteRandomAssembler extends CompleteAssembler {
 
       val maybeNewDistance = ImageSimilarityArgbDistance2(theReferenceImage, maybeNewImage)
 
-      println(s"    old dist: $distance ; new distance: $maybeNewDistance")
+      log.info(s"    old dist: $distance ; new distance: $maybeNewDistance")
 
       distance - maybeNewDistance match {
         case better if better > 0.0 =>

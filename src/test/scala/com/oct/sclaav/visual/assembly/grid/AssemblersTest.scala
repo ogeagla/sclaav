@@ -7,7 +7,7 @@ import org.scalatest.{BeforeAndAfter, FunSuite, Matchers}
 
 class AssemblersTest extends FunSuite with BeforeAndAfter with Matchers with TestHelpers {
 
-  ignore("builds composite using random method and stuff") {
+  test("builds composite using random method and stuff") {
     implicit val writer = JpegWriter.Default
     val files = bapImagesDir.listFiles().filter(_.isFile).take(400)
 

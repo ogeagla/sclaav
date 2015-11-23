@@ -2,8 +2,9 @@ package com.oct.sclaav.visual.assembly.genetic
 
 import com.oct.sclaav.visual.computation.{ComputesMeanAndStddev, Distance2, ImageSimilarityArgbDistance2, ImageSimilarityRgbDistance2}
 import com.oct.sclaav.visual.manipulators._
-import com.oct.sclaav.{IterationStats, CompleteAssembler, ImageManipulator}
+import com.oct.sclaav.{CompleteAssembler, ImageManipulator, IterationStats}
 import com.sksamuel.scrimage.{Image, ScaleMethod}
+import org.slf4j.LoggerFactory
 
 import scala.util.Random
 
@@ -17,13 +18,15 @@ object SimpleCompleteGeneticAssembler {
 class SimpleCompleteGeneticAssembler(
                                       initChainSizeMax: Int = 5,
                                       chainsInPopulation: Int = 200,
-                                      iterations: Int = 30,
+                                      iterations: Int = 10,
                                       topToTakePercent: Double = 0.2,
                                       splitChainOnSize: Option[Int] = Some(1000),
                                       chainSizeAttenuation: Option[Double] = Some(0.02)) extends CompleteAssembler {
+  val log = LoggerFactory.getLogger(getClass)
+
   override def apply(theImageToAssemble: Image, theBackgroundImage: Image, samples: Array[Image]): Image = {
 
-    println(s"GA assembler. chain size max: $initChainSizeMax, chain population $chainsInPopulation, iterations: $iterations, topToTake: $topToTakePercent")
+    log.info(s"GA assembler. chain size max: $initChainSizeMax, chain population $chainsInPopulation, iterations: $iterations, topToTake: $topToTakePercent")
 
     val (maxW, maxH) = (theBackgroundImage.width, theBackgroundImage.height)
     val refDistance = ImageSimilarityRgbDistance2(theBackgroundImage, theImageToAssemble)
@@ -40,11 +43,11 @@ class SimpleCompleteGeneticAssembler(
 
     val (topChainAgain, topImage, topDistance) = getApplied(Array(topChain), theBackgroundImage, theImageToAssemble).head
 
-    println(s"final distance: $topDistance")
+    log.info(s"final distance: $topDistance")
 
-    println(s"iteration,chain size mean,chain size stddev,pop fit,pop dist mean,pop dist stddev,best dist,worst dist:")
+    log.info(s"iteration,chain size mean,chain size stddev,pop fit,pop dist mean,pop dist stddev,best dist,worst dist:")
     (0 to iterations - 1).foreach{ i =>
-      println(s"$i,${finalStats.chainSizeMeans(i)},${finalStats.chainSizeStddevs(i)},${finalStats.populationFitness(i)},${finalStats.populationDistanceMeans(i)},${finalStats.populationDistanceStddevs(i)},${finalStats.bestDistances(i)},${finalStats.worstDistances(i)}")
+      log.info(s"$i,${finalStats.chainSizeMeans(i)},${finalStats.chainSizeStddevs(i)},${finalStats.populationFitness(i)},${finalStats.populationDistanceMeans(i)},${finalStats.populationDistanceStddevs(i)},${finalStats.bestDistances(i)},${finalStats.worstDistances(i)}")
     }
 
     topImage
@@ -55,7 +58,7 @@ class SimpleCompleteGeneticAssembler(
     var theChains = initChains
     var iterStats = IterationStats()
     for (iter <- 0 to iterations - 1) {
-      println(s"iteration: $iter, chain size: ${theChains.length}")
+      log.info(s"iteration: $iter, chain size: ${theChains.length}")
       val results = doOneStep(theChains, theBackgroundImage, theImageToAssemble, topPercent, manipChainPopulationSize, iterStats, splitChainOnSize, chainSizeAttenuation)
       theChains = results._1
       iterStats = results._2
@@ -90,7 +93,7 @@ class SimpleCompleteGeneticAssembler(
   def doOneStep(chainsToIterateOn: Array[Array[ImageManipulator]], theBackgroundImage: Image, theImageToAssemble: Image, topPercent: Double, manipChainPopulationSize: Int, stats: IterationStats, splitChainOnSize: Option[Int] = None, chainSizeAttenuation: Option[Double]): (Array[Array[ImageManipulator]], IterationStats) = {
 
     val manipsCount = chainsToIterateOn.map(_.length).sum
-    println(s"applying chains + getting distances for total manips: $manipsCount")
+    log.info(s"applying chains + getting distances for total manips: $manipsCount")
     val distances: Array[(Array[ImageManipulator], Image, Double)] = getApplied(chainsToIterateOn, theBackgroundImage, theImageToAssemble)
 
     val chainSizes = distances.map(_._1.length.toDouble)
@@ -98,9 +101,9 @@ class SimpleCompleteGeneticAssembler(
     val populationFitness = Distance2(justDistances, distances.map(t => 0.0))
     val (distMean, distStddev) = ComputesMeanAndStddev(justDistances)
     val (chainSizeMean, chainSizeStddev) = ComputesMeanAndStddev(chainSizes)
-    println(s"population fitness: $populationFitness")
-    println(s"population dist mean, stddev: $distMean +/- $distStddev")
-    println(s"population chain size mean, stddev: $chainSizeMean +/- $chainSizeStddev")
+    log.info(s"population fitness: $populationFitness")
+    log.info(s"population dist mean, stddev: $distMean +/- $distStddev")
+    log.info(s"population chain size mean, stddev: $chainSizeMean +/- $chainSizeStddev")
 
     val topChainsWDist = takeTopApplied(distances, topPercent)
     val bottomOne = takeBottom(distances)
@@ -116,7 +119,7 @@ class SimpleCompleteGeneticAssembler(
     )
 
     topChainsWDist.foreach{ tc =>
-      println(s"top chain distance: ${tc._3}, size: ${tc._1.length}")
+      log.info(s"top chain distance: ${tc._3}, size: ${tc._1.length}")
     }
 
     val topChains = topChainsWDist.map(_._1)
@@ -126,7 +129,7 @@ class SimpleCompleteGeneticAssembler(
     val chainsToIterateOnAndMaybeSplit: Array[Array[ImageManipulator]] = splitChainOnSize match {
       //TODO when do we want to split?  before computing fitness, after hybridization, etc?
       case Some(sizeToSplitOn) =>
-        println("splitting chains")
+        log.info("splitting chains")
         doChainSplit(chainsToIterateOn, sizeToSplitOn)
       case None => chainsToIterateOn
     }
@@ -181,7 +184,7 @@ class SimpleCompleteGeneticAssembler(
 
   def hybrdizeChainsCombine(chain1: Array[Array[ImageManipulator]],
                             chain2: Array[Array[ImageManipulator]]): Array[Array[ImageManipulator]] = {
-    println(s"hybridizing chain by combining, of sizes: ${chain1.length}, ${chain2.length}")
+    log.info(s"hybridizing chain by combining, of sizes: ${chain1.length}, ${chain2.length}")
     var hybChains = Array[Array[ImageManipulator]]()
     for (c1: Array[ImageManipulator] <- chain1; c2: Array[ImageManipulator] <- chain2) {
       hybChains = hybChains.+:(MixManipulationsCombinator(c1, c2))
@@ -191,7 +194,7 @@ class SimpleCompleteGeneticAssembler(
 
   def hybridizeChainsPointWise(chain1: Array[Array[ImageManipulator]],
                                chain2: Array[Array[ImageManipulator]]): Array[Array[ImageManipulator]] = {
-    println(s"hybridizing chain by combining point-wise, of sizes: ${chain1.length}, ${chain2.length}")
+    log.info(s"hybridizing chain by combining point-wise, of sizes: ${chain1.length}, ${chain2.length}")
     var hybChains = Array[Array[ImageManipulator]]()
     for (c1: Array[ImageManipulator] <- chain1; c2: Array[ImageManipulator] <- chain2) {
       hybChains = hybChains.+:(MixManipulationsRandomlyPointwise(c1, c2))
@@ -203,7 +206,7 @@ class SimpleCompleteGeneticAssembler(
                               chain1: Array[Array[ImageManipulator]],
                               chain2: Array[Array[ImageManipulator]]): Array[Array[ImageManipulator]] = {
 
-    println(s"hybridizing chain by split, of sizes: ${chain1.length}, ${chain2.length}")
+    log.info(s"hybridizing chain by split, of sizes: ${chain1.length}, ${chain2.length}")
     var hybChains = Array[Array[ImageManipulator]]()
     for (c1: Array[ImageManipulator] <- chain1; c2: Array[ImageManipulator] <- chain2) {
       if (!(c1 sameElements c2))

@@ -2,9 +2,9 @@ package com.oct.sclaav.visual.assembly.genetic
 
 import com.oct.sclaav.TestHelpers
 import com.oct.sclaav.visual.manipulators.CreatesTransparentImage
-import com.sksamuel.scrimage.{ScaleMethod, Image}
 import com.sksamuel.scrimage.nio.JpegWriter
-import org.scalatest.{Matchers, BeforeAndAfter, FunSuite}
+import com.sksamuel.scrimage.{Image, ScaleMethod}
+import org.scalatest.{BeforeAndAfter, FunSuite, Matchers}
 
 class SimpleCompleteGeneticAssemblerTest extends FunSuite with BeforeAndAfter with Matchers with TestHelpers {
 
