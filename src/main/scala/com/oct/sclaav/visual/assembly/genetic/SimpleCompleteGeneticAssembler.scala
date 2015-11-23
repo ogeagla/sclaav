@@ -16,13 +16,14 @@ object SimpleCompleteGeneticAssembler {
 
 class SimpleCompleteGeneticAssembler(
                                       initChainSizeMax: Int = 5,
-                                      chainsInPopulation: Int = 300,
-                                      iterations: Int = 20,
-                                      topToTake: Int = 5,
-                                      splitChainOnSize: Option[Int] = Some(15000)) extends CompleteAssembler {
+                                      chainsInPopulation: Int = 200,
+                                      iterations: Int = 30,
+                                      topToTakePercent: Double = 0.2,
+                                      splitChainOnSize: Option[Int] = Some(1000),
+                                      chainSizeAttenuation: Option[Double] = Some(0.02)) extends CompleteAssembler {
   override def apply(theImageToAssemble: Image, theBackgroundImage: Image, samples: Array[Image]): Image = {
 
-    println(s"GA assembler. chain size max: $initChainSizeMax, chain population $chainsInPopulation, iterations: $iterations, topToTake: $topToTake")
+    println(s"GA assembler. chain size max: $initChainSizeMax, chain population $chainsInPopulation, iterations: $iterations, topToTake: $topToTakePercent")
 
     val (maxW, maxH) = (theBackgroundImage.width, theBackgroundImage.height)
     val refDistance = ImageSimilarityRgbDistance2(theBackgroundImage, theImageToAssemble)
@@ -33,9 +34,9 @@ class SimpleCompleteGeneticAssembler(
       createAChain(maxW, maxH, samples, initChainSizeMax)
     }.toArray
 
-    val (finalChains, finalStats) = iterateSteps(initChains, iterations, theBackgroundImage, theImageToAssemble, topToTake, chainsInPopulation, splitChainOnSize)
+    val (finalChains, finalStats) = iterateSteps(initChains, iterations, theBackgroundImage, theImageToAssemble, topToTakePercent, chainsInPopulation, splitChainOnSize, chainSizeAttenuation)
 
-    val topChain = takeTopApplied(getApplied(finalChains, theBackgroundImage, theImageToAssemble), topToTake).map(_._1).head
+    val topChain = takeTopApplied(getApplied(finalChains, theBackgroundImage, theImageToAssemble), topToTakePercent).map(_._1).head
 
     val (topChainAgain, topImage, topDistance) = getApplied(Array(topChain), theBackgroundImage, theImageToAssemble).head
 
@@ -50,12 +51,12 @@ class SimpleCompleteGeneticAssembler(
   }
 
 
-  def iterateSteps(initChains: Array[Array[ImageManipulator]], iterations: Int, theBackgroundImage: Image, theImageToAssemble: Image, topNSize: Int, manipChainPopulationSize: Int, splitChainOnSize: Option[Int] = None): (Array[Array[ImageManipulator]], IterationStats) = {
+  def iterateSteps(initChains: Array[Array[ImageManipulator]], iterations: Int, theBackgroundImage: Image, theImageToAssemble: Image, topPercent: Double, manipChainPopulationSize: Int, splitChainOnSize: Option[Int] = None, chainSizeAttenuation: Option[Double]): (Array[Array[ImageManipulator]], IterationStats) = {
     var theChains = initChains
     var iterStats = IterationStats()
     for (iter <- 0 to iterations - 1) {
       println(s"iteration: $iter, chain size: ${theChains.length}")
-      val results = doOneStep(theChains, theBackgroundImage, theImageToAssemble, topNSize, manipChainPopulationSize, iterStats, splitChainOnSize)
+      val results = doOneStep(theChains, theBackgroundImage, theImageToAssemble, topPercent, manipChainPopulationSize, iterStats, splitChainOnSize, chainSizeAttenuation)
       theChains = results._1
       iterStats = results._2
     }
@@ -70,11 +71,13 @@ class SimpleCompleteGeneticAssembler(
     }.toArray
   }
 
-  def takeTopApplied(chainsWDistance: Array[(Array[ImageManipulator], Image, Double)], topCount: Int): Array[(Array[ImageManipulator], Image, Double)] = {
+  def takeTopApplied(chainsWDistance: Array[(Array[ImageManipulator], Image, Double)], topPercent: Double): Array[(Array[ImageManipulator], Image, Double)] = {
+    val takeCount = (topPercent * chainsWDistance.length).toInt
+    val theTake = if (takeCount <= 0) 1 else takeCount
     chainsWDistance.sortBy {
       case (chain, appliedImage, dist) =>
         dist
-    }.take(topCount)
+    }.take(theTake)
   }
 
   def takeBottom(chainsWDistance: Array[(Array[ImageManipulator], Image, Double)], topCount: Int = 1): Array[(Array[ImageManipulator], Image, Double)] = {
@@ -84,9 +87,10 @@ class SimpleCompleteGeneticAssembler(
     }.take(topCount)
   }
 
-  def doOneStep(chainsToIterateOn: Array[Array[ImageManipulator]], theBackgroundImage: Image, theImageToAssemble: Image, topNSize: Int, manipChainPopulationSize: Int, stats: IterationStats, splitChainOnSize: Option[Int] = None): (Array[Array[ImageManipulator]], IterationStats) = {
+  def doOneStep(chainsToIterateOn: Array[Array[ImageManipulator]], theBackgroundImage: Image, theImageToAssemble: Image, topPercent: Double, manipChainPopulationSize: Int, stats: IterationStats, splitChainOnSize: Option[Int] = None, chainSizeAttenuation: Option[Double]): (Array[Array[ImageManipulator]], IterationStats) = {
 
-    println("applying chains + getting distances")
+    val manipsCount = chainsToIterateOn.map(_.length).sum
+    println(s"applying chains + getting distances for total manips: $manipsCount")
     val distances: Array[(Array[ImageManipulator], Image, Double)] = getApplied(chainsToIterateOn, theBackgroundImage, theImageToAssemble)
 
     val chainSizes = distances.map(_._1.length.toDouble)
@@ -98,7 +102,7 @@ class SimpleCompleteGeneticAssembler(
     println(s"population dist mean, stddev: $distMean +/- $distStddev")
     println(s"population chain size mean, stddev: $chainSizeMean +/- $chainSizeStddev")
 
-    val topChainsWDist = takeTopApplied(distances, topNSize)
+    val topChainsWDist = takeTopApplied(distances, topPercent)
     val bottomOne = takeBottom(distances)
 
     val newStats = stats.copy(
@@ -146,7 +150,12 @@ class SimpleCompleteGeneticAssembler(
       .++(newChainsFromSingleOps)
 
     val newChainsChosenToLiveAndTheRestToDieMuahaha =
-      topChains.++:(Random.shuffle(newChainsCorpus.toList).take(chainsToIterateOn.length - topNSize - (manipChainPopulationSize / iterations)))
+      topChains
+        .++:(Random.shuffle(newChainsCorpus.toList)
+        .take(
+          chainsToIterateOn.length -
+          (topPercent*chainsToIterateOn.length).toInt -
+          (manipChainPopulationSize * chainSizeAttenuation.getOrElse(0.0)).toInt))
 
     (newChainsChosenToLiveAndTheRestToDieMuahaha, newStats)
   }
