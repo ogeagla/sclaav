@@ -17,7 +17,7 @@ object SimpleCompleteGeneticAssembler {
 class SimpleCompleteGeneticAssembler(
                                       initChainSizeMax: Int = 5,
                                       chainsInPopulation: Int = 200,
-                                      iterations: Int = 10,
+                                      iterations: Int = 30,
                                       topToTakePercent: Double = 0.2,
                                       splitChainOnSize: Option[Int] = Some(1000),
                                       chainSizeAttenuation: Option[Double] = Some(0.02)) extends CompleteAssembler {
