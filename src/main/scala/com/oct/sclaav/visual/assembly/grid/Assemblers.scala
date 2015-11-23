@@ -18,7 +18,7 @@ object SimpleCompleteRandomAssembler extends CompleteAssembler {
 
     scala.util.Random.setSeed(13)
 
-    for (i <- 0 to 1000) {
+    for (i <- 0 to 100) {
       log.info(s"$i")
 
       val randomX = scala.util.Random.nextInt(w)

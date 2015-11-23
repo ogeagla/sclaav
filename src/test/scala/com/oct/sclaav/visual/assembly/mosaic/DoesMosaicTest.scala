@@ -21,7 +21,9 @@ class DoesMosaicTest extends FunSuite with BeforeAndAfter with Matchers with Tes
 
     val theAssembledImage = DoMosaic(imageToCreate, files, 16, 16, outPath, Some("boulder-foothills-mosaic.jpeg"))
 
-    val mosaicImgFromResources = Image.fromFile(mosaicBoulderFoothills)
+    theAssembledImage.output(testRootPath + "mosaic-out.jpeg")
+
+    val mosaicImgFromResources = Image.fromFile(mosaicBoulderFoothillsLowRes)
 
     val relativeDistance = RelativeImageSimilarityArgbDistance2(mosaicImgFromResources, theAssembledImage)
 
