@@ -4,7 +4,7 @@ import com.oct.sclaav._
 import com.oct.sclaav.visual.assembly.grid.SimpleSingleAbsoluteAssembler
 import com.oct.sclaav.visual.computation.SimplePixelLocationComputer
 import com.sksamuel.scrimage.composite.AlphaComposite
-import com.sksamuel.scrimage.filter.{ChromeFilter, DiffuseFilter, GlowFilter, SummerFilter}
+import com.sksamuel.scrimage.filter._
 import com.sksamuel.scrimage.{Color, Image}
 import org.slf4j.LoggerFactory
 
@@ -198,6 +198,24 @@ object MixManipulationsRandomlyBy2SegmentSwap extends ManipulationsCrossHybridiz
       case (l1, l2) =>
         man1 ++: man2
     }
+  }
+}
+
+object EdgeManipulator extends ImageManipulator {
+  override def apply(img: Image): Image = {
+    img.filter(EdgeFilter)
+  }
+}
+
+object OilManipulator extends ImageManipulator {
+  override def apply(img: Image): Image = {
+    img.filter(OilFilter(6, 8))
+  }
+}
+
+object LensBlurManipulator extends ImageManipulator {
+  override def apply(img: Image): Image = {
+    img.filter(LensBlurFilter())
   }
 }
 
