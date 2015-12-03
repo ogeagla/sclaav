@@ -1,11 +1,11 @@
 package com.oct.sclaav.visual.computation
 
-import com.oct.sclaav.{AbsoluteQuadrilateralPosition, QuadrilateralGrid, QuadrilateralCell}
+import com.oct.sclaav.{QuadrilateralGridToAbsolutePositions, AbsoluteQuadrilateralPosition, QuadrilateralGrid, QuadrilateralCell}
 import org.scalatest.{BeforeAndAfter, FunSuite, Matchers}
 
 import scala.collection.mutable.ArrayBuffer
 
-class GeneratesQuadrilateralGridTest  extends FunSuite with BeforeAndAfter with Matchers {
+class GeneratesQuadrilateralGridTest extends FunSuite with BeforeAndAfter with Matchers {
 
   test("quad grid to absolute positions") {
 
