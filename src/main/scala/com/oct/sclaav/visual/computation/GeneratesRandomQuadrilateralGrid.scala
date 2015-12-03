@@ -1,34 +1,10 @@
 package com.oct.sclaav.visual.computation
 
-import com.oct.sclaav.{AbsoluteQuadrilateralPosition, QuadrilateralCell, QuadrilateralGrid}
+import com.oct.sclaav.{QuadrilateralCell, QuadrilateralGrid}
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
-
-class QuadrilateralGridToAbsolutePositions(sizeW: Int, sizeH: Int) {
-  def apply(grid: QuadrilateralGrid): Array[AbsoluteQuadrilateralPosition] = {
-
-    val cols = grid.cols
-    val rows = grid.rows
-
-    val colPixels = sizeW / cols
-    val rowPixels = sizeH / rows
-
-    grid.listOfTheStuff.map { cell =>
-
-      val colW = math.max(cell.endCol - cell.startCol, 1)
-      val rowW = math.max(cell.endRow - cell.startRow, 1)
-
-      val startWP = cell.startCol * colPixels
-      val endWP = (cell.endCol + 1) * colPixels
-      val startHP = cell.startRow * rowPixels
-      val endHP = (cell.endRow + 1) * rowPixels
-
-      new AbsoluteQuadrilateralPosition(startWP, startHP, endWP, endHP)
-    }
-  }
-}
 
 object GeneratesRandomQuadrilateralGrid {
   val log = LoggerFactory.getLogger(getClass)

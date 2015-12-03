@@ -7,4 +7,6 @@ trait TestHelpers {
   val testRootPath = getClass.getResource("/").getPath
   val mosaicBoulderFoothills = new File(getClass.getResource("/assembled/mosaic/boulder-foothills-mosaic.jpeg").getPath)
   val mosaicBoulderFoothillsLowRes = new File(getClass.getResource("/assembled/mosaic/boulder-foothills-mosaic-low-res.jpeg").getPath)
+  val blackAndYellowFlag = new File(getClass.getResource("/other/black-yellow-flag.jpg").getPath)
+
 }

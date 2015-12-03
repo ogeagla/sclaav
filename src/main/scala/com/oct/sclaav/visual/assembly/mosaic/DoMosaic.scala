@@ -40,7 +40,7 @@ object DoMosaic {
       case false => images
       case true =>
         log.info(s"doing manipulations")
-        val manips = Array(SummerManipulator, DiffuseManipulator, GlowManipulator, ChromeManipulator, LensBlurManipulator, OilManipulator, EdgeManipulator)
+        val manips = Array(SummerManipulator, DiffuseManipulator, GlowManipulator, ChromeManipulator, OilManipulator, EdgeManipulator, LensBlurManipulator) //LensBlurManipulator
         val manipped = ManipulateAllWithAllOnce(images, manips)
         images.++(manipped)
     }

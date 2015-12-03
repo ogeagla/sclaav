@@ -95,6 +95,11 @@ package object sclaav {
     def apply(argb1: Argb, argb2: Argb): Double
   }
 
+  object ImageManipulationMonoid {
+    def mappend(i1: Image, i2: Image) = ???
+
+  }
+
   trait ImageManipulator {
     def apply(img: Image): Image
   }
@@ -160,4 +165,29 @@ package object sclaav {
       listOfTheStuff: Array[QuadrilateralCell])
 
   case class AbsoluteQuadrilateralPosition(startW: Int, startH: Int, endW: Int, endH: Int)
+
+  class QuadrilateralGridToAbsolutePositions(sizeW: Int, sizeH: Int) {
+    def apply(grid: QuadrilateralGrid): Array[AbsoluteQuadrilateralPosition] = {
+
+      val cols = grid.cols
+      val rows = grid.rows
+
+      val colPixels = sizeW / cols
+      val rowPixels = sizeH / rows
+
+      grid.listOfTheStuff.map { cell =>
+
+        val colW = math.max(cell.endCol - cell.startCol, 1)
+        val rowW = math.max(cell.endRow - cell.startRow, 1)
+
+        val startWP = cell.startCol * colPixels
+        val endWP = (cell.endCol + 1) * colPixels
+        val startHP = cell.startRow * rowPixels
+        val endHP = (cell.endRow + 1) * rowPixels
+
+        new AbsoluteQuadrilateralPosition(startWP, startHP, endWP, endHP)
+      }
+    }
+  }
+
 }

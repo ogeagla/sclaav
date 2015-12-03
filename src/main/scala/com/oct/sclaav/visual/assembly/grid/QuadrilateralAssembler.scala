@@ -1,6 +1,6 @@
 package com.oct.sclaav.visual.assembly.grid
 
-import com.oct.sclaav.CompleteAssembler
+import com.oct.sclaav.{QuadrilateralGridToAbsolutePositions, CompleteAssembler}
 import com.oct.sclaav.visual.computation._
 import com.oct.sclaav.visual.manipulators.SimpleAbsoluteCrop
 import com.oct.sclaav.visual.search.MatchByArgbAverage
