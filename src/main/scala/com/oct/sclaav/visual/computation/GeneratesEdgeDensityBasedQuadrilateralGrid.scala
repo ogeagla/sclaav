@@ -1,11 +1,12 @@
 package com.oct.sclaav.visual.computation
 
-import com.oct.sclaav.{QuadrilateralCell, Argb, QuadrilateralGrid}
 import com.oct.sclaav.visual.manipulators.SimpleCrop
-import com.sksamuel.scrimage.filter.{ThresholdFilter, EdgeFilter}
+import com.oct.sclaav.{QuadrilateralCell, Argb, QuadrilateralGrid}
+import com.sksamuel.scrimage.filter.{EdgeFilter, ThresholdFilter}
 import com.sksamuel.scrimage.{Image, ScaleMethod}
 import org.slf4j.LoggerFactory
 
+import scala.collection.mutable.ArrayBuffer
 import scala.collection.parallel.mutable.ParArray
 
 object GeneratesEdgeDensityBasedQuadrilateralGrid {
@@ -14,11 +15,11 @@ object GeneratesEdgeDensityBasedQuadrilateralGrid {
 
   def getImageToCropFromOriginal(img: Image): Image = {
     val imgScaled = img.scale(0.2, ScaleMethod.FastScale)
-    val edges = imgScaled.filter(EdgeFilter).filter(ThresholdFilter(200))
+    val edges = imgScaled.filter(EdgeFilter).filter(ThresholdFilter(180))
     edges
   }
 
-  def apply(img: Image, rows: Int = 20, cols: Int = 20, granularity: Double = 0.1, iterations: Int = 5): QuadrilateralGrid = {
+  def apply(img: Image, rows: Int = 50, cols: Int = 50, granularity: Double = 0.1, iterations: Int = 5): QuadrilateralGrid = {
 
     val edgesImg = getImageToCropFromOriginal(img)
 
@@ -40,16 +41,35 @@ object GeneratesEdgeDensityBasedQuadrilateralGrid {
 
     val theDistances = listBuffer.toArray
 
-    log.info("sorted by brightest first:")
-    theDistances.sortBy(d => d._1).reverse.foreach {
+    val sortedDistancesByBrightestFirst = theDistances.sortBy(d => d._1).reverse
+
+    log.info("top 50 sorted by brightest first:")
+    sortedDistancesByBrightestFirst.take(50).foreach {
       case (d, (c, r)) =>
         log.info(s"($c, $r) : $d")
     }
 
-
-    new QuadrilateralGrid(0, 0, Array(new QuadrilateralCell(0,0,0,0)))
+    DensitiesToGridQuads(rows, cols, sortedDistancesByBrightestFirst)
   }
 
+}
 
+object DensitiesToGridQuads {
+  def apply(rows: Int, cols: Int, densities: Array[(Double, (Int, Int))]): QuadrilateralGrid = {
+
+    val percentageForHighestDensity = 0.2
+
+    val numberOfHighestGranularityCells = (percentageForHighestDensity * (rows * cols)).toInt
+
+
+    var arrBuff = ArrayBuffer.fill(cols, rows)(false)
+    var cells = Array[QuadrilateralCell]()
+
+
+
+
+
+    ???
+  }
 }
 

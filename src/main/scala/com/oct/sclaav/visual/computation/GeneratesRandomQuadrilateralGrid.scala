@@ -20,20 +20,6 @@ object GeneratesRandomQuadrilateralGrid {
 
   def allTrue(arr: ArrayBuffer[ArrayBuffer[Boolean]]) = arr.forall(r => r.forall(c => c))
 
-  def intersectsExisting(arrBuff: ArrayBuffer[ArrayBuffer[Boolean]], cell: QuadrilateralCell): Boolean = {
-    var doesNotInter = true
-
-    for(c <- cell.startCol to cell.endCol; r <- cell.startRow to cell.endRow) {
-      try {
-        doesNotInter = doesNotInter && (!arrBuff(c)(r))
-      } catch {
-        case e: Exception =>
-          log.info(e.getMessage)
-      }
-    }
-    ! doesNotInter
-  }
-
   def fillRemainingWithSingleCells(arrBuff: ArrayBuffer[ArrayBuffer[Boolean]]): Array[QuadrilateralCell] = {
 
     val cols = arrBuff.length
@@ -66,7 +52,7 @@ object GeneratesRandomQuadrilateralGrid {
 
       val cell = new QuadrilateralCell(c, r, c + dc, r + dr)
 
-      if( ! intersectsExisting(arrBuff, cell)) {
+      if( ! CellIntersectsExisting(arrBuff, cell)) {
         //FIXME this is both mutating the arr buff and re-assigning. i assume it will be optimized by compiler but not certain
         arrBuff = flipToTrue(arrBuff, cell)
         cells = cells.+:(cell)
