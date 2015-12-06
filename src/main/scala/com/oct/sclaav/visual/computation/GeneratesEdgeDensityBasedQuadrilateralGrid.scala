@@ -77,8 +77,9 @@ object DensitiesToGridQuads {
     var cells = Array[QuadrilateralCell]()
 
     //take each highest density and make those use highest resolution
-    highestDensities.foreach { hd =>
-      cells = cells.+:(QuadrilateralCell(hd._2._1, hd._2._2, hd._2._1 + sizeForHighestGran._1, hd._2._2  + sizeForHighestGran._2))
+    highestDensities.foreach {
+      case (d, (c, r)) =>
+        cells = cells.+:(QuadrilateralCell(c, r, c + sizeForHighestGran._1, r  + sizeForHighestGran._2))
     }
 
     /*
@@ -101,10 +102,37 @@ object DensitiesToGridQuads {
     val nextCellsWeCareAbout = nonHighestDensities.take(midDensityCount)
     val remaining = nonHighestDensities.diff(nextCellsWeCareAbout)
 
+    nextCellsWeCareAbout.map {
+      case (d, (c, r)) =>
+
+    }
 
 
     def tryToMakeAQuad(ofSize: (Int, Int), truthTable: ArrayBuffer[ArrayBuffer[Boolean]]) = {
 
+      ???
+    }
+
+    def tryToCreateQuadOfGivenSizesForATruthTable(
+                                                   sizes: Array[(Int, Int)],
+                                                   whereToTry: Array[(Int, Int)],
+                                                   truthTable: ArrayBuffer[ArrayBuffer[Boolean]]):
+    (Array[QuadrilateralCell], ArrayBuffer[ArrayBuffer[Boolean]]) = {
+
+      val possiblesForSizes: Map[(Int, Int), (Int, Int)] = sizes.flatMap {
+        case (colsWidth, rowsHeight) =>
+
+          //TODO this piece:
+          val topLefts = Array((1,2), (2, 3))
+
+
+          topLefts.map(tl => (colsWidth, rowsHeight) -> tl)
+      }.toMap
+
+
+
+
+      ???
     }
 
 
