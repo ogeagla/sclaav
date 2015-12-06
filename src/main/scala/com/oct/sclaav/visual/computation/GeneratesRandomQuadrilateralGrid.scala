@@ -9,7 +9,7 @@ import scala.util.Random
 object GeneratesRandomQuadrilateralGrid {
   val log = LoggerFactory.getLogger(getClass)
 
-  def apply(rows: Int, cols: Int, iterations: Int = 50000): QuadrilateralGrid = generateRandomly(rows, cols, iterations)
+  def apply(rows: Int, cols: Int, iterations: Int = 50000, truthTable: Option[ArrayBuffer[ArrayBuffer[Boolean]]] = None): QuadrilateralGrid = generateRandomly(rows, cols, iterations, truthTable)
 
   def flipToTrue(arrBuff: ArrayBuffer[ArrayBuffer[Boolean]], cell: QuadrilateralCell): ArrayBuffer[ArrayBuffer[Boolean]] = {
     for(c <- cell.startCol to cell.endCol; r <- cell.startRow to cell.endRow) {
@@ -35,9 +35,12 @@ object GeneratesRandomQuadrilateralGrid {
     cells
   }
 
-  def generateRandomly(rows: Int, cols: Int, iterations: Int = 5000): QuadrilateralGrid = {
+  def generateRandomly(rows: Int, cols: Int, iterations: Int = 5000, truthTable: Option[ArrayBuffer[ArrayBuffer[Boolean]]] = None): QuadrilateralGrid = {
 
-    var arrBuff = ArrayBuffer.fill(cols, rows)(false)
+    var arrBuff = truthTable match {
+      case Some(theTable) => theTable
+      case None => ArrayBuffer.fill(cols, rows)(false)
+    }
     var cells = Array[QuadrilateralCell]()
 
     var iter = 0
