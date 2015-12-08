@@ -1,5 +1,6 @@
 package com.oct.sclaav.visual.computation
 
+import com.oct.sclaav.visual.computation.CellIntersectsExisting.ApplyCellToTruthTable
 import com.oct.sclaav.{QuadrilateralGridToAbsolutePositions, AbsoluteQuadrilateralPosition, QuadrilateralGrid, QuadrilateralCell}
 import org.scalatest.{BeforeAndAfter, FunSuite, Matchers}
 
@@ -31,7 +32,7 @@ class GeneratesQuadrilateralGridTest extends FunSuite with BeforeAndAfter with M
 
     val cell = new QuadrilateralCell(2, 3, 6, 12)
 
-    val arrBuffWCell = GeneratesRandomQuadrilateralGrid.flipToTrue(arrBuff, cell)
+    val arrBuffWCell = ApplyCellToTruthTable(arrBuff, cell)
 
     assert(arrBuffWCell(2)(3) === true)
     assert(arrBuffWCell(2)(2) === false)
@@ -43,8 +44,8 @@ class GeneratesQuadrilateralGridTest extends FunSuite with BeforeAndAfter with M
     val anotherCellNoIntersect = new QuadrilateralCell(0, 0, 1, 2)
     val anotherCellYesIntersect = new QuadrilateralCell(0, 0, 2, 3)
 
-    assert(GeneratesRandomQuadrilateralGrid.intersectsExisting(arrBuffWCell, anotherCellNoIntersect) === false)
-    assert(GeneratesRandomQuadrilateralGrid.intersectsExisting(arrBuffWCell, anotherCellYesIntersect) === true)
+    assert(CellIntersectsExisting(arrBuffWCell, anotherCellNoIntersect) === false)
+    assert(CellIntersectsExisting(arrBuffWCell, anotherCellYesIntersect) === true)
 
     val cellsFromFalses = GeneratesRandomQuadrilateralGrid.fillRemainingWithSingleCells(arrBuffWCell)
     assert(cellsFromFalses.length === 25*25 - 50)

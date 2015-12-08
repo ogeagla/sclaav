@@ -1,5 +1,6 @@
 package com.oct.sclaav.visual.computation
 
+import com.oct.sclaav.visual.computation.CellIntersectsExisting.ApplyCellToTruthTable
 import com.oct.sclaav.visual.manipulators.SimpleCrop
 import com.oct.sclaav.{Argb, QuadrilateralCell, QuadrilateralGrid}
 import com.sksamuel.scrimage.filter.{EdgeFilter, ThresholdFilter}
@@ -47,8 +48,42 @@ object GeneratesEdgeDensityBasedQuadrilateralGrid {
 
 }
 
+object ValuesToLevels {
+  def apply(values: Array[Array[Double]], levels: Int = 3): Array[Array[Int]] = {
+
+    val max: Double = values.map(v => v.max).max
+    val min = values.map(v => v.min).min
+
+    val delta = (max - min) / levels.toDouble
+
+    val steps = (0 to levels - 1).map { l =>
+      (min + l * delta, min + (l + 1) * delta)
+    }.toArray
+
+    def whichStep(steps: Array[(Double, Double)], value: Double): Int = {
+
+      val theStep = steps.indices.flatMap { i =>
+        value match {
+          case s if s >= steps(i)._1 && s <= steps(i)._2 =>
+            Seq(i)
+          case _ =>
+            Seq()
+        }
+      }.head
+
+      theStep
+    }
+
+    values.map(v => v.map(e => whichStep(steps, e)))
+  }
+}
+
 object DensitiesToGridQuads {
   val log = LoggerFactory.getLogger(getClass)
+
+  def shapesAndScalarsToActualSizes(shapes: List[(Int, Int)], scalarC: Int, scalarR: Int) = {
+    shapes.map{case (c, r) => (scalarC*c, scalarR*r)}
+  }
 
   def apply(rows: Int, cols: Int, densities: Array[(Double, (Int, Int))]): QuadrilateralGrid = {
 
@@ -68,7 +103,8 @@ object DensitiesToGridQuads {
 
      */
     val percentageForHighestDensity = 0.2
-    val sizeForHighestGran = (1, 1)
+    val sizeTup = (1, 1)
+    val sizeForHighestGran =  shapesAndScalarsToActualSizes(List(sizeTup), 1, 1)
     val numberOfHighestGranularityCells = (percentageForHighestDensity * (rows * cols)).toInt
     val highestDensities = sortedDistancesByBrightestFirst.take(numberOfHighestGranularityCells)
     val nonHighestDensities = sortedDistancesByBrightestFirst.diff(highestDensities)
@@ -79,7 +115,11 @@ object DensitiesToGridQuads {
     //take each highest density and make those use highest resolution
     highestDensities.foreach {
       case (d, (c, r)) =>
-        cells = cells.+:(QuadrilateralCell(c, r, c + sizeForHighestGran._1, r  + sizeForHighestGran._2))
+        val daCell = QuadrilateralCell(c, r, c + sizeTup._1, r  + sizeTup._2)
+        if (! CellIntersectsExisting(arrBuff, daCell)) {
+          arrBuff = ApplyCellToTruthTable(arrBuff, daCell)
+          cells = cells.+:(daCell)
+        }
     }
 
     /*
@@ -92,10 +132,7 @@ object DensitiesToGridQuads {
     //these sizes should be proportional to grid size
     val scalarR = rows / 100
     val scalarC = cols / 100
-    val nextSizes = List((1,2), (2, 1), (2, 2)).map {
-      case (c, r) =>
-        (c * scalarC, r * scalarR)
-    }
+    val nextSizes = shapesAndScalarsToActualSizes(List((1,2), (2, 1), (2, 2)), scalarC, scalarR)
 
     val midDensityThresh = 0.5 * (1.0 / (1.0 - percentageForHighestDensity))
     val midDensityCount = (midDensityThresh * nonHighestDensities.length).toInt

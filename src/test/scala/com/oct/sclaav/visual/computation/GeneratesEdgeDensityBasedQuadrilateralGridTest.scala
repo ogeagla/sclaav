@@ -17,4 +17,22 @@ class GeneratesEdgeDensityBasedQuadrilateralGridTest extends FunSuite with Befor
 
   }
 
+  test("values to levels works") {
+
+    val values = Array(
+      Array(0.0, 2.0, 3.0),
+      Array(1.5, 2.5, 2.9)
+    )
+
+    val steps = ValuesToLevels(values)
+
+    val expectedSteps = Array(
+      Array(0, 1, 2),
+      Array(1, 2, 2)
+    )
+
+    assert(steps === expectedSteps, "steps should match")
+
+  }
+
 }

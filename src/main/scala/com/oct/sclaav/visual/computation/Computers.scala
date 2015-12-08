@@ -219,4 +219,12 @@ object CellIntersectsExisting {
     ! doesNotInter
   }
 
+  object ApplyCellToTruthTable {
+    def apply(table: ArrayBuffer[ArrayBuffer[Boolean]], cell: QuadrilateralCell): ArrayBuffer[ArrayBuffer[Boolean]] = {
+      for(c <- cell.startCol to cell.endCol; r <- cell.startRow to cell.endRow) {
+        table(c).update(r, true)
+      }
+      table
+    }
+  }
 }

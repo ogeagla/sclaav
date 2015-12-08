@@ -1,5 +1,6 @@
 package com.oct.sclaav.visual.computation
 
+import com.oct.sclaav.visual.computation.CellIntersectsExisting.ApplyCellToTruthTable
 import com.oct.sclaav.{QuadrilateralCell, QuadrilateralGrid}
 import org.slf4j.LoggerFactory
 
@@ -10,13 +11,6 @@ object GeneratesRandomQuadrilateralGrid {
   val log = LoggerFactory.getLogger(getClass)
 
   def apply(rows: Int, cols: Int, iterations: Int = 50000, truthTable: Option[ArrayBuffer[ArrayBuffer[Boolean]]] = None): QuadrilateralGrid = generateRandomly(rows, cols, iterations, truthTable)
-
-  def flipToTrue(arrBuff: ArrayBuffer[ArrayBuffer[Boolean]], cell: QuadrilateralCell): ArrayBuffer[ArrayBuffer[Boolean]] = {
-    for(c <- cell.startCol to cell.endCol; r <- cell.startRow to cell.endRow) {
-      arrBuff(c).update(r, true)
-    }
-    arrBuff
-  }
 
   def allTrue(arr: ArrayBuffer[ArrayBuffer[Boolean]]) = arr.forall(r => r.forall(c => c))
 
@@ -57,7 +51,7 @@ object GeneratesRandomQuadrilateralGrid {
 
       if( ! CellIntersectsExisting(arrBuff, cell)) {
         //FIXME this is both mutating the arr buff and re-assigning. i assume it will be optimized by compiler but not certain
-        arrBuff = flipToTrue(arrBuff, cell)
+        arrBuff = ApplyCellToTruthTable(arrBuff, cell)
         cells = cells.+:(cell)
       }
 
