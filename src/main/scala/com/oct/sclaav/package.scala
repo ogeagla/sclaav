@@ -190,4 +190,8 @@ package object sclaav {
     }
   }
 
+  trait ImageToQuadGridThing {
+    def apply(img: Image, rows: Int, cols: Int): QuadrilateralGrid
+  }
+
 }

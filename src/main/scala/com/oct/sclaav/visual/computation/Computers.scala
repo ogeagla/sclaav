@@ -227,4 +227,20 @@ object CellIntersectsExisting {
       table
     }
   }
+  object FillQuadWithSingles {
+    def apply(arrBuff: ArrayBuffer[ArrayBuffer[Boolean]]): Array[QuadrilateralCell] = {
+
+      val cols = arrBuff.length
+      val rows = arrBuff(0).length
+
+      var cells = Array[QuadrilateralCell]()
+      for (c <- 0 to cols - 1; r <- 0 to rows - 1) {
+        arrBuff(c)(r) match {
+          case false => cells = cells.+:(new QuadrilateralCell(c, r, c, r))
+          case true =>
+        }
+      }
+      cells
+    }
+  }
 }

@@ -1,11 +1,18 @@
 package com.oct.sclaav.visual.computation
 
-import com.oct.sclaav.visual.computation.CellIntersectsExisting.ApplyCellToTruthTable
-import com.oct.sclaav.{QuadrilateralCell, QuadrilateralGrid}
+import com.oct.sclaav.visual.computation.CellIntersectsExisting.{FillQuadWithSingles, ApplyCellToTruthTable}
+import com.oct.sclaav.{ImageToQuadGridThing, QuadrilateralCell, QuadrilateralGrid}
+import com.sksamuel.scrimage.Image
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
+
+class GeneratesRandomQuadrilateralGrid extends ImageToQuadGridThing {
+  def apply(img: Image, rows: Int, cols: Int): QuadrilateralGrid = {
+    GeneratesRandomQuadrilateralGrid(rows, cols)
+  }
+}
 
 object GeneratesRandomQuadrilateralGrid {
   val log = LoggerFactory.getLogger(getClass)
@@ -13,21 +20,6 @@ object GeneratesRandomQuadrilateralGrid {
   def apply(rows: Int, cols: Int, iterations: Int = 50000, truthTable: Option[ArrayBuffer[ArrayBuffer[Boolean]]] = None): QuadrilateralGrid = generateRandomly(rows, cols, iterations, truthTable)
 
   def allTrue(arr: ArrayBuffer[ArrayBuffer[Boolean]]) = arr.forall(r => r.forall(c => c))
-
-  def fillRemainingWithSingleCells(arrBuff: ArrayBuffer[ArrayBuffer[Boolean]]): Array[QuadrilateralCell] = {
-
-    val cols = arrBuff.length
-    val rows = arrBuff(0).length
-
-    var cells = Array[QuadrilateralCell]()
-    for (c <- 0 to cols - 1; r <- 0 to rows - 1) {
-      arrBuff(c)(r) match {
-        case false => cells = cells.+:(new QuadrilateralCell(c, r, c, r))
-        case true =>
-      }
-    }
-    cells
-  }
 
   def generateRandomly(rows: Int, cols: Int, iterations: Int = 5000, truthTable: Option[ArrayBuffer[ArrayBuffer[Boolean]]] = None): QuadrilateralGrid = {
 
@@ -58,7 +50,7 @@ object GeneratesRandomQuadrilateralGrid {
       iter = iter + 1
     }
 
-    cells = cells.++:(fillRemainingWithSingleCells(arrBuff))
+    cells = cells.++:(FillQuadWithSingles(arrBuff))
     val quadGrid = new QuadrilateralGrid(rows, cols, cells)
     quadGrid
   }

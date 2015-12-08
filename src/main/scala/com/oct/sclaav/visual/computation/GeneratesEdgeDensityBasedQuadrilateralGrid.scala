@@ -2,7 +2,7 @@ package com.oct.sclaav.visual.computation
 
 import com.oct.sclaav.visual.computation.CellIntersectsExisting.ApplyCellToTruthTable
 import com.oct.sclaav.visual.manipulators.SimpleCrop
-import com.oct.sclaav.{Argb, QuadrilateralCell, QuadrilateralGrid}
+import com.oct.sclaav.{ImageToQuadGridThing, Argb, QuadrilateralCell, QuadrilateralGrid}
 import com.sksamuel.scrimage.filter.{EdgeFilter, ThresholdFilter}
 import com.sksamuel.scrimage.{Image, ScaleMethod}
 import org.slf4j.LoggerFactory
@@ -10,7 +10,13 @@ import org.slf4j.LoggerFactory
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.parallel.mutable.ParArray
 
-object GeneratesEdgeDensityBasedQuadrilateralGrid {
+class GeneratesEdgeDensityBasedQuadrilateralGrid extends ImageToQuadGridThing {
+  def apply(img: Image, rows: Int, cols: Int): QuadrilateralGrid = {
+    GeneratesEdgeDensityBasedQuadrilateralGrid(img, rows, cols)
+  }
+}
+
+object GeneratesEdgeDensityBasedQuadrilateralGrid extends ImageToQuadGridThing {
 
   val log = LoggerFactory.getLogger(getClass)
 
@@ -20,7 +26,7 @@ object GeneratesEdgeDensityBasedQuadrilateralGrid {
     edges
   }
 
-  def apply(img: Image, rows: Int = 50, cols: Int = 50, granularity: Double = 0.1, iterations: Int = 5): QuadrilateralGrid = {
+  def apply(img: Image, rows: Int = 40, cols: Int = 40): QuadrilateralGrid = {
 
     val edgesImg = getImageToCropFromOriginal(img)
 
@@ -42,10 +48,100 @@ object GeneratesEdgeDensityBasedQuadrilateralGrid {
 
     val theDistances = listBuffer.toArray
 
+    val levels = 5
+    val sizesForLevels = (0 to levels - 1).map{l => l -> (l + 1) * (l + 1)}.toMap
 
-    DensitiesToGridQuads(rows, cols, theDistances)
+    val asArray = ArrayBuffer.fill(cols, rows)(-1.0)
+
+    theDistances.foreach{
+      case (d, (c, r)) =>
+        asArray(c).update(r, d)
+    }
+
+    val distArr = asArray.map(_.toArray).toArray
+
+    val levelsArr = ValuesToLevels(distArr, levels)
+    val levelsArrWSizes = levelsArr.map(v => v.map {
+      e => (e, sizesForLevels(e))
+    })
+
+    val quadCells = LevelsWithSquareSizesToCells(levelsArrWSizes, cols, rows)
+
+//    DensitiesToGridQuads(rows, cols, theDistances)
+    new QuadrilateralGrid(rows, cols, quadCells)
   }
 
+}
+
+object LevelsWithSquareSizesToCells {
+  def apply(levelsWithSizes: Array[Array[(Int, Int)]], cols: Int, rows: Int): Array[QuadrilateralCell] = {
+
+    var arr: List[((Int, Int), (Int, Int))] = List[((Int, Int), (Int, Int))]()
+    var arrBuff = ArrayBuffer.fill(cols, rows)(false)
+
+
+    for (c <- levelsWithSizes.indices) {
+      for (r <- levelsWithSizes(c).indices) {
+
+        val tup: ((Int, Int), (Int, Int)) = ((c, r), levelsWithSizes(c)(r))
+        arr = arr.+:(tup)
+      }
+    }
+
+    val sortedByLevel = arr.sortBy {
+      case ((c, r), (level, size)) => level
+    }
+
+    val biggestLevelsFirst = sortedByLevel.reverse
+
+    var cells = Array[QuadrilateralCell]()
+    for (l <- biggestLevelsFirst.indices) {
+
+      val ((c, r), (level, size)) = biggestLevelsFirst(l)
+      println(s"Doing level index ${l} c $c r $r level $level size $size")
+
+      val totalCells = size * size
+
+      var notThisLevel = 0
+
+      val endCol = c + size match {
+        case theOne if theOne < cols => theOne
+        case _ => cols - 1
+      }
+
+      val endRow = r + size match {
+        case theOne if theOne < rows => theOne
+        case _ => rows - 1
+      }
+
+      for (_c <- c to endCol - 1) {
+        for (_r <- r to endRow - 1) {
+          if (levelsWithSizes(_c)(_r)._1 != level) {
+            println(s"not the same level w ${_c}, ${_r} values: ${levelsWithSizes(_c)(_r)}")
+            notThisLevel = notThisLevel + 1
+          }
+        }
+      }
+
+      println(s"$notThisLevel / ${totalCells}")
+      notThisLevel.toDouble / totalCells.toDouble match {
+        case tooMany if tooMany >= 0.5 =>
+          println(s"too many intersected ${tooMany}")
+        case justRight =>
+          println(s"just right intersected ${justRight}")
+
+          val tryCell = new QuadrilateralCell(c, r, endCol, endRow)
+          if ( ! CellIntersectsExisting(arrBuff, tryCell)) {
+            arrBuff = ApplyCellToTruthTable(arrBuff, tryCell)
+            cells = cells.+:(tryCell)
+          }
+      }
+    }
+
+    //TODO round it out, fill in the gaps
+
+    cells
+  }
 }
 
 object ValuesToLevels {
@@ -78,105 +174,105 @@ object ValuesToLevels {
   }
 }
 
-object DensitiesToGridQuads {
-  val log = LoggerFactory.getLogger(getClass)
-
-  def shapesAndScalarsToActualSizes(shapes: List[(Int, Int)], scalarC: Int, scalarR: Int) = {
-    shapes.map{case (c, r) => (scalarC*c, scalarR*r)}
-  }
-
-  def apply(rows: Int, cols: Int, densities: Array[(Double, (Int, Int))]): QuadrilateralGrid = {
-
-
-    val sortedDistancesByBrightestFirst = densities.sortBy(d => d._1).reverse
-
-    log.info("top 50 sorted by brightest first:")
-    sortedDistancesByBrightestFirst.take(50).foreach {
-      case (d, (c, r)) =>
-        log.info(s"($c, $r) : $d")
-    }
-
-    /*
-
-    1.
-       Highest Edge Density
-
-     */
-    val percentageForHighestDensity = 0.2
-    val sizeTup = (1, 1)
-    val sizeForHighestGran =  shapesAndScalarsToActualSizes(List(sizeTup), 1, 1)
-    val numberOfHighestGranularityCells = (percentageForHighestDensity * (rows * cols)).toInt
-    val highestDensities = sortedDistancesByBrightestFirst.take(numberOfHighestGranularityCells)
-    val nonHighestDensities = sortedDistancesByBrightestFirst.diff(highestDensities)
-
-    var arrBuff: ArrayBuffer[ArrayBuffer[Boolean]] = ArrayBuffer.fill(cols, rows)(false)
-    var cells = Array[QuadrilateralCell]()
-
-    //take each highest density and make those use highest resolution
-    highestDensities.foreach {
-      case (d, (c, r)) =>
-        val daCell = QuadrilateralCell(c, r, c + sizeTup._1, r  + sizeTup._2)
-        if (! CellIntersectsExisting(arrBuff, daCell)) {
-          arrBuff = ApplyCellToTruthTable(arrBuff, daCell)
-          cells = cells.+:(daCell)
-        }
-    }
-
-    /*
-
-    2.
-       Try to fill using multiple sizes somehow
-
-     */
-
-    //these sizes should be proportional to grid size
-    val scalarR = rows / 100
-    val scalarC = cols / 100
-    val nextSizes = shapesAndScalarsToActualSizes(List((1,2), (2, 1), (2, 2)), scalarC, scalarR)
-
-    val midDensityThresh = 0.5 * (1.0 / (1.0 - percentageForHighestDensity))
-    val midDensityCount = (midDensityThresh * nonHighestDensities.length).toInt
-    val nextCellsWeCareAbout = nonHighestDensities.take(midDensityCount)
-    val remaining = nonHighestDensities.diff(nextCellsWeCareAbout)
-
-    nextCellsWeCareAbout.map {
-      case (d, (c, r)) =>
-
-    }
-
-
-    def tryToMakeAQuad(ofSize: (Int, Int), truthTable: ArrayBuffer[ArrayBuffer[Boolean]]) = {
-
-      ???
-    }
-
-    def tryToCreateQuadOfGivenSizesForATruthTable(
-                                                   sizes: Array[(Int, Int)],
-                                                   whereToTry: Array[(Int, Int)],
-                                                   truthTable: ArrayBuffer[ArrayBuffer[Boolean]]):
-    (Array[QuadrilateralCell], ArrayBuffer[ArrayBuffer[Boolean]]) = {
-
-      val possiblesForSizes: Map[(Int, Int), (Int, Int)] = sizes.flatMap {
-        case (colsWidth, rowsHeight) =>
-
-          //TODO this piece:
-          val topLefts = Array((1,2), (2, 3))
-
-
-          topLefts.map(tl => (colsWidth, rowsHeight) -> tl)
-      }.toMap
-
-
-
-
-      ???
-    }
-
-
-
-
-    ???
-  }
-
-}
+//object DensitiesToGridQuads {
+//  val log = LoggerFactory.getLogger(getClass)
+//
+//  def shapesAndScalarsToActualSizes(shapes: List[(Int, Int)], scalarC: Int, scalarR: Int) = {
+//    shapes.map{case (c, r) => (scalarC*c, scalarR*r)}
+//  }
+//
+//  def apply(rows: Int, cols: Int, densities: Array[(Double, (Int, Int))]): QuadrilateralGrid = {
+//
+//
+//    val sortedDistancesByBrightestFirst = densities.sortBy(d => d._1).reverse
+//
+//    log.info("top 50 sorted by brightest first:")
+//    sortedDistancesByBrightestFirst.take(50).foreach {
+//      case (d, (c, r)) =>
+//        log.info(s"($c, $r) : $d")
+//    }
+//
+//    /*
+//
+//    1.
+//       Highest Edge Density
+//
+//     */
+//    val percentageForHighestDensity = 0.2
+//    val sizeTup = (1, 1)
+//    val sizeForHighestGran =  shapesAndScalarsToActualSizes(List(sizeTup), 1, 1)
+//    val numberOfHighestGranularityCells = (percentageForHighestDensity * (rows * cols)).toInt
+//    val highestDensities = sortedDistancesByBrightestFirst.take(numberOfHighestGranularityCells)
+//    val nonHighestDensities = sortedDistancesByBrightestFirst.diff(highestDensities)
+//
+//    var arrBuff: ArrayBuffer[ArrayBuffer[Boolean]] = ArrayBuffer.fill(cols, rows)(false)
+//    var cells = Array[QuadrilateralCell]()
+//
+//    //take each highest density and make those use highest resolution
+//    highestDensities.foreach {
+//      case (d, (c, r)) =>
+//        val daCell = QuadrilateralCell(c, r, c + sizeTup._1, r  + sizeTup._2)
+//        if (! CellIntersectsExisting(arrBuff, daCell)) {
+//          arrBuff = ApplyCellToTruthTable(arrBuff, daCell)
+//          cells = cells.+:(daCell)
+//        }
+//    }
+//
+//    /*
+//
+//    2.
+//       Try to fill using multiple sizes somehow
+//
+//     */
+//
+//    //these sizes should be proportional to grid size
+//    val scalarR = rows / 100
+//    val scalarC = cols / 100
+//    val nextSizes = shapesAndScalarsToActualSizes(List((1,2), (2, 1), (2, 2)), scalarC, scalarR)
+//
+//    val midDensityThresh = 0.5 * (1.0 / (1.0 - percentageForHighestDensity))
+//    val midDensityCount = (midDensityThresh * nonHighestDensities.length).toInt
+//    val nextCellsWeCareAbout = nonHighestDensities.take(midDensityCount)
+//    val remaining = nonHighestDensities.diff(nextCellsWeCareAbout)
+//
+//    nextCellsWeCareAbout.map {
+//      case (d, (c, r)) =>
+//
+//    }
+//
+//
+//    def tryToMakeAQuad(ofSize: (Int, Int), truthTable: ArrayBuffer[ArrayBuffer[Boolean]]) = {
+//
+//      ???
+//    }
+//
+//    def tryToCreateQuadOfGivenSizesForATruthTable(
+//                                                   sizes: Array[(Int, Int)],
+//                                                   whereToTry: Array[(Int, Int)],
+//                                                   truthTable: ArrayBuffer[ArrayBuffer[Boolean]]):
+//    (Array[QuadrilateralCell], ArrayBuffer[ArrayBuffer[Boolean]]) = {
+//
+//      val possiblesForSizes: Map[(Int, Int), (Int, Int)] = sizes.flatMap {
+//        case (colsWidth, rowsHeight) =>
+//
+//          //TODO this piece:
+//          val topLefts = Array((1,2), (2, 3))
+//
+//
+//          topLefts.map(tl => (colsWidth, rowsHeight) -> tl)
+//      }.toMap
+//
+//
+//
+//
+//      ???
+//    }
+//
+//
+//
+//
+//    ???
+//  }
+//
+//}
 
