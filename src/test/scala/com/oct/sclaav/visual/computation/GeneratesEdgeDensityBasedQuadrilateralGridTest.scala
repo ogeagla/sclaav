@@ -54,16 +54,16 @@ class GeneratesEdgeDensityBasedQuadrilateralGridTest extends FunSuite with Befor
     implicit val writer = JpegWriter.Default
     val files = bapImagesDir.listFiles().filter(_.isFile).take(400)
 
-    val theImage1 = Image.fromFile(files.filter(f => f.getAbsolutePath.contains("0010-2015-07-1112-24-27")).head)
-    val theImage2 = Image.fromFile(files.filter(f => f.getAbsolutePath.contains("0068-2014-11-2816-57-05")).head)
+//    val theImage1 = Image.fromFile(files.filter(f => f.getAbsolutePath.contains("0010-2015-07-1112-24-27")).head)
+//    val theImage2 = Image.fromFile(files.filter(f => f.getAbsolutePath.contains("0068-2014-11-2816-57-05")).head)
 
     val otherImages = files.tail.map(f => Image.fromFile(f))
-    val emptyImage = Image.filled(theImage1.width, theImage1.height, Color.Transparent)
+    val emptyImage = Image.filled(flagPaintingImg.width, flagPaintingImg.height, Color.Transparent)
 
 
-    val composite1 = (new QuadrilateralAssembler)(theImage1, emptyImage, otherImages, GeneratesEdgeDensityBasedQuadrilateralGrid)
+    val composite1 = (new QuadrilateralAssembler(100, 100))(flagPaintingImg, emptyImage, otherImages, GeneratesEdgeDensityBasedQuadrilateralGrid)
     composite1.output(testRootPath + s"quad-edge-composite-1.jpeg")
-    theImage1.output(testRootPath + s"quad-edge-ref-1.jpeg")
+    flagPaintingImg.output(testRootPath + s"quad-edge-ref-1.jpeg")
 
   }
 

@@ -1,6 +1,6 @@
 package com.oct.sclaav.visual.computation
 
-import com.oct.sclaav.visual.computation.CellIntersectsExisting.ApplyCellToTruthTable
+import com.oct.sclaav.visual.computation.CellIntersectsExisting.{FillQuadWithSingles, ApplyCellToTruthTable}
 import com.oct.sclaav.visual.manipulators.SimpleCrop
 import com.oct.sclaav.{ImageToQuadGridThing, Argb, QuadrilateralCell, QuadrilateralGrid}
 import com.sksamuel.scrimage.filter.{EdgeFilter, ThresholdFilter}
@@ -26,7 +26,9 @@ object GeneratesEdgeDensityBasedQuadrilateralGrid extends ImageToQuadGridThing {
     edges
   }
 
-  def apply(img: Image, rows: Int = 40, cols: Int = 40): QuadrilateralGrid = {
+  def apply(img: Image, rows: Int = 100, cols: Int = 100): QuadrilateralGrid = {
+
+    println(s"running with cols: $cols rows: $rows")
 
     val edgesImg = getImageToCropFromOriginal(img)
 
@@ -48,8 +50,13 @@ object GeneratesEdgeDensityBasedQuadrilateralGrid extends ImageToQuadGridThing {
 
     val theDistances = listBuffer.toArray
 
-    val levels = 5
-    val sizesForLevels = (0 to levels - 1).map{l => l -> (l + 1) * (l + 1)}.toMap
+    val levels = 3
+    val sizesForLevels = (0 to levels - 1).map{l => l -> (2 * l + 1)}.toMap
+
+    println("sizes for levels:")
+    sizesForLevels.foreach{
+      case (k, v) => println(s"$k -> $v")
+    }
 
     val asArray = ArrayBuffer.fill(cols, rows)(-1.0)
 
@@ -61,9 +68,15 @@ object GeneratesEdgeDensityBasedQuadrilateralGrid extends ImageToQuadGridThing {
     val distArr = asArray.map(_.toArray).toArray
 
     val levelsArr = ValuesToLevels(distArr, levels)
+
     val levelsArrWSizes = levelsArr.map(v => v.map {
       e => (e, sizesForLevels(e))
     })
+
+    val forPrinting = levelsArrWSizes.flatten.sortBy(_._1)
+
+    forPrinting.take(10).foreach{ case (l, s) => println(s"level $l has size $s")}
+    forPrinting.reverse.take(10).foreach{ case (l, s) => println(s"level $l has size $s")}
 
     val quadCells = LevelsWithSquareSizesToCells(levelsArrWSizes, cols, rows)
 
@@ -106,12 +119,16 @@ object LevelsWithSquareSizesToCells {
 
       val endCol = c + size match {
         case theOne if theOne < cols => theOne
-        case _ => cols - 1
+        case _ =>
+          println("attempted to size an image out of bounds (cols)")
+          cols - 1
       }
 
       val endRow = r + size match {
         case theOne if theOne < rows => theOne
-        case _ => rows - 1
+        case _ =>
+          println("attempted to size an image out of bounds (rows)")
+          rows - 1
       }
 
       for (_c <- c to endCol - 1) {
@@ -125,7 +142,7 @@ object LevelsWithSquareSizesToCells {
 
       println(s"$notThisLevel / ${totalCells}")
       notThisLevel.toDouble / totalCells.toDouble match {
-        case tooMany if tooMany >= 0.5 =>
+        case tooMany if tooMany >= 0.25 =>
           println(s"too many intersected ${tooMany}")
         case justRight =>
           println(s"just right intersected ${justRight}")
@@ -138,7 +155,7 @@ object LevelsWithSquareSizesToCells {
       }
     }
 
-    //TODO round it out, fill in the gaps
+    cells = cells.++:(FillQuadWithSingles(arrBuff))
 
     cells
   }
@@ -147,14 +164,18 @@ object LevelsWithSquareSizesToCells {
 object ValuesToLevels {
   def apply(values: Array[Array[Double]], levels: Int = 3): Array[Array[Int]] = {
 
+    println(s"total elements: ${values.map(_.length).sum}")
+
     val max: Double = values.map(v => v.max).max
     val min = values.map(v => v.min).min
 
     val delta = (max - min) / levels.toDouble
 
+    println(s"min: $min max: $max delta: $delta")
+
     val steps = (0 to levels - 1).map { l =>
       (min + l * delta, min + (l + 1) * delta)
-    }.toArray
+    }.toArray.reverse
 
     def whichStep(steps: Array[(Double, Double)], value: Double): Int = {
 
