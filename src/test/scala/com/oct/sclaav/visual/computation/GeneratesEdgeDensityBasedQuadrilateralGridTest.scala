@@ -26,7 +26,7 @@ class GeneratesEdgeDensityBasedQuadrilateralGridTest extends FunSuite with Befor
       Array(1.5, 2.5, 2.9)
     )
 
-    val steps = ValuesToLevels(values)
+    val steps = ValuesToLevels(values, 3)
 
     val expectedSteps = Array(
       Array(0, 1, 2),
@@ -52,6 +52,10 @@ class GeneratesEdgeDensityBasedQuadrilateralGridTest extends FunSuite with Befor
     val flagPaintingImg = Image.fromFile(blackAndYellowFlag)
 
     implicit val writer = JpegWriter.Default
+
+    val edgesImgToBeUsed = GeneratesEdgeDensityBasedQuadrilateralGrid.getImageToCropFromOriginal(flagPaintingImg)
+    edgesImgToBeUsed.output(testRootPath + "edges-img.jpeg")
+
     val files = bapImagesDir.listFiles().filter(_.isFile).take(400)
 
 //    val theImage1 = Image.fromFile(files.filter(f => f.getAbsolutePath.contains("0010-2015-07-1112-24-27")).head)
@@ -61,7 +65,7 @@ class GeneratesEdgeDensityBasedQuadrilateralGridTest extends FunSuite with Befor
     val emptyImage = Image.filled(flagPaintingImg.width, flagPaintingImg.height, Color.Transparent)
 
 
-    val composite1 = (new QuadrilateralAssembler(100, 100))(flagPaintingImg, emptyImage, otherImages, GeneratesEdgeDensityBasedQuadrilateralGrid)
+    val composite1 = (new QuadrilateralAssembler(20, 20))(flagPaintingImg, emptyImage, otherImages, new GeneratesEdgeDensityBasedQuadrilateralGrid)
     composite1.output(testRootPath + s"quad-edge-composite-1.jpeg")
     flagPaintingImg.output(testRootPath + s"quad-edge-ref-1.jpeg")
 

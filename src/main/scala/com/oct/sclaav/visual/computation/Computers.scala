@@ -128,6 +128,18 @@ object Average {
   def apply(arr: Array[Int]): Int = arr.sum / arr.length
 }
 
+object SimpleRgbEstimator extends ArgbEstimator {
+  override def apply(img: Image): Argb = {
+
+    val argb = img.argb
+    val r = argb.map(_.apply(1))
+    val g = argb.map(_.apply(2))
+    val b = argb.map(_.apply(3))
+
+    Argb(0, Average(r), Average(g), Average(b))
+  }
+}
+
 object SimpleArgbEstimator extends ArgbEstimator {
   override def apply(img: Image): Argb = {
 
@@ -180,6 +192,16 @@ object SimpleArgbDistance extends ArgbDistance {
     val db = math.abs(argb1.b - argb2.b)
 
     math.sqrt(da*da + dr*dr + dg*dg + db*db)
+  }
+}
+
+object SimpleRgbDistance extends ArgbDistance {
+  override def apply(argb1: Argb, argb2: Argb): Double = {
+    val dr = math.abs(argb1.r - argb2.r)
+    val dg = math.abs(argb1.g - argb2.g)
+    val db = math.abs(argb1.b - argb2.b)
+
+    math.sqrt(dr*dr + dg*dg + db*db)
   }
 }
 

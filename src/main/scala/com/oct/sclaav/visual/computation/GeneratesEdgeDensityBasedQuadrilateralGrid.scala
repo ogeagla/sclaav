@@ -2,7 +2,7 @@ package com.oct.sclaav.visual.computation
 
 import com.oct.sclaav.visual.computation.CellIntersectsExisting.{FillQuadWithSingles, ApplyCellToTruthTable}
 import com.oct.sclaav.visual.manipulators.SimpleCrop
-import com.oct.sclaav.{ImageToQuadGridThing, Argb, QuadrilateralCell, QuadrilateralGrid}
+import com.oct.sclaav._
 import com.sksamuel.scrimage.filter.{EdgeFilter, ThresholdFilter}
 import com.sksamuel.scrimage.{Image, ScaleMethod}
 import org.slf4j.LoggerFactory
@@ -16,7 +16,7 @@ class GeneratesEdgeDensityBasedQuadrilateralGrid extends ImageToQuadGridThing {
   }
 }
 
-object GeneratesEdgeDensityBasedQuadrilateralGrid extends ImageToQuadGridThing {
+object GeneratesEdgeDensityBasedQuadrilateralGrid{
 
   val log = LoggerFactory.getLogger(getClass)
 
@@ -26,7 +26,7 @@ object GeneratesEdgeDensityBasedQuadrilateralGrid extends ImageToQuadGridThing {
     edges
   }
 
-  def apply(img: Image, rows: Int = 100, cols: Int = 100): QuadrilateralGrid = {
+  def apply(img: Image, rows: Int = 20, cols: Int = 20, argbEstimator: ArgbEstimator = SimpleArgbEstimator, argbDistance: ArgbDistance = SimpleArgbDistance): QuadrilateralGrid = {
 
     println(s"running with cols: $cols rows: $rows")
 
@@ -40,9 +40,9 @@ object GeneratesEdgeDensityBasedQuadrilateralGrid extends ImageToQuadGridThing {
       for(r <- 0 to rows - 1) {
         val cropped = SimpleCrop((cols, rows), (c, r), edgesImg)
 
-        val avgArgbOfCropped = SimpleArgbEstimator(cropped)
+        val avgRgbOfCropped = argbEstimator(cropped)
 
-        val dist = SimpleArgbDistance(blackArgb, avgArgbOfCropped)
+        val dist = argbDistance(blackArgb, avgRgbOfCropped)
 
         listBuffer.update(rows*c + r, (dist, (c, r)))
       }
@@ -51,7 +51,7 @@ object GeneratesEdgeDensityBasedQuadrilateralGrid extends ImageToQuadGridThing {
     val theDistances = listBuffer.toArray
 
     val levels = 3
-    val sizesForLevels = (0 to levels - 1).map{l => l -> (2 * l + 1)}.toMap
+    val sizesForLevels = (0 to levels - 1).map{l => l -> (l + 1)}.toMap
 
     println("sizes for levels:")
     sizesForLevels.foreach{
@@ -80,7 +80,6 @@ object GeneratesEdgeDensityBasedQuadrilateralGrid extends ImageToQuadGridThing {
 
     val quadCells = LevelsWithSquareSizesToCells(levelsArrWSizes, cols, rows)
 
-//    DensitiesToGridQuads(rows, cols, theDistances)
     new QuadrilateralGrid(rows, cols, quadCells)
   }
 
@@ -106,6 +105,7 @@ object LevelsWithSquareSizesToCells {
     }
 
     val biggestLevelsFirst = sortedByLevel.reverse
+//    val smallestLevelFirst = sortedByLevel
 
     var cells = Array[QuadrilateralCell]()
     for (l <- biggestLevelsFirst.indices) {
@@ -161,37 +161,80 @@ object LevelsWithSquareSizesToCells {
   }
 }
 
+object WhichStep {
+  def apply(steps: Array[(Double, Double)], value: Double): Int = {
+    steps.indices.flatMap { i =>
+      value match {
+        case s if s >= steps(i)._1 && s <= steps(i)._2 =>
+          Seq(i)
+        case _ =>
+          Seq()
+      }
+    }.head
+  }
+}
+
+trait StepMaker {
+  def apply(levels: Int, min: Double, max: Double, delta: Double): Array[(Double, Double)]
+}
+
+object UniformStepMaker extends StepMaker {
+  def apply(levels: Int, min: Double, max: Double, delta: Double): Array[(Double, Double)] = {
+    (0 to levels - 1).map { l =>
+      (min + l * delta, min + (l + 1) * delta)
+    }.toArray.reverse
+  }
+}
+
+object ExpStepMaker extends StepMaker {
+  override def apply(levels: Int, min: Double, max: Double, delta: Double): Array[(Double, Double)] = {
+
+    val uniformSteps = UniformStepMaker(levels, min, max, delta)
+
+    levels % 2 == 0 match {
+      case true =>
+        /*
+        even # of levels, odd # of edges, like so:
+
+        #levels = 4
+        | c1 | c2 | c3 | c4 |
+
+        edges: e1, ... , eN; N is odd
+        
+        */
+
+
+
+
+      case false =>
+        /*
+        odd # of levels, even # of edges, like so:
+
+        #levels = 3
+        | c1 | c2 | c3 |
+
+        */
+
+    }
+
+    ???
+  }
+}
+
 object ValuesToLevels {
-  def apply(values: Array[Array[Double]], levels: Int = 3): Array[Array[Int]] = {
+  def apply(values: Array[Array[Double]], levels: Int, stepMaker: StepMaker = UniformStepMaker): Array[Array[Int]] = {
 
     println(s"total elements: ${values.map(_.length).sum}")
 
     val max: Double = values.map(v => v.max).max
     val min = values.map(v => v.min).min
-
     val delta = (max - min) / levels.toDouble
 
     println(s"min: $min max: $max delta: $delta")
 
-    val steps = (0 to levels - 1).map { l =>
-      (min + l * delta, min + (l + 1) * delta)
-    }.toArray.reverse
+    val steps = stepMaker(levels, min, max, delta)
 
-    def whichStep(steps: Array[(Double, Double)], value: Double): Int = {
-
-      val theStep = steps.indices.flatMap { i =>
-        value match {
-          case s if s >= steps(i)._1 && s <= steps(i)._2 =>
-            Seq(i)
-          case _ =>
-            Seq()
-        }
-      }.head
-
-      theStep
-    }
-
-    values.map(v => v.map(e => whichStep(steps, e)))
+    values.map(v => v.map(e => WhichStep(steps, e)))
   }
 }
 
