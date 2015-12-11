@@ -186,6 +186,42 @@ object UniformStepMaker extends StepMaker {
   }
 }
 
+object ApproxExpStepMaker extends StepMaker {
+  override def apply(levels: Int, min: Double, max: Double, delta: Double): Array[(Double, Double)] = {
+    /*
+
+    from
+    |   |   |   |
+
+    to
+    |     |   | |
+
+    maybe something like this: http://math.nist.gov/DFTdata/atomdata/node6.html
+
+    or maybe a forward shift function: f_n: f at edge n where n !=0 and n != N
+      => f_n = V / n; where V is some constant < delta
+    where edge tranformer is:
+      => g_n = e_n + f_n
+
+    */
+
+    val uniformSteps: Array[(Double, Double)] = UniformStepMaker(levels, min, max, delta)
+
+    def f(n: Int, V: Double): Double = V/n
+
+    val nonuniform = uniformSteps.indices map {case i =>
+
+        val (e1, e2) = uniformSteps(i)
+
+        ???
+    }
+
+
+
+    ???
+  }
+}
+
 object ExpStepMaker extends StepMaker {
   override def apply(levels: Int, min: Double, max: Double, delta: Double): Array[(Double, Double)] = {
 
@@ -199,8 +235,21 @@ object ExpStepMaker extends StepMaker {
         #levels = 4
         | c1 | c2 | c3 | c4 |
 
-        edges: e1, ... , eN; N is odd
-        
+        edges: e_1, ... , e_N; N is odd
+
+        let middle edge value: e_M = e_((N+1)/2)
+        let origin-centered edges be: e'_n = e_n - e_M
+
+        the positive half:
+        | c3 | c4 |
+        with e'_3 = 0.0
+        with e'_N = e'_5 = e_5 - e_3
+
+        the grid transformer f must be s.t. f(e'_N) = e'_N = e'_5
+
+        f(e'_n) = e'
+
+
         */
 
 
