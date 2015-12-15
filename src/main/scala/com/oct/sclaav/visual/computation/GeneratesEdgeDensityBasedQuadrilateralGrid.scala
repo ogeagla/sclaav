@@ -67,7 +67,7 @@ object GeneratesEdgeDensityBasedQuadrilateralGrid{
 
     val distArr = asArray.map(_.toArray).toArray
 
-    val levelsArr = ValuesToLevels(distArr, levels)
+    val levelsArr = ValuesToLevels(distArr, levels, ApproxExpStepMaker)
 
     val levelsArrWSizes = levelsArr.map(v => v.map {
       e => (e, sizesForLevels(e))
@@ -207,18 +207,30 @@ object ApproxExpStepMaker extends StepMaker {
 
     val uniformSteps: Array[(Double, Double)] = UniformStepMaker(levels, min, max, delta)
 
-    def f(n: Int, V: Double): Double = V/n
+    val midpoint = (max + min) / 2.0
 
-    val nonuniform = uniformSteps.indices map {case i =>
+    def moveIt(thePoint: Double, min: Double, max: Double, mid: Double): Double = {
+      (thePoint, mid) match {
+        case (p, m) if p < m =>
+          val distToMin = thePoint - min
+          val shave = distToMin / (mid - min)
+          min + shave * distToMin
+        case (p, m) if p > m =>
+          val distToMax = max - thePoint
+          val shave = distToMax / (max - mid)
+          max - shave * distToMax
+        case (p, m) =>
+          p
+      }
+    }
 
-        val (e1, e2) = uniformSteps(i)
-
-        ???
+    val nonuniform = uniformSteps.indices map { case i =>
+      val (e1, e2) = uniformSteps(i)
+      (moveIt(e1, min, max, midpoint), moveIt(e2, min, max, midpoint))
     }
 
 
-
-    ???
+    nonuniform.toArray
   }
 }
 
