@@ -25,5 +25,7 @@ class ImageMatchersTest extends FunSuite with BeforeAndAfter with Matchers with 
     theMatches.map {
       case (f, i) =>
         i.output(testRootPath + s"matched_${f.getName}.jpeg")}
+
+    assert(theMatches.head._1.getName.contains("0207-"), "img should match itself")
   }
 }
