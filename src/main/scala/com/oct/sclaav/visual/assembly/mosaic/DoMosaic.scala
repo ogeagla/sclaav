@@ -3,8 +3,8 @@ package com.oct.sclaav.visual.assembly.mosaic
 import java.io.File
 
 import com.oct.sclaav.visual.assembly.grid.SimpleCompleteGridAssembler
-import com.oct.sclaav.visual.computation.{MatchByArgbAverage, SimpleArgbDistance, SimpleArgbEstimator}
 import com.oct.sclaav.visual.manipulators._
+import com.oct.sclaav.visual.search.MatchByArgbAverage
 import com.sksamuel.scrimage.nio.JpegWriter
 import com.sksamuel.scrimage.{Color, Image, ScaleMethod}
 import org.slf4j.LoggerFactory
@@ -54,7 +54,7 @@ object DoMosaic {
       for(r <- 0 to rows - 1) {
         val cropped = SimpleCrop((cols, rows), (c, r), controlImage)
 
-        val matchToCropped = MatchByArgbAverage(SimpleArgbEstimator, SimpleArgbDistance, cropped, allImages)
+        val matchToCropped = MatchByArgbAverage(cropped, allImages)
 
         listBuffer.update(rows*c + r, (matchToCropped, (c, r)))
       }

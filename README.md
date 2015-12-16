@@ -9,6 +9,7 @@ Functionality which presently works well and default parameters are tuned to wor
 | What                         | Where                                            | Test |
 | ---------------------------- |:------------------------------------------------:|:-----:|
 | [Image mosaic](#mosaic)      | [DoMosaic](https://github.com/ogeagla/sclaav/blob/master/src/main/scala/com/oct/sclaav/visual/assembly/mosaic/DoMosaic.scala) |[DoesMosaicTest](https://github.com/ogeagla/sclaav/blob/master/src/test/scala/com/oct/sclaav/visual/assembly/mosaic/DoesMosaicTest.scala)|
+| [Image similarity](#similarity) | [ImageMatchers](https://github.com/ogeagla/sclaav/tree/master/src/main/scala/com/oct/sclaav/visual/search/ImageMatchers.scala)|[ImageMatchersTest](https://github.com/ogeagla/sclaav/tree/master/src/test/scala/com/oct/sclaav/visual/search/ImageMatchersTest.scala)|
 
 ## Experimental Functionality:
 
@@ -35,7 +36,7 @@ $ ./sbt clean test
 
 ## Using via CLI
 
-This is the preferred method for using the functionality.
+This is the preferred method for using this tool.
 
 ### Mosaic
 
@@ -53,14 +54,29 @@ Run with:
 
 ```
 $ java -jar bin/Sclaav.jar \ # invokes jar
-  --in input-files-dir \     # input images directory
-  --out output-dir \         # output directory
-  --mode permute \           # permute or single mode
-  --rows 64 \                # how many rows to split target
-  --cols 64 \                # how many cols to split target
-  --samples 300 \            # how many samples to use from input dir
-  --filters true \           # apply and use filtered images
-  --target photo.jpg         # if mode is single, specify the target image to use
+  --in file:///input-files-dir \     # input images directory
+  --out file:///output-dir \         # output directory
+  --mode permute \                   # permute or single mode
+  --rows 64 \                        # how many rows to split target
+  --cols 64 \                        # how many cols to split target
+  --samples 300 \                    # how many samples to use from input dir
+  --filters true \                   # apply and use filtered images
+  --target file:///photo.jpg         # if mode is single, specify the target image to use
+```
+
+### Similarity
+
+Given a target image, print out the images which best matches based on a distance metric and similarity measure (Euclidean ARGB for now).
+ 
+Run with:
+
+```
+$ java -jar bin/Sclaav.jar \ 
+  --in file:///input-files-dir \     
+  --out file:///output-dir \         
+  --mode similarity \            
+  --samples 300 \            
+  --target file:///photo.jpg         
 ```
 
 ## Credits

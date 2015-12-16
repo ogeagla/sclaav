@@ -4,6 +4,7 @@ import java.io.File
 
 import com.oct.sclaav.cli.Parser
 import com.oct.sclaav.visual.assembly.mosaic.DoMosaic
+import com.oct.sclaav.visual.search.MatchesByArgbAverageThresh
 import org.slf4j.LoggerFactory
 
 object Main {
@@ -28,6 +29,23 @@ object Main {
         val files = new File(inPath.get).listFiles().filter(_.isFile).take(maxSamples.get)
 
         mode match {
+
+          case Mode.SIMILARITY =>
+
+            log.info("doing similarity")
+
+            val target = config.singleTarget
+            val targetImg = new File(target.get)
+
+            val matches = MatchesByArgbAverageThresh(targetImg, files)
+
+            log.info(s"Found ${matches.length} matches!")
+
+            log.info(s"For ${target.get.getPath} the matches are: ")
+            matches.foreach(m => log.info(s"Match: ${m._1.getAbsolutePath}"))
+
+//          case Mode.SIMILARITY_PERMUTE =>
+
 
           case Mode.MOSAIC_SINGLE_FILE =>
             log.info("using single file target")
