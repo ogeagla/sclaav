@@ -80,6 +80,7 @@ package object sclaav {
     def validateOutputDir: Either[String, Unit] = (mode, out) match {
       case (Mode.MOSAIC_SINGLE_FILE, None) => Right(Unit)
       case (_, None) => Left("Should provide output dir")
+      case _ => Right(Unit)
     }
 
   }
