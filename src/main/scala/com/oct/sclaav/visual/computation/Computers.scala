@@ -196,3 +196,16 @@ object MatchByArgbAverage {
     }.head._1
   }
 }
+
+object MatchesByArgbAverageThresh {
+  def apply(argbEstimator: ArgbEstimator, argbDistance: ArgbDistance, refImage: Image, otherImages: Array[Image], threshold: Double = 0.85): Array[Image] = {
+
+
+
+
+
+    ???
+
+
+  }
+}

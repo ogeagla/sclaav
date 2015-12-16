@@ -13,6 +13,8 @@ package object sclaav {
       case "single" => Mode.MOSAIC_SINGLE_FILE
       case "free-random-composite" => Mode.FREE_COMPOSITE_RANDOM
       case "free-ga-composite" => Mode.FREE_COMPOSITE_GA
+      case "similarity-permute" => Mode.SIMILARITY_PERMUTE
+      case "similarity" => Mode.SIMILARITY
     }
   }
 
@@ -21,20 +23,22 @@ package object sclaav {
     val MOSAIC_PERMUTE_ALL_FILES,
         MOSAIC_SINGLE_FILE,
         FREE_COMPOSITE_RANDOM,
-        FREE_COMPOSITE_GA = Value
+        FREE_COMPOSITE_GA,
+        SIMILARITY_PERMUTE,
+        SIMILARITY = Value
   }
 
   case class Config(
-                     maxSamplePhotos: Option[Int] = Some(10),
-                     rows: Option[Int] = None,
-                     cols: Option[Int] = None,
-                     mode: Mode = Mode.MOSAIC_SINGLE_FILE,
-                     in: Option[URI] = None,
-                     out: Option[URI] = None,
-                     singleTarget: Option[URI] = None,
-                     manipulate: Boolean = false,
-                     verbose: Boolean = false,
-                     debug: Boolean = false) {
+      maxSamplePhotos: Option[Int] = Some(10),
+      rows: Option[Int] = None,
+      cols: Option[Int] = None,
+      mode: Mode = Mode.MOSAIC_SINGLE_FILE,
+      in: Option[URI] = None,
+      out: Option[URI] = None,
+      singleTarget: Option[URI] = None,
+      manipulate: Boolean = false,
+      verbose: Boolean = false,
+      debug: Boolean = false) {
 
     def validate: Either[String, Unit] = {
       val validations = Seq(validateMode, validateMosaic)
@@ -53,6 +57,10 @@ package object sclaav {
         Left("Should provide a target file when using Mosaic mode with a single file")
       case (Mode.MOSAIC_PERMUTE_ALL_FILES, Some(_)) =>
         Left("Should not provide a target file when using Mosaic mode with permuting all input files")
+      case (Mode.SIMILARITY, None) =>
+        Left("Should provide a single target for similarity")
+      case (Mode.SIMILARITY_PERMUTE, Some(_)) =>
+        Left("Should not provide target image when permuting over images")
       case (_, _) =>
         Right(Unit)
     }

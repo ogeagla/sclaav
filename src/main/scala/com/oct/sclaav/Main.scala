@@ -4,6 +4,7 @@ import java.io.File
 
 import com.oct.sclaav.cli.Parser
 import com.oct.sclaav.visual.assembly.mosaic.DoMosaic
+import com.sksamuel.scrimage.{ScaleMethod, Image}
 import org.slf4j.LoggerFactory
 
 object Main {
@@ -28,6 +29,26 @@ object Main {
         val files = new File(inPath.get).listFiles().filter(_.isFile).take(maxSamples.get)
 
         mode match {
+
+          case Mode.SIMILARITY =>
+
+            log.info("doing similarity")
+
+            val target = config.singleTarget
+            val targetImg = Image.fromFile(new File(target.get))
+            val (targetImgW, targetImgH) = (targetImg.width, targetImg.height)
+
+            val similarityScale = 0.5
+            val (scTargetImgW, scTargetImgH) = ((targetImg.width*similarityScale).toInt, (targetImg.height*similarityScale).toInt)
+
+
+            val scaledTargetImg = targetImg.scaleTo(scTargetImgW, scTargetImgH, ScaleMethod.FastScale)
+            val scaledSampleFiles = files.map(f => Image.fromFile(f).scaleTo(scTargetImgW, scTargetImgH))
+
+//            val matches
+
+          case Mode.SIMILARITY_PERMUTE =>
+
 
           case Mode.MOSAIC_SINGLE_FILE =>
             log.info("using single file target")
