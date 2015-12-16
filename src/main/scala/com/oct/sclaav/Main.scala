@@ -4,6 +4,7 @@ import java.io.File
 
 import com.oct.sclaav.cli.Parser
 import com.oct.sclaav.visual.assembly.mosaic.DoMosaic
+import com.oct.sclaav.visual.computation.{SimpleArgbDistance, SimpleArgbEstimator, MatchesByArgbAverageThresh}
 import com.sksamuel.scrimage.{ScaleMethod, Image}
 import org.slf4j.LoggerFactory
 
@@ -45,7 +46,9 @@ object Main {
             val scaledTargetImg = targetImg.scaleTo(scTargetImgW, scTargetImgH, ScaleMethod.FastScale)
             val scaledSampleFiles = files.map(f => Image.fromFile(f).scaleTo(scTargetImgW, scTargetImgH))
 
-//            val matches
+            val matches = MatchesByArgbAverageThresh(SimpleArgbEstimator, SimpleArgbDistance, scaledTargetImg, scaledSampleFiles)
+
+            log.info(s"Found ${matches.length} matches!")
 
           case Mode.SIMILARITY_PERMUTE =>
 
