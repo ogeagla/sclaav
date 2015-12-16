@@ -54,14 +54,14 @@ Run with:
 
 ```
 $ java -jar bin/Sclaav.jar \ # invokes jar
-  --in input-files-dir \     # input images directory
-  --out output-dir \         # output directory
-  --mode permute \           # permute or single mode
-  --rows 64 \                # how many rows to split target
-  --cols 64 \                # how many cols to split target
-  --samples 300 \            # how many samples to use from input dir
-  --filters true \           # apply and use filtered images
-  --target photo.jpg         # if mode is single, specify the target image to use
+  --in file:///input-files-dir \     # input images directory
+  --out file:///output-dir \         # output directory
+  --mode permute \                   # permute or single mode
+  --rows 64 \                        # how many rows to split target
+  --cols 64 \                        # how many cols to split target
+  --samples 300 \                    # how many samples to use from input dir
+  --filters true \                   # apply and use filtered images
+  --target file:///photo.jpg         # if mode is single, specify the target image to use
 ```
 
 ### Similarity
@@ -72,11 +72,11 @@ Run with:
 
 ```
 $ java -jar bin/Sclaav.jar \ 
-  --in input-files-dir \     
-  --out output-dir \         
+  --in file:///input-files-dir \     
+  --out file:///output-dir \         
   --mode similarity \            
   --samples 300 \            
-  --target photo.jpg         
+  --target file:///photo.jpg         
 ```
 
 ## Credits
