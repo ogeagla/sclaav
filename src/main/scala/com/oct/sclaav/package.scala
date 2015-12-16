@@ -13,7 +13,7 @@ package object sclaav {
       case "single" => Mode.MOSAIC_SINGLE_FILE
       case "free-random-composite" => Mode.FREE_COMPOSITE_RANDOM
       case "free-ga-composite" => Mode.FREE_COMPOSITE_GA
-      case "similarity-permute" => Mode.SIMILARITY_PERMUTE
+//      case "similarity-permute" => Mode.SIMILARITY_PERMUTE
       case "similarity" => Mode.SIMILARITY
     }
   }
@@ -24,7 +24,7 @@ package object sclaav {
         MOSAIC_SINGLE_FILE,
         FREE_COMPOSITE_RANDOM,
         FREE_COMPOSITE_GA,
-        SIMILARITY_PERMUTE,
+//        SIMILARITY_PERMUTE,
         SIMILARITY = Value
   }
 
@@ -41,7 +41,11 @@ package object sclaav {
       debug: Boolean = false) {
 
     def validate: Either[String, Unit] = {
-      val validations = Seq(validateMode, validateMosaic)
+      val validations = Seq(
+        validateMode,
+        validateMosaic,
+        validateOutputDir
+      )
       validations.foldLeft[Either[String, Unit]](Right(Unit)) { (vs, v) =>
         if (vs.isLeft)
           vs
@@ -59,8 +63,8 @@ package object sclaav {
         Left("Should not provide a target file when using Mosaic mode with permuting all input files")
       case (Mode.SIMILARITY, None) =>
         Left("Should provide a single target for similarity")
-      case (Mode.SIMILARITY_PERMUTE, Some(_)) =>
-        Left("Should not provide target image when permuting over images")
+//      case (Mode.SIMILARITY_PERMUTE, Some(_)) =>
+//        Left("Should not provide target image when permuting over images")
       case (_, _) =>
         Right(Unit)
     }
@@ -135,27 +139,24 @@ package object sclaav {
   }
 
   case class IterationStats(
-                             chainSizeMeans: Array[Double] = Array(),
-                             chainSizeStddevs: Array[Double] = Array(),
-                             populationFitness: Array[Double] = Array(),
-                             populationDistanceMeans: Array[Double] = Array(),
-                             populationDistanceStddevs: Array[Double] = Array(),
-                             bestDistances: Array[Double] = Array(),
-                             worstDistances: Array[Double] = Array()
-                           )
+      chainSizeMeans: Array[Double] = Array(),
+      chainSizeStddevs: Array[Double] = Array(),
+      populationFitness: Array[Double] = Array(),
+      populationDistanceMeans: Array[Double] = Array(),
+      populationDistanceStddevs: Array[Double] = Array(),
+      bestDistances: Array[Double] = Array(),
+      worstDistances: Array[Double] = Array())
 
   case class QuadrilateralCell(
-                                startCol: Int,
-                                startRow: Int,
-                                endCol: Int,
-                                endRow: Int
-                              )
+      startCol: Int,
+      startRow: Int,
+      endCol: Int,
+      endRow: Int)
 
   case class QuadrilateralGrid(
-                              rows: Int,
-                              cols: Int,
-                              listOfTheStuff: Array[QuadrilateralCell]
-                              )
+      rows: Int,
+      cols: Int,
+      listOfTheStuff: Array[QuadrilateralCell])
 
   case class AbsoluteQuadrilateralPosition(startW: Int, startH: Int, endW: Int, endH: Int)
 }

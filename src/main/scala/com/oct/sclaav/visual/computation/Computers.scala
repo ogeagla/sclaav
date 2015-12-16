@@ -1,5 +1,7 @@
 package com.oct.sclaav.visual.computation
 
+import java.io.File
+
 import com.oct.sclaav._
 import com.sksamuel.scrimage.filter.GrayscaleFilter
 import com.sksamuel.scrimage.{Color, Image, ScaleMethod}
@@ -175,51 +177,5 @@ object SimpleArgbDistance extends ArgbDistance {
     val db = math.abs(argb1.b - argb2.b)
 
     math.sqrt(da*da + dr*dr + dg*dg + db*db)
-  }
-}
-
-object MatchByArgbAverage {
-  def apply(argbEstimator: ArgbEstimator, argbDistance: ArgbDistance, refImage: Image, otherImages: Array[Image]): Image = {
-
-    val refArgb = argbEstimator(refImage)
-
-    val argbs = otherImages.map {
-      i => (i, argbEstimator(i))
-    }
-
-    val argbsWDistance = argbs.map {
-      case (i, argb) => (i, argbDistance(refArgb, argb))
-    }
-
-    argbsWDistance.sortBy {
-      case (i, dist) => dist
-    }.head._1
-  }
-}
-
-object MatchesByArgbAverageThresh {
-  def apply(argbEstimator: ArgbEstimator, argbDistance: ArgbDistance, refImage: Image, otherImages: Array[Image], threshold: Double = 0.85): Array[Image] = {
-
-    val refArgb = argbEstimator(refImage)
-
-    val argbs = otherImages.map {
-      i => (i, argbEstimator(i))
-    }
-
-    val argbsWDistance = argbs.map {
-      case (i, argb) => (i, argbDistance(refArgb, argb))
-    }
-
-    val smallestDistancesFirst = argbsWDistance.sortBy {
-      case (i, dist) => dist
-    }
-
-    val smallestDist = smallestDistancesFirst.head._2
-    val distThresh = smallestDist / threshold
-    val imgsBelowCutoff = smallestDistancesFirst.filter{
-      case (i, dist) =>
-        dist < distThresh
-    }
-    imgsBelowCutoff.map(_._1)
   }
 }

@@ -3,6 +3,7 @@ package com.oct.sclaav.visual.assembly.grid
 import com.oct.sclaav.CompleteAssembler
 import com.oct.sclaav.visual.computation._
 import com.oct.sclaav.visual.manipulators.SimpleAbsoluteCrop
+import com.oct.sclaav.visual.search.MatchByArgbAverage
 import com.sksamuel.scrimage.nio.JpegWriter
 import com.sksamuel.scrimage.{Image, ScaleMethod}
 import org.slf4j.LoggerFactory
@@ -40,7 +41,7 @@ class QuadrilateralAssembler(cols: Int = 20, rows: Int = 20) extends CompleteAss
 
       val cropped = SimpleAbsoluteCrop(q.startW, q.startH, q.endW, q.endH, theReferenceImage)
 
-      val matchToCropped = MatchByArgbAverage(SimpleArgbEstimator, SimpleArgbDistance, cropped, scaledSamples)
+      val matchToCropped = MatchByArgbAverage(cropped, scaledSamples)
 
       listBuffer.update(i, (matchToCropped, (q.startW, q.startH)))
     }
