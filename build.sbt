@@ -23,6 +23,8 @@ libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.7.12"
 
 libraryDependencies += "com.github.scopt" %% "scopt" % "3.3.0"
 
+libraryDependencies += "org.im4java" % "im4java" % "1.4.0"
+
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.1" % "test"
 
 testOptions in Test += Tests.Argument("-oD")
