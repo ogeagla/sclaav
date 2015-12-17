@@ -4,11 +4,29 @@ import java.io.{FileInputStream, FileOutputStream}
 import java.util
 
 import com.oct.sclaav.TestHelpers
-import org.im4java.core._
+import org.im4java.core.{DcrawCmd, DCRAWOperation}
 import org.im4java.process.{Pipe, ProcessStarter}
-import org.scalatest.{BeforeAndAfter, FunSuite, Matchers}
+import org.scalatest.{Matchers, BeforeAndAfter, FunSuite}
 
 
+/*
+## Raw WIP
+
+to be truly dep-free, should I?:
+ - create docker image with some ubuntu base
+ - install dcraw/libraw
+ - have a scala wrapper around the runnin docker container:
+   - wrapper uploads raw images into container and dls the finished extracted filet to local FS
+
+WIP -> use im4j
+NXT -> use jrawio: either compile code into this proj or add jar manually to classpath... http://jrawio.rawdarkroom.org/
+  dcraw Java interface: http://ij-plugins.sourceforge.net/plugins/dcraw/
+  use libraw from Rust: http://www.libraw.org/docs
+  use libraw-rust: does not currently compile
+  use dcraw from Rust: WIP
+
+
+*/
 class ConvertsRawImagesTest extends FunSuite with BeforeAndAfter with Matchers with TestHelpers {
 
   test("converts raw imgs") {
@@ -27,7 +45,7 @@ class ConvertsRawImagesTest extends FunSuite with BeforeAndAfter with Matchers w
     val dcRawOp = new DCRAWOperation
 
     dcRawOp.halfSize()
-    dcRawOp.createTIFF()
+//    dcRawOp.createTIFF()
 //    dcRawOp.setGamma(2.4, 12.9)
 //    dcRawOp.extractThumbnail()
     dcRawOp.write2stdout()
