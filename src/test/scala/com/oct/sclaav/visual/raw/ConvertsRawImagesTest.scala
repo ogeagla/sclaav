@@ -27,9 +27,9 @@ class ConvertsRawImagesTest extends FunSuite with BeforeAndAfter with Matchers w
     val dcRawOp = new DCRAWOperation
 
     dcRawOp.halfSize()
-//    dcRawOp.createTIFF()
+    dcRawOp.createTIFF()
 //    dcRawOp.setGamma(2.4, 12.9)
-    dcRawOp.extractThumbnail()
+//    dcRawOp.extractThumbnail()
     dcRawOp.write2stdout()
     dcRawOp.addImage(inPath)
 
@@ -44,16 +44,17 @@ class ConvertsRawImagesTest extends FunSuite with BeforeAndAfter with Matchers w
     val pipeIn = new Pipe(fileInStream, null)
     val dcRawCmd = new DcrawCmd
 
-    dcRawCmd.setInputProvider(pipeIn)
-    dcRawCmd.setOutputConsumer(pipeOutToStream)
-    dcRawCmd.run(dcRawOp)
-    fileOutStream.close()
 
     println("Running:")
     val cmds = dcRawCmd.getCommand
     printCmd(cmds)
 
-//    DisplayCmd.show(outPath)
+
+    dcRawCmd.setInputProvider(pipeIn)
+    dcRawCmd.setOutputConsumer(pipeOutToStream)
+    dcRawCmd.run(dcRawOp)
+    fileInStream.close()
+    fileOutStream.close()
 
   }
 
