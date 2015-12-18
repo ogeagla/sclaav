@@ -7,7 +7,7 @@ docker <<= (docker dependsOn assembly)
 
 assemblySettings
 
-organization := "oct"
+organization := "ogeagla"
 
 name := "sclaav"
 
@@ -79,7 +79,6 @@ dockerfile in docker := {
     workDir("/opt/sclaav")
 //    entryPoint("java", "-jar", artifactTargetPath)
     entryPoint("sleep", "12000")
-
   }
 }
 
