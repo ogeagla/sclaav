@@ -10,6 +10,7 @@ Functionality which presently works well and default parameters are tuned to wor
 | ---------------------------- |:------------------------------------------------:|:-----:|
 | [Image mosaic](#mosaic)      | [DoMosaic](https://github.com/ogeagla/sclaav/blob/master/src/main/scala/com/oct/sclaav/visual/assembly/mosaic/DoMosaic.scala) |[DoesMosaicTest](https://github.com/ogeagla/sclaav/blob/master/src/test/scala/com/oct/sclaav/visual/assembly/mosaic/DoesMosaicTest.scala)|
 | [Image similarity](#similarity) | [ImageMatchers](https://github.com/ogeagla/sclaav/tree/master/src/main/scala/com/oct/sclaav/visual/search/ImageMatchers.scala)|[ImageMatchersTest](https://github.com/ogeagla/sclaav/tree/master/src/test/scala/com/oct/sclaav/visual/search/ImageMatchersTest.scala)|
+| [Docker image](#docker) | [build.sbt](https://github.com/ogeagla/sclaav/tree/master/build.sbt) | |
 
 ## Experimental Functionality:
 
