@@ -79,6 +79,37 @@ $ java -jar bin/Sclaav.jar \
   --target file:///photo.jpg         
 ```
 
+## Docker
+
+This comes with a Docker image!  Build with:
+```
+./sbt docker
+```
+
+The container contains:
+ - The assembly jar in `/opt/sclaav/Sclaav.jar`
+ - DCRAW installation.  Test with `/opt/dcraw/scripts/test.sh`.
+
+To use the container as a DCRAW execution environment, first start the container, then run a shell into it.
+
+Run the container with:
+```
+docker run oct/sclaav:latest
+```
+Check that it is running with:
+```
+docker ps
+```
+Find the container ID and then run:
+```
+docker exec -it <container-id> bash
+```
+You will then have a prompt inside the running container.  Run the test script with:
+```
+sh /opt/dcraw/scripts/test.sh
+```
+Which should create a thumbnail jpeg in `/opt/dcraw/samples`.
+
 ## Credits
 http://www.octaviangeagla.com/bap
 

@@ -67,13 +67,19 @@ dockerfile in docker := {
   new Dockerfile {
     from("fedora:23")
     run("dnf", "-y", "update")
-    run("dnf", "-y", "install", "java-1.8.0-openjdk", "gcc", "tar")
+    run("dnf", "-y", "install", "java-1.8.0-openjdk", "gcc", "tar", "gettext", "jasper-devel", "lcms2-devel")
     copy(new File("dcraw-embedded/dcraw-9.26.0.tar.gz"), "/opt/dcraw/dcraw-9.26.0.tar.gz")
+    copy(new File("src/test/resources/raw/cr2/E1DXLL0000503.CR2"), "/opt/dcraw/samples/E1DXLL0000503.CR2")
     run("tar", "-xvf", "/opt/dcraw/dcraw-9.26.0.tar.gz", "-C", "/opt/dcraw")
-    run("cd", "/opt/dcraw/dcraw", "&&", "sh", "/opt/dcraw/dcraw/install")
+    workDir("/opt/dcraw/dcraw")
+    run("sh", "/opt/dcraw/dcraw/install")
+    copy(new File("dcraw-scripts/test.sh"), "/opt/dcraw/scripts/test.sh")
+    run("sh", "/opt/dcraw/scripts/test.sh")
     add(artifact, artifactTargetPath)
     workDir("/opt/sclaav")
-    entryPoint("java", "-jar", artifactTargetPath)
+//    entryPoint("java", "-jar", artifactTargetPath)
+    entryPoint("sleep", "12000")
+
   }
 }
 

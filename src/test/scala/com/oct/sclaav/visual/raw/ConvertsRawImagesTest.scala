@@ -47,7 +47,7 @@ class ConvertsRawImagesTest extends FunSuite with BeforeAndAfter with Matchers w
     dcRawOp.halfSize()
 //    dcRawOp.createTIFF()
 //    dcRawOp.setGamma(2.4, 12.9)
-//    dcRawOp.extractThumbnail()
+    dcRawOp.extractThumbnail()
     dcRawOp.write2stdout()
     dcRawOp.addImage(inPath)
 
