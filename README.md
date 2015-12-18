@@ -10,6 +10,7 @@ Functionality which presently works well and default parameters are tuned to wor
 | ---------------------------- |:------------------------------------------------:|:-----:|
 | [Image mosaic](#mosaic)      | [DoMosaic](https://github.com/ogeagla/sclaav/blob/master/src/main/scala/com/oct/sclaav/visual/assembly/mosaic/DoMosaic.scala) |[DoesMosaicTest](https://github.com/ogeagla/sclaav/blob/master/src/test/scala/com/oct/sclaav/visual/assembly/mosaic/DoesMosaicTest.scala)|
 | [Image similarity](#similarity) | [ImageMatchers](https://github.com/ogeagla/sclaav/tree/master/src/main/scala/com/oct/sclaav/visual/search/ImageMatchers.scala)|[ImageMatchersTest](https://github.com/ogeagla/sclaav/tree/master/src/test/scala/com/oct/sclaav/visual/search/ImageMatchersTest.scala)|
+| [Docker image](#docker) | [On Dockerhub](https://hub.docker.com/r/ogeagla/sclaav/) | |
 
 ## Experimental Functionality:
 
@@ -78,6 +79,42 @@ $ java -jar bin/Sclaav.jar \
   --samples 300 \            
   --target file:///photo.jpg         
 ```
+
+## Docker
+
+This comes with a Docker image!  Build with:
+```
+./sbt docker
+```
+
+Or pull the image from Docker Hub:
+```
+docker pull ogeagla/sclaav
+```
+
+The container contains:
+ - The assembly jar in `/opt/sclaav/Sclaav.jar`
+ - DCRAW installation.  Test with `/opt/dcraw/scripts/test.sh`.
+
+To use the container as a DCRAW execution environment, first start the container, then run a shell into it.
+
+Run the container with:
+```
+docker run oct/sclaav:latest
+```
+Check that it is running with:
+```
+docker ps
+```
+Find the container ID and then run:
+```
+docker exec -it <container-id> bash
+```
+You will then have a prompt inside the running container.  Run the test script with:
+```
+sh /opt/dcraw/scripts/test.sh
+```
+Which should create a thumbnail jpeg in `/opt/dcraw/samples`.
 
 ## Credits
 http://www.octaviangeagla.com/bap
