@@ -29,7 +29,7 @@ NXT -> use jrawio: either compile code into this proj or add jar manually to cla
 */
 class ConvertsRawImagesTest extends FunSuite with BeforeAndAfter with Matchers with TestHelpers {
 
-  test("converts raw imgs") {
+  ignore("converts raw imgs") {
 
     def printCmd(cmd: util.LinkedList[String]) = {
       cmd.toArray.map(_.toString).toList.foreach(println(_))
