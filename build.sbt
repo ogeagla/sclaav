@@ -15,6 +15,11 @@ version := "0.0.1"
 
 scalaVersion := "2.11.7"
 
+val nd4jVersion = "0.4-rc3.7"
+val dl4jVersion =	"0.4-rc3.7"
+val canovaVersion = "0.0.0.13"
+val jacksonVersion = "2.5.1"
+
 resolvers += Resolver.sonatypeRepo("public")
 
 libraryDependencies += "com.sksamuel.scrimage" % "scrimage-core_2.11" % "2.1.1"
@@ -49,13 +54,12 @@ libraryDependencies  ++= Seq(
 libraryDependencies ++= Seq(
 //  "commons-io" % "commons-io" % "2.4",
 //  "com.google.guava" % "guava" % "18.0",
-  "org.deeplearning4j" % "deeplearning4j-core" % "0.4-rc3.7",
-  "org.deeplearning4j" % "deeplearning4j-nlp" % "0.4-rc3.7",
-  "org.deeplearning4j" % "deeplearning4j-ui" % "0.4-rc3.7",
-  "org.jblas" % "jblas" % "1.2.4",
-  "org.nd4j" % "canova-nd4j-image" % "0.0.0.13",
-  "org.nd4j" % "nd4j-jblas" % "0.4-rc3.6",
-  "org.nd4j" % "nd4j-x86" % "0.4-rc3.6"
+  "org.deeplearning4j" % "deeplearning4j-core" % dl4jVersion,
+  "org.deeplearning4j" % "deeplearning4j-nlp" % dl4jVersion,
+  "org.deeplearning4j" % "deeplearning4j-ui" % dl4jVersion,
+  "org.nd4j" % "canova-nd4j-image" % canovaVersion,
+  "org.nd4j" % "canova-nd4j-codec" % canovaVersion,
+  "org.nd4j" % "nd4j-x86" % nd4jVersion
 )
 
 resolvers ++= Seq(

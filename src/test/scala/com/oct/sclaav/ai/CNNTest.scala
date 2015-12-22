@@ -4,20 +4,19 @@ import java.util.Random
 
 import com.oct.sclaav.TestHelpers
 import com.sksamuel.scrimage.Image
-import org.deeplearning4j.datasets.iterator.DataSetIterator
 import org.deeplearning4j.datasets.iterator.impl.IrisDataSetIterator
 import org.deeplearning4j.eval.Evaluation
 import org.deeplearning4j.nn.api.OptimizationAlgorithm
 import org.deeplearning4j.nn.conf.layers.setup.ConvolutionLayerSetup
 import org.deeplearning4j.nn.conf.layers.{ConvolutionLayer, OutputLayer}
-import org.deeplearning4j.nn.conf.{GradientNormalization, MultiLayerConfiguration, NeuralNetConfiguration}
+import org.deeplearning4j.nn.conf.{MultiLayerConfiguration, NeuralNetConfiguration}
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork
 import org.deeplearning4j.nn.params.DefaultParamInitializer
 import org.deeplearning4j.nn.weights.WeightInit
 import org.deeplearning4j.optimize.api.IterationListener
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener
 import org.nd4j.linalg.api.ndarray.INDArray
-import org.nd4j.linalg.dataset.{DataSet, SplitTestAndTrain}
+import org.nd4j.linalg.factory.Nd4j
 import org.nd4j.linalg.lossfunctions.LossFunctions
 import org.scalatest.{BeforeAndAfter, FunSuite, Matchers}
 import org.slf4j.LoggerFactory
@@ -40,7 +39,6 @@ class CNNTest extends FunSuite with BeforeAndAfter with Matchers with TestHelper
 
     lazy val log = LoggerFactory.getLogger(getClass)
 
-
     val numRows = 2
     val numColumns = 2
     val nChannels = 1
@@ -52,42 +50,36 @@ class CNNTest extends FunSuite with BeforeAndAfter with Matchers with TestHelper
     val seed = 123
     val listenerFreq = 1
 
-
     /**
       *Set a neural network configuration with multiple layers
       */
+
     log.info("Load data....")
-    val irisIter: DataSetIterator = new IrisDataSetIterator(batchSize, numSamples)
-    val iris: DataSet = irisIter.next()
+    val irisIter = new IrisDataSetIterator(150, 150)
+    val iris = irisIter.next()
     iris.normalizeZeroMeanZeroUnitVariance()
+    Nd4j.shuffle(iris.getFeatureMatrix(), new Random(seed), 1)
+    Nd4j.shuffle(iris.getLabels(),new Random(seed),1)
+    val trainTest = iris.splitTestAndTrain(splitTrainNum, new Random(seed))
 
-    val trainTest: SplitTestAndTrain = iris.splitTestAndTrain(splitTrainNum, new Random(seed))
-
-    val builder: MultiLayerConfiguration.Builder = new NeuralNetConfiguration.Builder()
+    val builder = new NeuralNetConfiguration.Builder()
       .seed(seed)
       .iterations(iterations)
-//      .batchSize(batchSize)
       .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
-      .gradientNormalization(GradientNormalization)
-      .l2(2e-4)
-      .regularization(true)
-      .useDropConnect(true)
       .list(2)
       .layer(0, new ConvolutionLayer.Builder(Array(1, 1):_*)
         .nIn(nChannels)
-        .nOut(6).dropOut(0.5)
+        .nOut(1000)
         .activation("relu")
-        .weightInit(WeightInit.XAVIER)
+        .weightInit(WeightInit.RELU)
         .build())
       .layer(1, new OutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
-        .nIn(6)
         .nOut(outputNum)
         .weightInit(WeightInit.XAVIER)
         .activation("softmax")
         .build())
-
       .backprop(true).pretrain(false)
-    new ConvolutionLayerSetup(builder, numRows, numColumns, nChannels);
+    new ConvolutionLayerSetup(builder, numRows, numColumns, nChannels)
 
     val conf: MultiLayerConfiguration = builder.build()
 
