@@ -33,6 +33,38 @@ libraryDependencies += "org.im4java" % "im4java" % "1.4.0"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.1" % "test"
 
+libraryDependencies  ++= Seq(
+  // other dependencies here
+  "org.scalanlp" %% "breeze" % "0.11.2",
+  // native libraries are not included by default. add this if you want them (as of 0.7)
+  // native libraries greatly improve performance, but increase jar sizes.
+  // It also packages various blas implementations, which have licenses that may or may not
+  // be compatible with the Apache License. No GPL code, as best I know.
+  "org.scalanlp" %% "breeze-natives" % "0.11.2",
+  // the visualization library is distributed separately as well.
+  // It depends on LGPL code.
+  "org.scalanlp" %% "breeze-viz" % "0.11.2"
+)
+
+libraryDependencies ++= Seq(
+//  "commons-io" % "commons-io" % "2.4",
+//  "com.google.guava" % "guava" % "18.0",
+  "org.deeplearning4j" % "deeplearning4j-core" % "0.4-rc3.7",
+  "org.deeplearning4j" % "deeplearning4j-nlp" % "0.4-rc3.7",
+  "org.deeplearning4j" % "deeplearning4j-ui" % "0.4-rc3.7",
+  "org.jblas" % "jblas" % "1.2.4",
+  "org.nd4j" % "canova-nd4j-image" % "0.0.0.13",
+  "org.nd4j" % "nd4j-jblas" % "0.4-rc3.6",
+  "org.nd4j" % "nd4j-x86" % "0.4-rc3.6"
+)
+
+resolvers ++= Seq(
+  // other resolvers here
+  // if you want to use snapshot builds (currently 0.12-SNAPSHOT), use this.
+  "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/",
+  "Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/"
+)
+
 testOptions in Test += Tests.Argument("-oD")
 
 mainClass in assembly := Some("com.oct.sclaav.Main")
