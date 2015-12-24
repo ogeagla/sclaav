@@ -16,6 +16,7 @@ import org.deeplearning4j.nn.weights.WeightInit
 import org.deeplearning4j.optimize.api.IterationListener
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener
 import org.nd4j.linalg.api.ndarray.INDArray
+import org.nd4j.linalg.dataset.SplitTestAndTrain
 import org.nd4j.linalg.factory.Nd4j
 import org.nd4j.linalg.lossfunctions.LossFunctions
 import org.scalatest.{BeforeAndAfter, FunSuite, Matchers}
@@ -60,7 +61,7 @@ class CNNTest extends FunSuite with BeforeAndAfter with Matchers with TestHelper
     iris.normalizeZeroMeanZeroUnitVariance()
     Nd4j.shuffle(iris.getFeatureMatrix(), new Random(seed), 1)
     Nd4j.shuffle(iris.getLabels(),new Random(seed),1)
-    val trainTest = iris.splitTestAndTrain(splitTrainNum, new Random(seed))
+    val trainTest: SplitTestAndTrain = iris.splitTestAndTrain(splitTrainNum, new Random(seed))
 
     val builder = new NeuralNetConfiguration.Builder()
       .seed(seed)
