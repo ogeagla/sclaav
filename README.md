@@ -116,6 +116,37 @@ sh /opt/dcraw/scripts/test.sh
 ```
 Which should create a thumbnail jpeg in `/opt/dcraw/samples`.
 
+## Convolutional Neural Network
+ - Look at the sample iris dataset to understand what their features/labels are
+ - Train a network using a set of images' pixels' ARGB vectors
+    - training input vector is:
+    ```
+    [[a, r, g, b]]
+    ```
+    or maybe don't both with alpha since I'm not really dealing with transparent stuff  
+    - training output vector possibilities:
+    ```
+    image latitude
+    image longitude
+    image taken time of day
+    image taken month of year
+    ```
+    
+    - if training with labels, some input labels can be:
+    ```
+    sunset
+    sunrise
+    ski
+    climb
+    desert
+    snow
+    flower
+    river
+    people
+    ```
+ - Eventually, if I can find some labels that work well, I can train the model with bap corpus, and:
+    - For each label, run the cNN in reverse and print the prototypical 'sunset', etc
+
 ## Credits
 http://www.octaviangeagla.com/bap
 
