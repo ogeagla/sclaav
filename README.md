@@ -117,7 +117,8 @@ sh /opt/dcraw/scripts/test.sh
 Which should create a thumbnail jpeg in `/opt/dcraw/samples`.
 
 ## Convolutional Neural Network
- - Look at the sample iris dataset to understand what their features/labels are
+  
+ - Look at the sample CNNLFWDataSet to understand what their features/labels are
  - Train a network using a set of images' pixels' ARGB vectors
     - training input vector is:
     ```

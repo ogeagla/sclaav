@@ -17,26 +17,24 @@ import org.slf4j.LoggerFactory
 import scala.collection.JavaConverters._
 
 trait ImageNN {
-
   def init(): MultiLayerNetwork
   def train(data: DataSet): Unit
-  def apply(data: DataSet): Evaluation
-
+  def apply(data: DataSet): Evaluation[Nothing]
 }
 
-class ConvolutionalNN() extends ImageNN {
+class ConvolutionalNN(
+    numRows: Int = 2,
+    numColumns: Int = 2,
+    nChannels: Int = 1,
+    outputNum: Int = 3,
+    numSamples: Int = 150,
+    batchSize: Int = 110,
+    iterations: Int = 10,
+    splitTrainNum: Int = 100,
+    seed: Int = 123,
+    listenerFreq: Int = 1) extends ImageNN {
 
   val log = LoggerFactory.getLogger(getClass)
-  val numRows = 2
-  val numColumns = 2
-  val nChannels = 1
-  val outputNum = 3
-  val numSamples = 150
-  val batchSize = 110
-  val iterations = 10
-  val splitTrainNum = 100
-  val seed = 123
-  val listenerFreq = 1
 
   val model = init()
 
@@ -82,12 +80,11 @@ class ConvolutionalNN() extends ImageNN {
     }
   }
 
-  def apply(data: DataSet): Evaluation = {
-    val eval: Evaluation = new Evaluation(outputNum)
+  def apply(data: DataSet): Evaluation[Nothing] = {
+    val eval: Evaluation[Nothing] = new Evaluation(outputNum)
     val output = model.output(data.getFeatureMatrix)
     eval.eval(data.getLabels, output)
     eval
-    ???
   }
 
 }
