@@ -26,7 +26,7 @@ object GeneratesEdgeDensityBasedQuadrilateralGrid{
     edges
   }
 
-  def apply(img: Image, rows: Int = 20, cols: Int = 20, argbEstimator: ArgbEstimator = SimpleArgbEstimator, argbDistance: ArgbDistance = SimpleArgbDistance): QuadrilateralGrid = {
+  def apply(img: Image, rows: Int = 20, cols: Int = 20, argbEstimator: ArgbEstimator = SimpleArgbEstimator, argbDistance: ArgbDistance = SimpleArgbDistance, stepMaker: StepMaker = PlateauToMaxStepMaker): QuadrilateralGrid = {
 
     println(s"running with cols: $cols rows: $rows")
 
@@ -67,7 +67,7 @@ object GeneratesEdgeDensityBasedQuadrilateralGrid{
 
     val distArr = asArray.map(_.toArray).toArray
 
-    val levelsArr = ValuesToLevels(distArr, levels, ApproxExpStepMaker)
+    val levelsArr = ValuesToLevels(distArr, levels, stepMaker)
 
     val levelsArrWSizes = levelsArr.map(v => v.map {
       e => (e, sizesForLevels(e))
@@ -186,7 +186,50 @@ object UniformStepMaker extends StepMaker {
   }
 }
 
+object PlateauToMaxStepMaker extends StepMaker {
+
+  def apply(levels: Int, min: Double, max: Double, delta: Double): Array[(Double, Double)] = {
+
+    val uniformSteps = UniformStepMaker(levels, min, max, delta)
+
+    /*
+
+    start with uniform:
+
+    |    |    |    |
+    min            max
+
+
+    shift abs max cannot exceed delta, as we may have second to last be gt max
+
+    then define
+
+    let i : zeroindexof(l)
+    shift : i -> i/levels * delta if i is not the index of the max, else 0
+    l'(i) : l(i) -> l(i) + shift(i)
+     */
+
+    val mapOfShift = (0 to levels - 1).map { i =>
+      i -> i.toDouble / levels.toDouble
+    }.asMap
+
+    val newLevels: Array[((Double), (Double))] = for (i in uniformSteps.indices) {
+
+      val (l1, l2) = uniformSteps(i)
+      val (shift1, shift2) = (mapOfShift(i).getOrElse(0), mapOfShift(i + 1).getOrElse(0))
+
+      (l1 + shift, l2 + shift2)
+
+    }
+    newLevels
+
+
+  }
+
+}
+
 object ApproxExpStepMaker extends StepMaker {
+
   override def apply(levels: Int, min: Double, max: Double, delta: Double): Array[(Double, Double)] = {
     /*
 
@@ -283,7 +326,7 @@ object ExpStepMaker extends StepMaker {
 }
 
 object ValuesToLevels {
-  def apply(values: Array[Array[Double]], levels: Int, stepMaker: StepMaker = UniformStepMaker): Array[Array[Int]] = {
+  def apply(values: Array[Array[Double]], levels: Int, stepMaker: StepMaker): Array[Array[Int]] = {
 
     println(s"total elements: ${values.map(_.length).sum}")
 
