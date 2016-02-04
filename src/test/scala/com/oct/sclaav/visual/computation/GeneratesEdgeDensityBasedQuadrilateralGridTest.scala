@@ -2,9 +2,9 @@ package com.oct.sclaav.visual.computation
 
 import com.oct.sclaav.TestHelpers
 import com.oct.sclaav.visual.assembly.grid.QuadrilateralAssembler
-import com.sksamuel.scrimage.{Color, Image}
 import com.sksamuel.scrimage.nio.JpegWriter
-import org.scalatest.{Matchers, BeforeAndAfter, FunSuite}
+import com.sksamuel.scrimage.{Color, Image}
+import org.scalatest.{BeforeAndAfter, FunSuite, Matchers}
 
 class GeneratesEdgeDensityBasedQuadrilateralGridTest extends FunSuite with BeforeAndAfter with Matchers with TestHelpers {
 
@@ -26,7 +26,7 @@ class GeneratesEdgeDensityBasedQuadrilateralGridTest extends FunSuite with Befor
       Array(1.5, 2.5, 2.9)
     )
 
-    val steps = ValuesToLevels(values, 3)
+    val steps = ValuesToLevels(values, 3, UniformStepMaker)
 
     val expectedSteps = Array(
       Array(0, 1, 2),

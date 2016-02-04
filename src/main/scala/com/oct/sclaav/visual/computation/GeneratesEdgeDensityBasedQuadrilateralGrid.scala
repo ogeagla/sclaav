@@ -1,8 +1,8 @@
 package com.oct.sclaav.visual.computation
 
-import com.oct.sclaav.visual.computation.CellIntersectsExisting.{FillQuadWithSingles, ApplyCellToTruthTable}
-import com.oct.sclaav.visual.manipulators.SimpleCrop
 import com.oct.sclaav._
+import com.oct.sclaav.visual.computation.CellIntersectsExisting.{ApplyCellToTruthTable, FillQuadWithSingles}
+import com.oct.sclaav.visual.manipulators.SimpleCrop
 import com.sksamuel.scrimage.filter.{EdgeFilter, ThresholdFilter}
 import com.sksamuel.scrimage.{Image, ScaleMethod}
 import org.slf4j.LoggerFactory
@@ -71,7 +71,7 @@ object GeneratesEdgeDensityBasedQuadrilateralGrid{
 
     val levelsArrWSizes = levelsArr.map(v => v.map {
       e => (e, sizesForLevels(e))
-    })
+    }.toArray).toArray
 
     val forPrinting = levelsArrWSizes.flatten.sortBy(_._1)
 
@@ -211,14 +211,15 @@ object PlateauToMaxStepMaker extends StepMaker {
 
     val mapOfShift = (0 to levels - 1).map { i =>
       i -> i.toDouble / levels.toDouble
-    }.asMap
+    }.toMap
 
-    val newLevels: Array[((Double), (Double))] = for (i in uniformSteps.indices) {
+    val newLevels: Array[((Double), (Double))] = uniformSteps.indices.toArray.map { i =>
 
       val (l1, l2) = uniformSteps(i)
-      val (shift1, shift2) = (mapOfShift(i).getOrElse(0), mapOfShift(i + 1).getOrElse(0))
 
-      (l1 + shift, l2 + shift2)
+      val (shift1, shift2) = (mapOfShift.getOrElse(i, 0.0), mapOfShift.getOrElse(i + 1, 0.0))
+
+      (l1 + shift1, l2 + shift2)
 
     }
     newLevels
