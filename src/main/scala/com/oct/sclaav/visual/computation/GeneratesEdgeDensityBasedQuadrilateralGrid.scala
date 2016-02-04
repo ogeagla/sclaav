@@ -167,6 +167,10 @@ object WhichStep {
       value match {
         case s if s >= steps(i)._1 && s <= steps(i)._2 =>
           Seq(i)
+        case s if s < steps(0)._1 =>
+          Seq(0)
+        case s if s > steps.last._2 =>
+          Seq(steps.length - 1)
         case _ =>
           Seq()
       }
@@ -182,7 +186,7 @@ object UniformStepMaker extends StepMaker {
   def apply(levels: Int, min: Double, max: Double, delta: Double): Array[(Double, Double)] = {
     (0 to levels - 1).map { l =>
       (min + l * delta, min + (l + 1) * delta)
-    }.toArray.reverse
+    }.toArray
   }
 }
 
