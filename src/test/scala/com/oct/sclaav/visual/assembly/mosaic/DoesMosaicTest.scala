@@ -27,6 +27,6 @@ class DoesMosaicTest extends FunSuite with BeforeAndAfter with Matchers with Tes
 
     val relativeDistance = RelativeImageSimilarityArgbDistance2(mosaicImgFromResources, theAssembledImage)
 
-    relativeDistance should be <= 0.05
+    relativeDistance should be <= 0.075
   }
 }

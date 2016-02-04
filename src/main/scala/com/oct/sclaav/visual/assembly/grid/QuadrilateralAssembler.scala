@@ -1,6 +1,6 @@
 package com.oct.sclaav.visual.assembly.grid
 
-import com.oct.sclaav.CompleteAssembler
+import com.oct.sclaav.{ImageToQuadGridThing, QuadrilateralGridToAbsolutePositions, CompleteAssembler}
 import com.oct.sclaav.visual.computation._
 import com.oct.sclaav.visual.manipulators.SimpleAbsoluteCrop
 import com.oct.sclaav.visual.search.MatchByArgbAverage
@@ -14,18 +14,18 @@ object QuadrilateralAssembler extends CompleteAssembler {
   override def apply(theReferenceImage: Image, theBackgroundImage: Image, samples: Array[Image]): Image = (new QuadrilateralAssembler)(theReferenceImage, theBackgroundImage, samples)
 }
 
-class QuadrilateralAssembler(cols: Int = 20, rows: Int = 20) extends CompleteAssembler {
+class QuadrilateralAssembler(cols: Int = 20, rows: Int = 20) {
 
   val log = LoggerFactory.getLogger(getClass)
   implicit val writer = JpegWriter.Default
 
-  override def apply(theReferenceImage: Image, theBackgroundImage: Image, samples: Array[Image]): Image = {
+  def apply(theReferenceImage: Image, theBackgroundImage: Image, samples: Array[Image], gridGen: ImageToQuadGridThing = new GeneratesRandomQuadrilateralGrid): Image = {
     val controlSize = (theReferenceImage.width, theReferenceImage.height)
 
     val (colWidth, rowHeight) = (controlSize._1 / cols, controlSize._2 / rows)
 
     log.info("generating quad grid")
-    val quadsGrid = GeneratesRandomQuadrilateralGrid(rows, cols)
+    val quadsGrid = gridGen(theReferenceImage, rows, cols)
     val absQuadsGrid = (new QuadrilateralGridToAbsolutePositions(controlSize._1, controlSize._2))(quadsGrid)
     val listBuffer = new ParArray[(Image, (Int, Int))](absQuadsGrid.length)
 

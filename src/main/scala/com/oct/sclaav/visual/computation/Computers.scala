@@ -5,6 +5,9 @@ import java.io.File
 import com.oct.sclaav._
 import com.sksamuel.scrimage.filter.GrayscaleFilter
 import com.sksamuel.scrimage.{Color, Image, ScaleMethod}
+import org.slf4j.LoggerFactory
+
+import scala.collection.mutable.ArrayBuffer
 
 
 object ComputesMeanAndStddev {
@@ -125,6 +128,18 @@ object Average {
   def apply(arr: Array[Int]): Int = arr.sum / arr.length
 }
 
+object SimpleRgbEstimator extends ArgbEstimator {
+  override def apply(img: Image): Argb = {
+
+    val argb = img.argb
+    val r = argb.map(_.apply(1))
+    val g = argb.map(_.apply(2))
+    val b = argb.map(_.apply(3))
+
+    Argb(0, Average(r), Average(g), Average(b))
+  }
+}
+
 object SimpleArgbEstimator extends ArgbEstimator {
   override def apply(img: Image): Argb = {
 
@@ -177,5 +192,77 @@ object SimpleArgbDistance extends ArgbDistance {
     val db = math.abs(argb1.b - argb2.b)
 
     math.sqrt(da*da + dr*dr + dg*dg + db*db)
+  }
+}
+
+object SimpleRgbDistance extends ArgbDistance {
+  override def apply(argb1: Argb, argb2: Argb): Double = {
+    val dr = math.abs(argb1.r - argb2.r)
+    val dg = math.abs(argb1.g - argb2.g)
+    val db = math.abs(argb1.b - argb2.b)
+
+    math.sqrt(dr*dr + dg*dg + db*db)
+  }
+}
+
+object MatchByArgbAverage {
+  def apply(argbEstimator: ArgbEstimator, argbDistance: ArgbDistance, refImage: Image, otherImages: Array[Image]): Image = {
+
+    val refArgb = argbEstimator(refImage)
+
+    val argbs = otherImages.map {
+      i => (i, argbEstimator(i))
+    }
+
+    val argbsWDistance = argbs.map {
+      case (i, argb) => (i, argbDistance(refArgb, argb))
+    }
+
+    argbsWDistance.sortBy {
+      case (i, dist) => dist
+    }.head._1
+  }
+}
+
+object CellIntersectsExisting {
+  val log = LoggerFactory.getLogger(getClass)
+
+  def apply(arrBuff: ArrayBuffer[ArrayBuffer[Boolean]], cell: QuadrilateralCell): Boolean = {
+    var doesNotInter = true
+
+    for(c <- cell.startCol to cell.endCol; r <- cell.startRow to cell.endRow) {
+      try {
+        doesNotInter = doesNotInter && (!arrBuff(c)(r))
+      } catch {
+        case e: Exception =>
+          log.error(e.getMessage)
+      }
+    }
+    ! doesNotInter
+  }
+
+  object ApplyCellToTruthTable {
+    def apply(table: ArrayBuffer[ArrayBuffer[Boolean]], cell: QuadrilateralCell): ArrayBuffer[ArrayBuffer[Boolean]] = {
+      for(c <- cell.startCol to cell.endCol; r <- cell.startRow to cell.endRow) {
+        table(c).update(r, true)
+      }
+      table
+    }
+  }
+  object FillQuadWithSingles {
+    def apply(arrBuff: ArrayBuffer[ArrayBuffer[Boolean]]): Array[QuadrilateralCell] = {
+
+      val cols = arrBuff.length
+      val rows = arrBuff(0).length
+
+      var cells = Array[QuadrilateralCell]()
+      for (c <- 0 to cols - 1; r <- 0 to rows - 1) {
+        arrBuff(c)(r) match {
+          case false => cells = cells.+:(new QuadrilateralCell(c, r, c, r))
+          case true =>
+        }
+      }
+      cells
+    }
   }
 }
