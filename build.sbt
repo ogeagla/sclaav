@@ -15,9 +15,9 @@ version := "0.0.1"
 
 scalaVersion := "2.11.7"
 
-val nd4jVersion = "0.4-rc3.7"
-val dl4jVersion =	"0.4-rc3.7"
-val canovaVersion = "0.0.0.13"
+val nd4jVersion = "0.4-rc3.8"
+val dl4jVersion =	"0.4-rc3.8"
+val canovaVersion = "0.0.0.14"
 val jacksonVersion = "2.5.1"
 
 resolvers += Resolver.sonatypeRepo("public")
