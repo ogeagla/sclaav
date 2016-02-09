@@ -6,12 +6,11 @@ import com.oct.sclaav.TestHelpers
 import com.oct.sclaav.visual.computation.RelativeImageSimilarityArgbDistance2
 import com.sksamuel.scrimage.Image
 import com.sksamuel.scrimage.nio.JpegWriter
-import org.scalatest.{BeforeAndAfter, FunSuite, Matchers}
+import org.scalatest.{Matchers, BeforeAndAfter, FunSuite}
 
-class DoesMosaicTest extends FunSuite with BeforeAndAfter with Matchers with TestHelpers {
+class DoesMosaicOfMosaicsTest extends FunSuite with BeforeAndAfter with Matchers with TestHelpers {
 
-  test("builds mosaics for realz") {
-
+  test("builds mosaic of mosaics for realz") {
     implicit val writer = JpegWriter.Default
     val outPath = new File(testRootPath)
 
@@ -19,9 +18,9 @@ class DoesMosaicTest extends FunSuite with BeforeAndAfter with Matchers with Tes
 
     val imageToCreate = files.filter(_.getName.contains("0207-")).head
 
-    val theAssembledImage = DoMosaic(imageToCreate, files, 16, 16, Some(outPath), Some("boulder-foothills-mosaic.jpeg"))
+    val theAssembledImage = DoMosaicOfMosaics(imageToCreate, files, 16, 16, outPath, Some("boulder-foothills-mosaic-of-mosaics.jpeg"))
 
-    theAssembledImage.output(testRootPath + "mosaic-out.jpeg")
+    theAssembledImage.output(testRootPath + "mosaic-of-mosaics-out.jpeg")
 
     val mosaicImgFromResources = Image.fromFile(mosaicBoulderFoothillsLowRes)
 
@@ -29,4 +28,5 @@ class DoesMosaicTest extends FunSuite with BeforeAndAfter with Matchers with Tes
 
     relativeDistance should be <= 0.075
   }
+
 }

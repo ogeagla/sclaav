@@ -22,7 +22,7 @@ class OozeManipulatorTest extends FunSuite with BeforeAndAfter with Matchers wit
 
 //    val image = Image.fromFile(files.filter(_.getName.contains("0207-")).head)
 
-    val theAssembledImage = DoMosaic(imageToCreate, sampleFiles, 14, 18, outPath, Some("mosaic-w-manips.jpeg"), doManipulate = true)
+    val theAssembledImage = DoMosaic(imageToCreate, sampleFiles, 14, 18, Some(outPath), Some("mosaic-w-manips.jpeg"), doManipulate = true)
 
 //    val oozedImg = OozeManipulator(theAssembledImage)
 

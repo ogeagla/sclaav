@@ -2,55 +2,28 @@ package com.oct.sclaav.visual.assembly.mosaic
 
 import java.io.File
 
-import com.oct.sclaav.visual.assembly.grid.SimpleCompleteGridAssembler
 import com.oct.sclaav.visual.manipulators._
-import com.oct.sclaav.visual.search.MatchByArgbAverage
+import com.sksamuel.scrimage.{ScaleMethod, Image}
 import com.sksamuel.scrimage.nio.JpegWriter
-import com.sksamuel.scrimage.{Color, Image, ScaleMethod}
 import org.slf4j.LoggerFactory
 
-import scala.collection.parallel.mutable.ParArray
+object DoMosaicOfMosaics {
 
-object DoMosaic {
 
   val log = LoggerFactory.getLogger(getClass)
+
   implicit val writer = JpegWriter.Default
-
-  def compose(rows: Int, cols: Int, allImages: Array[Image], controlImage: Image, controlSize: (Int, Int)): Image = {
-
-
-    val listBuffer = new ParArray[(Image, (Int, Int))](rows * cols)
-
-    log.info(s"cropping and matching using sample size ${allImages.length}")
-
-    for (c <- (0 to cols - 1).par) {
-      log.info(s"${c + 1} of $cols cols complete")
-      for(r <- 0 to rows - 1) {
-        val cropped = SimpleCrop((cols, rows), (c, r), controlImage)
-
-        val matchToCropped = MatchByArgbAverage(cropped, allImages)
-
-        listBuffer.update(rows*c + r, (matchToCropped, (c, r)))
-      }
-    }
-
-    val transparentCanvas = Image.filled(controlSize._1, controlSize._2, Color.Transparent)
-
-    log.info("assembling")
-    val assembledImage = SimpleCompleteGridAssembler(transparentCanvas,listBuffer.seq.toArray , (cols, rows))
-
-    assembledImage
-  }
 
   def apply(
              controlFile: File,
              sampleFiles: Array[File],
              cols: Int,
              rows: Int,
-             outPath: Option[File] = None,
+             outPath: Option[File],
              outputFilename: Option[String] = None,
              doManipulate: Boolean = false,
              writeReferenceImg: Boolean = false): Image = {
+
 
     val controlImage = Image.fromFile(controlFile)
     val controlSize = (controlImage.width, controlImage.height)
@@ -62,16 +35,24 @@ object DoMosaic {
 
     val images = sampleFiles.map(f => Image.fromFile(f).scaleTo(colWidth, rowHeight, ScaleMethod.FastScale))
 
+    val allFiles = sampleFiles.+:(controlFile)
+    var counter = 0
+    val mosaics = allFiles.map{ f =>
+      counter = counter + 1
+      log.info(s"Doing mosaic for ${counter} of ${allFiles.length}")
+      DoMosaic(f, allFiles, 4, 4)
+    }
+
     val allImages = doManipulate match {
-      case false => images
+      case false => images.++(mosaics)
       case true =>
         log.info(s"doing manipulations")
         val manips = Array(SummerManipulator, DiffuseManipulator, GlowManipulator, ChromeManipulator, OilManipulator, EdgeManipulator, LensBlurManipulator) //LensBlurManipulator
-        val manipped = ManipulateAllWithAllOnce(images, manips)
-        images.++(manipped)
+      val manipped = ManipulateAllWithAllOnce(images, manips)
+        images.++(manipped).++(mosaics)
     }
 
-    val assembledImage = compose(rows, cols, allImages, controlImage, controlSize)
+    val assembledImage = DoMosaic.compose(rows, cols, allImages, controlImage, controlSize)
 
     log.info("persisting")
 

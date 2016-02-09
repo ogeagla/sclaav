@@ -3,7 +3,7 @@ package com.oct.sclaav
 import java.io.File
 
 import com.oct.sclaav.cli.Parser
-import com.oct.sclaav.visual.assembly.mosaic.DoMosaic
+import com.oct.sclaav.visual.assembly.mosaic.{DoMosaicOfMosaics, DoMosaic}
 import com.oct.sclaav.visual.search.MatchesByArgbAverageThresh
 import org.slf4j.LoggerFactory
 
@@ -47,10 +47,16 @@ object Main {
 //          case Mode.SIMILARITY_PERMUTE =>
 
 
+          case Mode.MOSAIC_OF_MOSAICS =>
+            log.info("doing mosaic of mosaics")
+            val target = config.singleTarget
+            DoMosaicOfMosaics(new File(target.get), files, cols.get, rows.get, Some(new File(outPath.get)), doManipulate = doManipulate)
+
+
           case Mode.MOSAIC_SINGLE_FILE =>
             log.info("using single file target")
             val target = config.singleTarget
-            DoMosaic(new File(target.get), files, cols.get, rows.get, new File(outPath.get), doManipulate = doManipulate)
+            DoMosaic(new File(target.get), files, cols.get, rows.get, Some(new File(outPath.get)), doManipulate = doManipulate)
 
           case Mode.MOSAIC_PERMUTE_ALL_FILES =>
             log.info("permuting all files in input dir")
@@ -60,7 +66,7 @@ object Main {
 
               log.info(s"running with control image: ${controlFile.getName}")
 
-              DoMosaic(controlFile, sampleFiles, cols.get, rows.get, new File(outPath.get), doManipulate = doManipulate)
+              DoMosaic(controlFile, sampleFiles, cols.get, rows.get, Some(new File(outPath.get)), doManipulate = doManipulate)
             }
         }
       case None =>
