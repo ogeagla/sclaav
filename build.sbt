@@ -15,7 +15,11 @@ version := "0.0.1"
 
 scalaVersion := "2.11.7"
 
+val scVersion = "1.18.0"
+
 resolvers += Resolver.sonatypeRepo("public")
+
+libraryDependencies += "de.sciss" %% "scalacollider" % scVersion
 
 libraryDependencies += "com.sksamuel.scrimage" % "scrimage-core_2.11" % "2.1.1"
 
