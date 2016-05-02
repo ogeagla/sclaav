@@ -91,7 +91,6 @@ object DoMosaic {
       case None =>
 
     }
-
     assembledImage
   }
 }

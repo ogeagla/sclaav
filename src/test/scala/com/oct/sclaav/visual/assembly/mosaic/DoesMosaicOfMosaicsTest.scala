@@ -18,7 +18,7 @@ class DoesMosaicOfMosaicsTest extends FunSuite with BeforeAndAfter with Matchers
 
     val imageToCreate = files.filter(_.getName.contains("0207-")).head
 
-    val theAssembledImage = DoMosaicOfMosaics(imageToCreate, files, 16, 16, outPath, Some("boulder-foothills-mosaic-of-mosaics.jpeg"))
+    val theAssembledImage = DoMosaicOfMosaics(imageToCreate, files, 16, 16, Some(outPath), Some("boulder-foothills-mosaic-of-mosaics.jpeg"))
 
     theAssembledImage.output(testRootPath + "mosaic-of-mosaics-out.jpeg")
 

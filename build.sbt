@@ -7,7 +7,7 @@ docker <<= (docker dependsOn assembly)
 
 assemblySettings
 
-organization := "ogeagla"
+organization := "oct"
 
 name := "sclaav"
 
