@@ -242,3 +242,9 @@ object GlowManipulator extends ImageManipulator {
     img.filter(GlowFilter())
   }
 }
+
+object BlurManipulator extends ImageManipulator {
+  override def apply(img: Image): Image = {
+    img.filter(BlurFilter)
+  }
+}

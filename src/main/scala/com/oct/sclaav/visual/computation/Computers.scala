@@ -1,14 +1,26 @@
 package com.oct.sclaav.visual.computation
 
-import java.io.File
-
 import com.oct.sclaav._
+import com.oct.sclaav.visual.manipulators.BlurManipulator
 import com.sksamuel.scrimage.filter.GrayscaleFilter
 import com.sksamuel.scrimage.{Color, Image, ScaleMethod}
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable.ArrayBuffer
 
+object CCV {
+  def quantizeColor(img: Image): Image = {
+    ???
+  }
+  def apply(img: Image): Array[Double] = {
+
+    val blurred = BlurManipulator(img)
+    //TODO make into manipulator
+    val quantized = quantizeColor(blurred)
+    
+    ???
+  }
+}
 
 object ComputesMeanAndStddev {
   def apply(arr: Array[Double]): (Double, Double) = {
@@ -256,7 +268,7 @@ object CellIntersectsExisting {
       val rows = arrBuff(0).length
 
       var cells = Array[QuadrilateralCell]()
-      for (c <- 0 to cols - 1; r <- 0 to rows - 1) {
+      for (c <- 0 until cols; r <- 0 until rows) {
         arrBuff(c)(r) match {
           case false => cells = cells.+:(new QuadrilateralCell(c, r, c, r))
           case true =>
