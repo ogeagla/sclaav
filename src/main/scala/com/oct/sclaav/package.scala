@@ -11,6 +11,7 @@ package object sclaav {
     def apply(mode: String) = mode match {
       case "permute" => Mode.MOSAIC_PERMUTE_ALL_FILES
       case "single" => Mode.MOSAIC_SINGLE_FILE
+      case "mosaic-of-mosaics" => Mode.MOSAIC_OF_MOSAICS
       case "free-random-composite" => Mode.FREE_COMPOSITE_RANDOM
       case "free-ga-composite" => Mode.FREE_COMPOSITE_GA
 //      case "similarity-permute" => Mode.SIMILARITY_PERMUTE
@@ -22,6 +23,7 @@ package object sclaav {
     type Mode = Value
     val MOSAIC_PERMUTE_ALL_FILES,
         MOSAIC_SINGLE_FILE,
+        MOSAIC_OF_MOSAICS,
         FREE_COMPOSITE_RANDOM,
         FREE_COMPOSITE_GA,
 //        SIMILARITY_PERMUTE,
